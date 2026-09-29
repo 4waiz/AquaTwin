@@ -29,7 +29,7 @@ function parseRange(header: string, size: number): { start: number; end: number 
   return { start, end };
 }
 
-export default {
+const worker = {
   async fetch(request: Request, env: Env): Promise<Response> {
     const range = request.headers.get("Range");
     // Fetch the whole asset (without the Range header) from the asset store.
@@ -53,3 +53,5 @@ export default {
     return new Response(body.slice(r.start, r.end + 1), { status: 206, headers });
   },
 };
+
+export default worker;
