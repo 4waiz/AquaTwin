@@ -1,0 +1,158 @@
+{
+  "normal": {
+    "eventKind": null,
+    "event_h": null,
+    "eventsObserved": 0,
+    "conventional_h": null,
+    "physics_h": null,
+    "mlonly_h": null,
+    "hybrid_h": null,
+    "warned": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    },
+    "falseWarningHours": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    }
+  },
+  "salinity": {
+    "eventKind": "violation:tds",
+    "event_h": 2.6666666666666665,
+    "eventsObserved": 5,
+    "conventional_h": 0.3333333333333335,
+    "physics_h": 1,
+    "mlonly_h": 1,
+    "hybrid_h": 0.8333333333333333,
+    "warned": {
+      "conventional": 5,
+      "physics": 5,
+      "mlonly": 5,
+      "hybrid": 5
+    }
+  },
+  "temperature": {
+    "eventKind": null,
+    "event_h": null,
+    "eventsObserved": 0,
+    "conventional_h": null,
+    "physics_h": null,
+    "mlonly_h": null,
+    "hybrid_h": null,
+    "warned": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    }
+  },
+  "fouling": {
+    "eventKind": "cip:T2",
+    "event_h": 18.166666666666664,
+    "eventsObserved": 5,
+    "conventional_h": null,
+    "physics_h": 11.633333333333331,
+    "mlonly_h": 12.633333333333331,
+    "hybrid_h": 12.466666666666665,
+    "warned": {
+      "conventional": 0,
+      "physics": 5,
+      "mlonly": 5,
+      "hybrid": 5
+    }
+  },
+  "pump": {
+    "eventKind": null,
+    "event_h": null,
+    "eventsObserved": 0,
+    "conventional_h": null,
+    "physics_h": null,
+    "mlonly_h": null,
+    "hybrid_h": null,
+    "warned": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    }
+  },
+  "sensor": {
+    "eventKind": null,
+    "event_h": null,
+    "eventsObserved": 0,
+    "conventional_h": null,
+    "physics_h": null,
+    "mlonly_h": null,
+    "hybrid_h": null,
+    "warned": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    }
+  },
+  "algal": {
+    "eventKind": null,
+    "event_h": null,
+    "eventsObserved": 0,
+    "conventional_h": null,
+    "physics_h": null,
+    "mlonly_h": null,
+    "hybrid_h": null,
+    "warned": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    }
+  },
+  "energy": {
+    "eventKind": null,
+    "event_h": null,
+    "eventsObserved": 0,
+    "conventional_h": null,
+    "physics_h": null,
+    "mlonly_h": null,
+    "hybrid_h": null,
+    "warned": {
+      "conventional": 0,
+      "physics": 0,
+      "mlonly": 0,
+      "hybrid": 0
+    }
+  },
+  "demand": {
+    "eventKind": "violation:reservoir",
+    "event_h": 8.666666666666666,
+    "eventsObserved": 5,
+    "conventional_h": 1.333333333333333,
+    "physics_h": 6.833333333333333,
+    "mlonly_h": 6.666666666666666,
+    "hybrid_h": 6.833333333333333,
+    "warned": {
+      "conventional": 5,
+      "physics": 5,
+      "mlonly": 5,
+      "hybrid": 5
+    }
+  },
+  "extreme": {
+    "eventKind": "violation:tds",
+    "event_h": 1.8333333333333333,
+    "eventsObserved": 5,
+    "conventional_h": 0.16666666666666674,
+    "physics_h": 0.33333333333333326,
+    "mlonly_h": 0.33333333333333326,
+    "hybrid_h": 0.33333333333333326,
+    "warned": {
+      "conventional": 5,
+      "physics": 5,
+      "mlonly": 5,
+      "hybrid": 5
+    }
+  }
+}

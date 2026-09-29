@@ -1,0 +1,100 @@
+{
+  "kappa_h": 0.00005596883842113295,
+  "refFlux_LMH": 14,
+  "phiMax": 0.6,
+  "dpGain": 2.2055113263729784,
+  "saltGain": 0.15921596120236697,
+  "fitted_on": "reference-plant history, 15 operating points × 72 h, biofouling profile, noise-free 0D calibration",
+  "points": [
+    {
+      "P": 58,
+      "Qv": 8,
+      "flux": 10.37,
+      "phiEff": 0.0941
+    },
+    {
+      "P": 58,
+      "Qv": 9.6,
+      "flux": 11.43,
+      "phiEff": 0.1238
+    },
+    {
+      "P": 58,
+      "Qv": 11.5,
+      "flux": 12.32,
+      "phiEff": 0.1549
+    },
+    {
+      "P": 61,
+      "Qv": 8,
+      "flux": 11.14,
+      "phiEff": 0.0959
+    },
+    {
+      "P": 61,
+      "Qv": 9.6,
+      "flux": 12.33,
+      "phiEff": 0.1289
+    },
+    {
+      "P": 61,
+      "Qv": 11.5,
+      "flux": 13.32,
+      "phiEff": 0.1642
+    },
+    {
+      "P": 64,
+      "Qv": 8,
+      "flux": 11.86,
+      "phiEff": 0.0962
+    },
+    {
+      "P": 64,
+      "Qv": 9.6,
+      "flux": 13.17,
+      "phiEff": 0.1321
+    },
+    {
+      "P": 64,
+      "Qv": 11.5,
+      "flux": 14.27,
+      "phiEff": 0.1713
+    },
+    {
+      "P": 67,
+      "Qv": 8,
+      "flux": 12.52,
+      "phiEff": 0.0953
+    },
+    {
+      "P": 67,
+      "Qv": 9.6,
+      "flux": 13.96,
+      "phiEff": 0.1335
+    },
+    {
+      "P": 67,
+      "Qv": 11.5,
+      "flux": 15.24,
+      "phiEff": 0.2011
+    },
+    {
+      "P": 70,
+      "Qv": 8,
+      "flux": 13.14,
+      "phiEff": 0.0933
+    },
+    {
+      "P": 70,
+      "Qv": 9.6,
+      "flux": 14.7,
+      "phiEff": 0.1414
+    },
+    {
+      "P": 70,
+      "Qv": 11.5,
+      "flux": 15.24,
+      "phiEff": 0.2011
+    }
+  ]
+}

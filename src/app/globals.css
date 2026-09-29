@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/*
+  AquaTwin design tokens.
+  Surfaces are near-black navy; blue is the only accent. Green / amber / red are
+  reserved for state (healthy / warning / critical) and never used decoratively.
+*/
+@theme {
+  --color-ink-950: #04060a;
+  --color-ink-900: #070a0f;
+  --color-ink-850: #0a0e14;
+  --color-ink-800: #0d121a;
+  --color-ink-750: #111722;
+  --color-ink-700: #161d29;
+  --color-line: #19202b;
+  --color-line-strong: #232c3a;
+  --color-line-bright: #313c4e;
+
+  --color-fg: #e8edf4;
+  --color-fg-muted: #a2acba;
+  --color-fg-subtle: #6d7787;
+  --color-fg-faint: #475163;
+
+  --color-accent: #5b9dff;
+  --color-accent-strong: #3b82f6;
+  --color-accent-soft: #16294a;
+  --color-water: #3a9be0;
+  --color-water-deep: #12406b;
+
+  --color-ok: #3ecf8e;
+  --color-ok-soft: #0e2a20;
+  --color-warn: #f2a93b;
+  --color-warn-soft: #2e2211;
+  --color-crit: #f0564d;
+  --color-crit-soft: #331514;
+
+  --color-series-base: #7c8799;
+  --color-series-noact: #d4dae3;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
+  --radius-panel: 10px;
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+  color-scheme: dark;
+  --sidebar-w: 232px;
+}
+
+@media (max-width: 1600px) {
+  :root {
+    --sidebar-w: 212px;
+  }
+}
+
+html,
+body {
+  background: var(--color-ink-950);
+  color: var(--color-fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+::selection {
+  background: #2b4c80;
+  color: #fff;
+}
+
+/* Numbers in telemetry must not jitter as they update. */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-fg-subtle);
+}
+
+.panel {
+  background: var(--color-ink-850);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+}
+
+.panel-flat {
+  background: var(--color-ink-900);
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+}
+
+.hairline {
+  border-color: var(--color-line);
+}
+
+/* Scrollbars: thin and quiet. */
+.scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: #243041 transparent;
+}
+.scroll-quiet::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-quiet::-webkit-scrollbar-thumb {
+  background: #1f2835;
+  border-radius: 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+  Intro reveal. Elements are laid out in their final position from the first
+  frame; only opacity and transform animate, so there is no layout shift.
+*/
+[data-reveal] {
+  transition:
+    opacity 700ms var(--ease-out-cubic),
+    transform 700ms var(--ease-out-cubic);
+}
+html[data-intro="pending"] [data-reveal] {
+  opacity: 0;
+  transform: translateY(10px) scale(0.995);
+}
+html[data-intro="pending"] [data-reveal="sidebar"] {
+  opacity: 0.2;
+  transform: none;
+}
+html[data-intro="pending"] [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+  [data-reveal] {
+    transition: opacity 400ms linear !important;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Print stylesheet for run records (Reports → Export PDF). */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  html,
+  body {
+    color-scheme: light !important;
+    background: #fff !important;
+    color: #0b1220 !important;
+    overflow: visible !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  #app-root,
+  #app-root > main,
+  #page-scroll {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .print-doc {
+    color: #0b1220;
+    font-size: 10pt;
+  }
+  .print-doc .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .print-doc a {
+    text-decoration: underline;
+  }
+}
+.print-only {
+  display: none;
+}

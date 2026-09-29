@@ -1,0 +1,16 @@
+{
+  // Static deployment of the exported Next.js app (npm run build → out/)
+  // on Cloudflare Workers static assets, served at aquatwin.kanbanstudios.ae.
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "aquatwin",
+  "account_id": "f8dc06dc6cc06ecfe499b2fdbcf45196",
+  "compatibility_date": "2026-09-29",
+  "assets": {
+    "directory": "./out",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "aquatwin.kanbanstudios.ae", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false
+}

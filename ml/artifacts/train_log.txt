@@ -1,0 +1,29 @@
+﻿{'train': 40000, 'cal': 8000, 'test_id': 8000, 'test_ood': 6000}
+trained Q (4.0s)
+trained C (6.6s)
+trained D (8.4s)
+trained W (10.1s)
+
+test_id: MAE vs truth
+  Q [m3/h] nominal=53.169  physics=48.035  mlonly=9.740  hybrid=4.855
+  C [mg/L] nominal=59.294  physics=32.447  mlonly=9.164  hybrid=3.739
+  D [bar] nominal=0.291  physics=0.049  mlonly=0.038  hybrid=0.016
+  W [kW] nominal=166.218  physics=138.983  mlonly=25.975  hybrid=14.679
+
+test_ood: MAE vs truth
+  Q [m3/h] nominal=67.234  physics=47.879  mlonly=35.115  hybrid=12.113
+  C [mg/L] nominal=96.841  physics=49.399  mlonly=52.301  hybrid=14.747
+  D [bar] nominal=0.360  physics=0.050  mlonly=0.079  hybrid=0.022
+  W [kW] nominal=184.345  physics=156.540  mlonly=61.883  hybrid=41.343
+
+test_id permeate-flow MAE by query type:
+  envshift   n= 1260  nominal=63.44  physics=56.04  mlonly=12.80  hybrid=6.40
+  normalise  n= 2383  nominal=36.25  physics=49.45  mlonly=6.05  hybrid=3.22
+  whatif     n= 4357  nominal=59.45  physics=44.95  mlonly=10.87  hybrid=5.30
+
+noise floor MAE: {'Q': 2.952, 'C': 4.605, 'D': 0.024, 'W': 8.681}
+conformal q (bins): {'physics': {'Q': [0.0327, 0.0745, 0.1686], 'C': [0.0458, 0.096, 0.2121], 'D': [0.0569, 0.0754, 0.1629], 'W': [0.0372, 0.0829, 0.1911]}, 'mlonly': {'Q': [0.0298, 0.0293, 0.0303], 'C': [0.0478, 0.0503, 0.0576], 'D': [0.0867, 0.0899, 0.1081], 'W': [0.0337, 0.0321, 0.0335]}, 'hybrid': {'Q': [0.0137, 0.0155, 0.0177], 'C': [0.0293, 0.031, 0.0327], 'D': [0.0564, 0.0585, 0.0636], 'W': [0.0164, 0.0188, 0.0215]}}
+coverage test_id: {'physics': {'Q': 0.897, 'C': 0.912, 'D': 0.934, 'W': 0.905}, 'mlonly': {'Q': 0.902, 'C': 0.929, 'D': 0.935, 'W': 0.918}, 'hybrid': {'Q': 0.934, 'C': 0.983, 'D': 0.985, 'W': 0.937}}
+coverage test_ood: {'physics': {'Q': 0.842, 'C': 0.876, 'D': 0.94, 'W': 0.825}, 'mlonly': {'Q': 0.444, 'C': 0.469, 'D': 0.704, 'W': 0.582}, 'hybrid': {'Q': 0.54, 'C': 0.677, 'D': 0.95, 'W': 0.531}}
+OOD flag rates: {'mahalanobis_only': {'test_id_flag_rate': 0.012375, 'test_ood_flag_rate': 0.17716666666666667}, 'withhold_rule': {'test_id_flag_rate': 0.000125, 'test_ood_flag_rate': 0.7718333333333334, 'test_ood_flag_rate_by_type': {'both': 1.0, 'fouling': 0.06991089787525702, 'salinity': 1.0, 'temperature': 0.9906614785992218}}}
+done in 13.5s

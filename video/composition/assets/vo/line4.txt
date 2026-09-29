@@ -1,0 +1,1 @@
+It weighs six hundred and seventy-six strategies, and a safety layer, AquaGuard, checks every limit at the edge of the model's uncertainty.

@@ -1,0 +1,1 @@
+Gulf desalination plants run on fixed setpoints and fixed alarms. By the time an alarm fires, the plant is already reacting.

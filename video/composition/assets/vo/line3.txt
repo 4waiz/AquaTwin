@@ -1,0 +1,1 @@
+Before a salinity shock arrives, it simulates the next day. Doing nothing breaks the water-quality limit within three hours. AquaTwin's plan holds every constraint.

@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aquatwin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3100,
+      "autoPort": true
+    },
+    {
+      "name": "aquatwin-static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "dev",
+        "--port",
+        "3300"
+      ],
+      "port": 3300
+    }
+  ]
+}

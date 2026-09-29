@@ -1,0 +1,38 @@
+{
+  "tolerance": 1e-9,
+  "passed": true,
+  "results": {
+    "hybrid.Q": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "hybrid.C": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "hybrid.D": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "hybrid.W": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "mlonly.Q": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "mlonly.C": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "mlonly.D": {
+      "n": 500,
+      "maxAbsDiff": 0
+    },
+    "mlonly.W": {
+      "n": 500,
+      "maxAbsDiff": 0
+    }
+  }
+}

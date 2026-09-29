@@ -1,0 +1,1 @@
+AquaTwin keeps a physics model of each reverse-osmosis train calibrated to live data, and corrects it with machine learning. Train 2, it tells us, is due for cleaning.

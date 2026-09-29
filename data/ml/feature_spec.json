@@ -1,0 +1,196 @@
+{
+  "seed": 20261101,
+  "created": "2026-09-29T11:20:40.795Z",
+  "splits": {
+    "train": 40000,
+    "cal": 8000,
+    "test_id": 8000,
+    "test_ood": 6000
+  },
+  "rejectedSamples": 17850,
+  "hybrid_features": [
+    "P1_bar",
+    "Qv1_m3h",
+    "Cf_gL",
+    "T_C",
+    "P0_bar",
+    "Qv0_m3h",
+    "Cf0_gL",
+    "T0_C",
+    "A25",
+    "B25",
+    "kdp",
+    "eta",
+    "r_phys",
+    "J_phys",
+    "Cp_phys_mgL",
+    "dP_phys_bar"
+  ],
+  "mlonly_features": [
+    "P1_bar",
+    "Qv1_m3h",
+    "Cf_gL",
+    "T_C",
+    "P0_bar",
+    "Qv0_m3h",
+    "Cf0_gL",
+    "T0_C",
+    "Qp0_m3h",
+    "Cp0_mgL",
+    "dP0_bar",
+    "Pow0_kW"
+  ],
+  "ood_features": [
+    "Cf_gL",
+    "T_C",
+    "Cf0_gL",
+    "T0_C",
+    "P1_bar",
+    "Qv1_m3h",
+    "A25",
+    "B25",
+    "kdp",
+    "eta"
+  ],
+  "envelope": {
+    "Cf_gL": [
+      36,
+      48
+    ],
+    "T_C": [
+      18,
+      36
+    ],
+    "fouling_mean": [
+      0,
+      0.3
+    ],
+    "P_bar": [
+      52,
+      73
+    ],
+    "Qv_m3h": [
+      6.5,
+      14
+    ]
+  },
+  "ood_envelope": {
+    "Cf_gL": [
+      48.5,
+      54
+    ],
+    "T_C": [
+      36.5,
+      40
+    ],
+    "fouling_mean": [
+      0.32,
+      0.45
+    ]
+  },
+  "plant": {
+    "vesselsPerTrain": 200,
+    "elementsPerVessel": 7,
+    "A25_clean": 1.05
+  },
+  "degradation": {
+    "kappa_h": 0.00005596883842113295,
+    "refFlux_LMH": 14,
+    "phiMax": 0.6,
+    "dpGain": 2.2055113263729784,
+    "saltGain": 0.15921596120236697,
+    "fitted_on": "reference-plant history, 15 operating points × 72 h, biofouling profile, noise-free 0D calibration",
+    "points": [
+      {
+        "P": 58,
+        "Qv": 8,
+        "flux": 10.37,
+        "phiEff": 0.0941
+      },
+      {
+        "P": 58,
+        "Qv": 9.6,
+        "flux": 11.43,
+        "phiEff": 0.1238
+      },
+      {
+        "P": 58,
+        "Qv": 11.5,
+        "flux": 12.32,
+        "phiEff": 0.1549
+      },
+      {
+        "P": 61,
+        "Qv": 8,
+        "flux": 11.14,
+        "phiEff": 0.0959
+      },
+      {
+        "P": 61,
+        "Qv": 9.6,
+        "flux": 12.33,
+        "phiEff": 0.1289
+      },
+      {
+        "P": 61,
+        "Qv": 11.5,
+        "flux": 13.32,
+        "phiEff": 0.1642
+      },
+      {
+        "P": 64,
+        "Qv": 8,
+        "flux": 11.86,
+        "phiEff": 0.0962
+      },
+      {
+        "P": 64,
+        "Qv": 9.6,
+        "flux": 13.17,
+        "phiEff": 0.1321
+      },
+      {
+        "P": 64,
+        "Qv": 11.5,
+        "flux": 14.27,
+        "phiEff": 0.1713
+      },
+      {
+        "P": 67,
+        "Qv": 8,
+        "flux": 12.52,
+        "phiEff": 0.0953
+      },
+      {
+        "P": 67,
+        "Qv": 9.6,
+        "flux": 13.96,
+        "phiEff": 0.1335
+      },
+      {
+        "P": 67,
+        "Qv": 11.5,
+        "flux": 15.24,
+        "phiEff": 0.2011
+      },
+      {
+        "P": 70,
+        "Qv": 8,
+        "flux": 13.14,
+        "phiEff": 0.0933
+      },
+      {
+        "P": 70,
+        "Qv": 9.6,
+        "flux": 14.7,
+        "phiEff": 0.1414
+      },
+      {
+        "P": 70,
+        "Qv": 11.5,
+        "flux": 15.24,
+        "phiEff": 0.2011
+      }
+    ]
+  }
+}

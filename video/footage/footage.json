@@ -1,0 +1,32 @@
+{
+  "intro": {
+    "frames": 386,
+    "seconds": 10.99,
+    "capture_fps": 35.0
+  },
+  "twin": {
+    "frames": 1092,
+    "seconds": 20.33,
+    "capture_fps": 53.7
+  },
+  "scenario": {
+    "frames": 1161,
+    "seconds": 21.29,
+    "capture_fps": 54.5
+  },
+  "optimization": {
+    "frames": 1069,
+    "seconds": 18.58,
+    "capture_fps": 57.5
+  },
+  "withheld": {
+    "frames": 722,
+    "seconds": 12.2,
+    "capture_fps": 59.1
+  },
+  "validation": {
+    "frames": 459,
+    "seconds": 8.01,
+    "capture_fps": 57.2
+  }
+}

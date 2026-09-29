@@ -1,0 +1,53 @@
+{
+  "name": "aquatwin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node scripts/postexport.mjs",
+    "start": "wrangler dev --port 3200",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "data:generate": "tsx scripts/generate-dataset.ts",
+    "ml:train": "python ml/train.py",
+    "ml:parity": "tsx scripts/parity-test.ts",
+    "experiments": "tsx scripts/run-experiments.ts",
+    "experiments:quick": "tsx scripts/run-experiments.ts --quick",
+    "pipeline": "npm run data:generate && npm run ml:train && npm run ml:parity && npm run experiments",
+    "qa:capture": "python scripts/qa/capture.py",
+    "qa:perf": "python scripts/qa/perf.py",
+    "report": "python scripts/report/validation_md.py && python scripts/report/figures.py && python scripts/report/build.py",
+    "qa:screenshots": "python scripts/qa/screenshots.py",
+    "preview": "wrangler dev --port 3200",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "dependencies": {
+    "d3-array": "^3.2.4",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0",
+    "motion": "^13.4.4",
+    "next": "16.3.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "^0.186.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/d3-array": "^3.2.2",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-shape": "^3.2.0",
+    "@types/node": "^24.19.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.186.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.2",
+    "wrangler": "^4.143.1"
+  }
+}
