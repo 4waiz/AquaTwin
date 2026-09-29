@@ -20,8 +20,8 @@ export function DecisionLog({ branch, cursor, onSeek }: { branch: ScenarioBranch
           <tr className="text-left text-fg-subtle">
             <th className="pb-1.5 font-normal">Time</th>
             <th className="pb-1.5 font-normal">AquaGuard</th>
-            <th className="pb-1.5 text-right font-normal">Pressure</th>
-            <th className="pb-1.5 text-right font-normal">Feed / vessel</th>
+            <th className="pb-1.5 pl-2 text-right font-normal">Pressure</th>
+            <th className="pb-1.5 pl-2 text-right font-normal">Feed / vessel</th>
             <th className="pb-1.5 pl-3 font-normal">Allocation</th>
             <th className="pb-1.5 text-right font-normal">Target</th>
           </tr>
@@ -36,10 +36,13 @@ export function DecisionLog({ branch, cursor, onSeek }: { branch: ScenarioBranch
                 onClick={() => onSeek(d.t)}
                 className={`cursor-pointer border-t border-line transition-colors ${active ? "bg-accent-soft/40" : "hover:bg-ink-800"}`}
               >
-                <td className="num py-1.5 font-mono whitespace-nowrap text-fg-muted">
+                <td className="num py-1.5 pr-2 font-mono whitespace-nowrap text-fg-muted">
                   {fmtOffset(d.t)}
                   {d.trigger === "outlook" && (
-                    <span className="ml-1 font-sans text-[9.5px] text-accent" title="Unscheduled re-plan: the current setpoints would break a limit if the feed trend continued">
+                    <span
+                      className="block font-sans text-[9px] leading-none text-accent"
+                      title="Unscheduled re-plan: the current setpoints would break a limit if the feed trend continued"
+                    >
                       re-plan
                     </span>
                   )}
@@ -47,8 +50,8 @@ export function DecisionLog({ branch, cursor, onSeek }: { branch: ScenarioBranch
                 <td className="py-1.5">
                   <span className={`rounded border px-1.5 py-px font-mono text-[9.5px] ${VERDICT_CLS[d.verdict] ?? VERDICT_CLS.HOLD}`}>{d.verdict}</span>
                 </td>
-                <td className="num py-1.5 text-right text-fg">{d.chosen ? `${fmt(d.chosen.P, 1)} bar` : "hold"}</td>
-                <td className="num py-1.5 text-right text-fg">{d.chosen ? `${fmt(d.chosen.Qv, 1)} m³/h` : "—"}</td>
+                <td className="num py-1.5 pl-2 text-right whitespace-nowrap text-fg">{d.chosen ? `${fmt(d.chosen.P, 1)} bar` : "hold"}</td>
+                <td className="num py-1.5 pl-2 text-right whitespace-nowrap text-fg">{d.chosen ? `${fmt(d.chosen.Qv, 1)} m³/h` : "—"}</td>
                 <td className="py-1.5 pl-3 text-fg-muted">
                   {d.chosen
                     ? d.chosen.focusMode === "normal"

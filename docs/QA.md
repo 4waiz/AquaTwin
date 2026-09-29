@@ -6,7 +6,7 @@ Status of the checks run on the release build (30 September 2026). Scripts are i
 |---|---|---|
 | Static checks | `npm run typecheck` (TypeScript, strict) | 0 errors |
 | | `npm run lint` (ESLint, Next.js rules) | 0 errors, 0 warnings |
-| Unit tests | `npm test` (vitest) | 29 / 29 pass |
+| Unit tests | `npm test` (vitest) | 31 / 31 pass |
 | ML runtime | Browser tree runtime vs scikit-learn (`npm run ml:parity`, `tests/ml.test.ts`) | equal within 1·10⁻⁹ on 500 samples per model |
 | Reproducibility | Closed-loop experiments rerun on the committed code | identical to the previous run apart from provenance fields (creation time, commit, duration) |
 | Desktop browser | 11 pages at 1920×1080 and 1440×900, Chrome, production build | 0 console errors, 0 page errors, no `NaN` / `undefined` / `Infinity` rendered |
@@ -16,7 +16,7 @@ Status of the checks run on the release build (30 September 2026). Scripts are i
 
 ## 1. Unit tests
 
-`tests/physics.test.ts`, `tests/safety.test.ts` and `tests/ml.test.ts` cover:
+`tests/physics.test.ts`, `tests/safety.test.ts`, `tests/closedloop.test.ts` and `tests/ml.test.ts` cover:
 
 - seawater properties: densities, and the osmotic pressure of standard seawater (35 g/kg, 25 °C) ≈ 25.9 bar, which matches TEOS-10 to within ±0.4 % (not the ≈ 28 bar of a NaCl solution); temperature correction;
 - reference plant: water balance, salt balance within 0.5 % (on the membrane feed after pressure-exchanger mixing), operation inside the design envelope, and the expected response to fouling and higher feed salinity;
@@ -25,6 +25,7 @@ Status of the checks run on the release build (30 September 2026). Scripts are i
 - forecasting: linear trend recovery, threshold-crossing time, stable-signal behaviour;
 - cleaning criteria (FilmTec manual): healthy, flow −10 %, pressure drop +15 % alone, approaching;
 - feed look-ahead: needs four samples, ignores a steady feed, projects a ramp over the decision interval, clamps implausible extrapolations;
+- closed loop: AquaTwin re-plans between hourly decisions when a salinity ramp threatens the quality limit (and then has no violation), while held setpoints violate it;
 - ML runtime: parity with scikit-learn on 500 samples per model (both models, all four targets), and the out-of-distribution rule flags a compound extreme but not the centre of the training envelope.
 
 ## 2. Browser QA
@@ -54,7 +55,7 @@ Both GPUs stayed at the high quality tier. If frame time stays above 22 ms for 2
 - **Claims audit.** Every number quoted in `README.md`, `report/AquaTwin-Report.md` and `docs/MODEL.md` was checked against `results.json` and `ml-metrics.json` after the final run. `docs/VALIDATION.md` is generated from those files and not edited by hand.
 - **Fair comparison.** All three model variants use the same optimiser, AquaGuard and data; only the prediction model differs. Lead times count only warnings related to the event they precede. False warnings in normal operation are counted (none for any method).
 - **Negative results are reported.** Examples: the hybrid's in-loop production error is not the lowest in the demand surge; every method fails in the compound extreme; conventional alarms are only minutes behind for fast quality events.
-- **Development disclosure.** The start-time sweep revealed short hybrid violations when a salinity shock began at night. The optimiser's feed look-ahead was added in response, so that sweep is not an independent test of the look-ahead (stated in the report and in `docs/VALIDATION.md` §3.8).
+- **Development disclosure.** Two controller features were added after failures were observed: the feed look-ahead (after the start-time sweep showed short hybrid violations when a salinity shock began at night) and the unscheduled re-plan (after the Scenario Lab showed a 20-minute quality violation for a night start with 65 % storage). The robustness sweep is therefore not an independent test of them; this is stated in the report and in `docs/VALIDATION.md` §3.8.
 - **Labelling.** Every number in the interface carries a provenance tag: *simulated*, *modeled*, *estimated*, *assumed* or *external reference*. No organisation is presented as endorsing the prototype.
 
 ## 5. Deployment

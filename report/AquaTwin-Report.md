@@ -34,9 +34,9 @@ We built a complete working prototype — an 11-page web application with a live
 
 - **Prediction:** permeate-flow error of 4.9 m³/h per train (mean absolute error) inside the training envelope, against 48.0 for the self-calibrated physics model and 9.7 for a pure ML model with the same data; outside the envelope 12.1 against 35.1 for ML alone.
 - **Knowing its limits:** the withhold rule flags 77 % of out-of-envelope conditions and 0.01 % of in-envelope ones.
-- **Closed loop:** under a +15 % salinity shock, fixed operation violates the permeate-quality or storage limits for 21.3 of 24 hours; AquaTwin keeps every constraint. Under a grid power cap and a +20 % demand surge, violations fall from 6.0 h and 15.3 h to zero. The hybrid is the only model variant with no violation in all three, and it stays at zero when the same disturbances start at six different times of day. The energy cost ranges from 0 to +2.9 % in specific energy — lower energy is not claimed.
+- **Closed loop:** under a +15 % salinity shock, fixed operation violates the permeate-quality or storage limits for 21.3 of 24 hours; AquaTwin keeps every constraint. Under a grid power cap and a +20 % demand surge, violations fall from 6.0 h and 15.3 h to zero. Repeating the three disturbances at six times of day, the hybrid has no violation in any of the 18 runs from normal storage (physics-only: 4 runs with a violation, ML-only: 8). Starting with storage close to its reserve, no method avoids every violation. The energy cost ranges from 0 to +2.8 % in specific energy — lower energy is not claimed.
 - **Early warning:** a membrane train reaching the flow cleaning criterion is flagged about 12.5 hours ahead, where conventional fixed-threshold alarms give no warning; storage depletion 6.8 h ahead versus 1.3 h.
-- **Honest failure:** in a compound extreme outside the model's envelope every method fails; AquaTwin withholds 19 of 24 recommendations, as designed.
+- **Honest failure:** in a compound extreme outside the model's envelope every method fails; AquaTwin withholds its recommendation 20 times in the 24 hours, as designed.
 
 The prototype runs entirely in the browser, is fully reproducible from fixed seeds, and is designed to be connected read-only to a plant historian and run in shadow mode — the next step toward industrial validation.
 
@@ -112,7 +112,7 @@ Normalised permeate flow, salt passage and pressure drop are computed by queryin
 
 A production planner converts demand, storage level and any announced power cap into minimum, maximum and target production. The optimiser enumerates 676 strategies (common feed pressure × feed flow per vessel × allocation of the weakest train) and ranks admissible ones by a weighted sum of specific energy, permeate quality, production tracking, membrane stress and fouling rate; weights are editable, but constraints are never traded off. AquaGuard checks 12 hard limits — feed pressure, permeate TDS, recovery, flux, concentrate and feed flow per vessel, vessel pressure drop, motor rating, minimum production, power cap, setpoint ramp and model confidence — at the conservative edge of each prediction interval. Its rules are plain comparisons; nothing in it is learned.
 
-Because a decision is held for an hour, the optimiser also looks ahead: the feed salinity and temperature trend of the last hour is extrapolated over the decision interval (with bounded steps), and the best-scoring admissible strategy that still satisfies the limits under that extrapolated feed is recommended. If none does, the best-scoring strategy is still proposed, with a note that the operator's attention is needed. The same extrapolation drives a two-hour permeate-quality outlook.
+Because a decision is held for an hour, the optimiser also looks ahead: the feed salinity and temperature trend of the last hour is extrapolated over the decision interval (with bounded steps), and the best-scoring admissible strategy that still satisfies the limits under that extrapolated feed is recommended. If none does, the best-scoring strategy is still proposed, with a note that the operator's attention is needed. The same extrapolation drives a two-hour permeate-quality outlook. Between hourly decisions, AquaTwin checks every ten minutes whether its current setpoints would still pass this look-ahead check, and re-plans at once if they would not (at most every 20 minutes, and not while recommendations are withheld); otherwise a ramp that starts just after a decision would go unanswered for up to an hour.
 
 ## 5. Implementation
 
@@ -124,7 +124,7 @@ Because a decision is held for an hour, the optimiser also looks ahead: the feed
 | Machine learning | Python 3.12, scikit-learn 1.9; JSON export; browser runtime verified to 10⁻⁹ |
 | 3D twin | three.js r186, WebGL2; procedural plant; GPU flow particles; planar water reflections; ambient occlusion; cinematic first-visit intro; adaptive quality tiers |
 | Reproducibility | Fixed seeds throughout; one command regenerates the dataset, models, parity check and all experiments (≈ 10 minutes); rerunning reproduced every artefact bit-for-bit apart from timestamps |
-| Quality assurance | 29 unit tests (physics balances, seawater properties, calibration round trip, AquaGuard verdicts, cleaning criteria, forecasting, feed look-ahead, ML parity), type checking, lint, automated browser QA of all pages at 1920×1080 and 1440×900 and on emulated phone (390×844) and tablet (820×1180) screens |
+| Quality assurance | 31 unit tests (physics balances, seawater properties, calibration round trip, AquaGuard verdicts, cleaning criteria, forecasting, feed look-ahead, closed-loop re-planning, ML parity), type checking, lint, automated browser QA of all pages at 1920×1080 and 1440×900 and on emulated phone (390×844) and tablet (820×1180) screens |
 
 On the target hardware class (RTX 5080 Laptop GPU, Chrome, 1920×1080) the 3D pages render at about 235 frames per second (measured without vsync; about 130 fps on the Scenario Lab during playback) with the full effect stack. On the same laptop's integrated graphics they hold 55–80 fps at full quality, and an adaptive governor steps down ambient occlusion, shadow resolution and pixel ratio if frames become slow. We evaluated WebGPU and kept WebGL2: at this frame budget WebGPU would not materially change what users see, and WebGL2 is more stable across laptop graphics drivers.
 
@@ -140,7 +140,7 @@ On the target hardware class (RTX 5080 Laptop GPU, Chrome, 1920×1080) the 3D pa
 
 We asked four questions: (1) does the hybrid predict better than physics or ML alone, inside and outside its training envelope; (2) are its uncertainty estimates honest and does it recognise out-of-envelope conditions; (3) in closed loop, does better prediction reduce constraint violations and at what energy cost; (4) does model-based monitoring warn earlier than conventional alarms?
 
-For (1)–(2) we use the held-out test sets. For (3)–(4) we run 24-hour closed-loop simulations on the reference plant for ten scenarios — normal operation, salinity shock, temperature shock, membrane fouling, pump degradation, sensor degradation, algal bloom, energy constraint, demand surge and a compound extreme outside the envelope — with four methods: fixed operation (setpoints held), and AquaTwin's optimiser and AquaGuard driven by the physics-only, ML-only or hybrid model. Each combination is run with five sensor-noise seeds (200 runs). Decisions are hourly; the plant is simulated in 10-minute steps; each run starts at 14:00. Warnings are counted only if they relate to the event they precede. Because demand and seawater temperature follow a daily cycle, the salinity, power-cap and demand scenarios are also repeated at six start times across the day (00:00 to 20:00, seed 1). The complete tables are in `docs/VALIDATION.md`, generated directly from the result files.
+For (1)–(2) we use the held-out test sets. For (3)–(4) we run 24-hour closed-loop simulations on the reference plant for ten scenarios — normal operation, salinity shock, temperature shock, membrane fouling, pump degradation, sensor degradation, algal bloom, energy constraint, demand surge and a compound extreme outside the envelope — with four methods: fixed operation (setpoints held), and AquaTwin's optimiser and AquaGuard driven by the physics-only, ML-only or hybrid model. Each combination is run with five sensor-noise seeds (200 runs). Decisions are hourly, with re-plans in between when the feed trend threatens a limit; the plant is simulated in 10-minute steps; each run starts at 14:00 with product storage at 55 % (reserve minimum 25 %). Warnings are counted only if they relate to the event they precede. Because demand and seawater temperature follow a daily cycle and storage sets the plant's slack, the salinity, power-cap and demand scenarios are also repeated at six start times across the day (00:00 to 20:00) from three storage levels (35, 55 and 75 %), with seed 1. The complete tables are in `docs/VALIDATION.md`, generated directly from the result files.
 
 ## 8. Results
 
@@ -160,15 +160,25 @@ Inside the envelope the intervals cover 90–98 % of outcomes, as designed. Outs
 
 <figure class="wide"><img src="figures/violations.svg" alt="Constraint violations"><figcaption>Figure 4. Hours with any constraint violation on the true plant, mean of five seeds. Simulated.</figcaption></figure>
 
-In six of ten scenarios no method violates a constraint — the plant is operated inside a comfortable envelope. Where the disturbance matters, the difference is large: under the salinity shock fixed operation violates the permeate-quality specification for 12.0 h and the storage minimum for 13.2 h (21.3 h in total); the physics-only closed loop still incurs 1.07 h, the ML-only and hybrid loops none. Under the power cap and the demand surge, fixed operation violates for 6.0 h and 15.3 h; the hybrid for zero hours (ML-only 1.5 h and 2.5 h, physics-only zero).
+In six of ten scenarios no method violates a constraint — the plant is operated inside a comfortable envelope. Where the disturbance matters, the difference is large: under the salinity shock fixed operation violates the permeate-quality specification for 12.0 h and the storage minimum for 13.2 h (21.3 h in total); all three AquaTwin variants none. Under the power cap and the demand surge, fixed operation violates for 6.0 h and 15.3 h; the hybrid and the physics-only loop for zero hours, the ML-only loop for 1.6 h and 2.5 h.
 
-**Start time.** Across the 18 start-time runs (three scenarios × six start times), the hybrid closed loop has no violation hour in any; the physics-only loop violates in 6 (up to 8.3 h), the ML-only loop in 8 (up to 12.2 h) and fixed operation in all 18. One caveat: this sweep is not an independent test of the optimiser's look-ahead (Section 4.6). An earlier version without it showed short hybrid violations (0.2–0.5 h) when the salinity shock began at night; the look-ahead was added in response, and the sweep was then rerun.
+**Start time and storage.** The robustness sweep separates the models more clearly than the main runs:
+
+| Runs with a violation (of 18) | Fixed operation | Physics only | ML only | AquaTwin hybrid |
+|---|---|---|---|---|
+| Storage at 35 % | 18 | 11 | 12 | 7 |
+| Storage at 55 % | 18 | 4 | 8 | 0 |
+| Storage at 75 % | 18 | 0 | 1 | 0 |
+
+From 55 % and 75 % storage the hybrid has no violation at any start time. From 35 %, only 10 percentage points above the reserve, no method avoids every violation: all of the hybrid's are storage-reserve violations under the demand surge (3 of 6 start times) and the power cap (4 of 6). There AquaTwin treats the grid cap as a hard limit and lets storage fall, whereas fixed operation keeps storage but runs above the cap; we did not establish whether any strategy could have met both.
+
+Two caveats. The sweep uses one seed. And it is not an independent test of two controller features that were added after failures were observed: the feed look-ahead (Section 4.6), added after an earlier sweep showed short hybrid violations (0.2–0.5 h) when the salinity shock began at night, and the unscheduled re-plan, added after the Scenario Lab showed a 20-minute quality violation for a night start with 65 % storage. Both are general mechanisms rather than scenario-specific settings, and they apply equally to all three model variants.
 
 <figure class="wide"><img src="figures/salinity.svg" alt="Salinity shock trajectories"><figcaption>Figure 5. Salinity shock, seed 1: permeate TDS and product storage for the four methods. AquaTwin raises pressure and production early, keeping quality below 400 mg/L and storage well above the 25 % reserve. Simulated.</figcaption></figure>
 
 <figure class="wide"><img src="figures/sec.svg" alt="Specific energy"><figcaption>Figure 6. Specific energy consumption relative to fixed operation. Simulated.</figcaption></figure>
 
-Avoiding violations is not free: the hybrid closed loop uses between 0 % and 2.9 % more energy per cubic metre than fixed operation, most in the demand surge (where it also produces 12 % more water). We do not claim energy savings. In the compound extreme outside the envelope, every method violates constraints for about 22 of 24 hours; AquaTwin withholds its recommendation at 19 of 24 decisions. Abstention limits harm — it prevents confident but wrong recommendations — but it does not solve the problem; a human decision is required.
+Avoiding violations is not free: the hybrid closed loop uses between 0 % and 2.8 % more energy per cubic metre than fixed operation, most in the demand surge (where it also produces 12 % more water). We do not claim energy savings. In the compound extreme outside the envelope, every method violates constraints for 21–22 of 24 hours; AquaTwin withholds its recommendation 20 times in the 24 hours. Abstention limits harm — it prevents confident but wrong recommendations — but it does not solve the problem; a human decision is required.
 
 ### 8.3 Early warning
 
@@ -204,11 +214,12 @@ The plant configuration (trains, vessels, elements, limits) is data, not code, s
 
 - **Simulated plant.** All results are against a simulator. Real plants include scaling chemistry, vessel-to-vessel heterogeneity, control-loop dynamics and instrument faults that neither model contains.
 - **Synthetic training data.** The residual is trained on data from the same reference plant it is evaluated on; the out-of-envelope tests and model-form differences mitigate but do not remove this optimism.
-- **Steady-state models.** Minute-scale hydraulic and control transients are not modelled; decisions are hourly.
+- **Steady-state models.** Minute-scale hydraulic and control transients are not modelled; decisions are hourly, with re-plans at most every 20 minutes.
 - **Water quality.** Only total dissolved solids are modelled — boron, which single-pass SWRO rejects poorly and which has a WHO guideline value [17], is not.
 - **Fouling.** The degradation model is lumped and fitted to one fouling profile; scaling and chemical degradation are not modelled; heavier-than-seen fouling is poorly detected by the out-of-distribution rule.
 - **Energy and carbon.** The simulated plant's specific energy (≈ 3.3 kWh/m³) is at the efficient end of published ranges because auxiliary loads are assumptions; comparisons between strategies are meaningful, absolute values are not plant-specific. Carbon uses an average grid factor.
 - **Sensor faults.** Sensor drift propagates into all models; sensor validation is not part of the prototype.
+- **Low storage.** Starting close to the storage reserve, a long demand surge or power cap drains storage below the reserve with every method; AquaTwin reduces how often this happens but does not prevent it.
 
 ## 13. Roadmap
 

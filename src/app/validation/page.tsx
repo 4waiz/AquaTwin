@@ -41,8 +41,12 @@ interface Results {
       falseWarningHours?: Record<Monitor, number | null>;
     }
   >;
-  /** Violation hours (seed 1) by disturbance start time of day: scenario → start clock → method. */
-  startTimes?: Record<string, Record<string, Record<Method, number>>>;
+  /** Seed-1 violation hours by start time of day and initial product storage: runs[scenario][storage][clock][method]. */
+  robustness?: {
+    clocks: number[];
+    storage: number[];
+    runs: Record<string, Record<string, Record<string, Record<Method, { any: number; by: Record<string, number> }>>>>;
+  };
 }
 interface ErrStats {
   vs_truth: { mae: number };
@@ -98,6 +102,7 @@ export default function ValidationPage() {
   const { data: ml, missing: mlMissing } = useStaticJson<Metrics>("/data/models/ml-metrics.json");
   const [metric, setMetric] = useState(METRICS[0].key);
   const [split, setSplit] = useState<"test_id" | "test_ood">("test_id");
+  const [storage, setStorage] = useState("0.55");
   useEffect(() => useScenario.getState().setActive(false), []);
   const m = METRICS.find((x) => x.key === metric)!;
 
@@ -289,11 +294,35 @@ export default function ValidationPage() {
         </Panel>
       </div>
 
-      {res?.startTimes && Object.keys(res.startTimes).length > 0 && (
-        <Panel title="Robustness to start time" right={<Provenance kind="simulated" />} reveal="panel3" bodyClassName="p-4">
+      {res?.robustness && (
+        <Panel
+          title={
+            <>
+              <span className="max-sm:hidden">Robustness to start time and storage</span>
+              <span className="sm:hidden">Robustness</span>
+            </>
+          }
+          right={
+            <div className="flex items-center gap-2">
+              <Segmented
+                size="sm"
+                ariaLabel="Initial product storage"
+                value={storage}
+                onChange={setStorage}
+                options={res.robustness.storage.map((x) => ({ value: String(x), label: `${Math.round(x * 100)} %` }))}
+              />
+              <span className="max-sm:hidden">
+                <Provenance kind="simulated" />
+              </span>
+            </div>
+          }
+          reveal="panel3"
+          bodyClassName="p-4"
+        >
           <div className="grid grid-cols-3 gap-6 max-xl:grid-cols-1">
-            {Object.entries(res.startTimes).map(([id, byClock]) => {
-              const clocks = Object.keys(byClock).sort((a, b) => Number(a) - Number(b));
+            {Object.entries(res.robustness.runs).map(([id, byStorage]) => {
+              const byClock = byStorage[storage] ?? {};
+              const clocks = res.robustness!.clocks.map(String);
               const name = res.scenarios.find((x) => x.id === id)?.name ?? id;
               return (
                 <div key={id} className="scroll-quiet overflow-x-auto">
@@ -319,10 +348,18 @@ export default function ValidationPage() {
                             </span>
                           </td>
                           {clocks.map((c) => {
-                            const v = byClock[c]?.[k];
+                            const cell = byClock[c]?.[k];
+                            const v = cell?.any;
+                            const why = cell
+                              ? Object.entries(cell.by)
+                                  .filter(([, h]) => h > 0)
+                                  .map(([t, h]) => `${VIOLATION_LABEL[t] ?? t} ${fmt(h, 1)} h`)
+                                  .join(" · ")
+                              : "";
                             return (
                               <td
                                 key={c}
+                                title={why || undefined}
                                 className={`num py-[5px] text-right ${v === undefined ? "text-fg-faint" : v > 0 ? "text-warn" : k === "hybrid" ? "text-fg" : "text-fg-subtle"}`}
                               >
                                 {v === undefined ? "—" : fmt(v, v > 0 ? 1 : 0)}
@@ -338,8 +375,33 @@ export default function ValidationPage() {
             })}
           </div>
           <p className="mt-3 text-[11px] leading-relaxed text-fg-subtle">
-            The same 24 h scenario started at six times of day (seed 1): demand and seawater temperature follow a daily cycle, so the disturbance meets the plant in a different
-            state each time. Values are hours with any constraint violation on the true plant; amber marks a violation.
+            The three in-envelope scenarios in which fixed operation breaks a limit, started at six times of day (demand and seawater temperature follow a daily cycle)
+            and from three product-storage levels; the main experiments start at 14:00 with 55 %. Values are hours with any constraint violation on the true plant (seed
+            1); amber marks a violation, and hovering a value shows which limit.{" "}
+            {(() => {
+              const cells = Object.values(res.robustness.runs).flatMap((byStorage) => Object.values(byStorage[storage] ?? {}));
+              const typeHours = (k: Method) => {
+                const acc: Record<string, number> = {};
+                for (const row of cells) for (const [t, h] of Object.entries(row[k]?.by ?? {})) acc[t] = (acc[t] ?? 0) + h;
+                return Object.entries(acc)
+                  .filter(([, h]) => h > 0)
+                  .map(([t, h]) => `${(VIOLATION_LABEL[t] ?? t).toLowerCase()} ${fmt(h, 1)} h`)
+                  .join(", ");
+              };
+              return (
+                <>
+                  At {Math.round(Number(storage) * 100)} % storage, runs with a violation:{" "}
+                  {res.methods
+                    .map((k) => {
+                      const n = cells.filter((row) => (row[k]?.any ?? 0) > 0).length;
+                      const types = typeHours(k);
+                      return `${METHOD_LABEL[k]} ${n} of ${cells.length}${types ? ` (${types})` : ""}`;
+                    })
+                    .join("; ")}
+                  .
+                </>
+              );
+            })()}
           </p>
         </Panel>
       )}

@@ -14,7 +14,7 @@
 │  ┌─ live.worker ───────────────────┐   ┌─ compute.worker ─────────────────────────────┐         │
 │  │ TwinRuntime (1 Hz tick)         │   │ ComputeRuntime                                 │         │
 │  │  reference plant (hidden truth) │   │  Scenario Lab: twin forward, no action vs      │         │
-│  │  → noisy telemetry              │   │   AquaTwin (24 h, hourly decisions)            │         │
+│  │  → noisy telemetry              │   │   AquaTwin (24 h, hourly decisions + re-plans) │         │
 │  │  → self-calibration θ̂           │   │  optimisation (676 candidates + AquaGuard)     │         │
 │  │  → hybrid prediction, health,   │   │  OOD probe (reference vs physics/ML/hybrid)    │         │
 │  │    trends, AquaGuard, alerts    │   │  safe-operating envelope (40 × 40 grid)        │         │

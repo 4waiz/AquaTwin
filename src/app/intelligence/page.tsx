@@ -107,7 +107,7 @@ const LAYERS: Layer[] = [
     inputs: "Candidate pressure × flow × train allocation (676), production plan, weights.",
     outputs: "Admissible set, Pareto set, recommended strategy.",
     method: "Exhaustive grid with cached per-train predictions; weighted objectives (SEC, TDS, production, stress, fouling) + move suppression.",
-    live: () => "Hourly in the Scenario Lab; on demand on the Optimization page.",
+    live: () => "Hourly in the Scenario Lab, plus a re-plan when the feed trend threatens a limit; on demand on the Optimization page.",
   },
   {
     id: "guard",

@@ -85,6 +85,15 @@ def hours(h):
     return f"{h * 60:.0f} min" if h < 1 else f"{h:.1f} h"
 
 
+def robust_cells(rb, storage) -> list[dict]:
+    """All start-time runs (every scenario) at one initial storage level."""
+    key = str(storage)
+    return [row for by_storage in rb["runs"].values() for row in (by_storage.get(key) or {}).values()]
+
+
+VIOL_NAME = {"tds": "permeate quality", "reservoir": "storage reserve", "powercap": "power cap"}
+
+
 def compute_findings(res) -> list[str]:
     R = res["results"]
     name = {s["id"]: s["name"] for s in res["scenarios"]}
@@ -110,15 +119,15 @@ def compute_findings(res) -> list[str]:
     worse = [sid for sid in ids if (m(sid, "hybrid", "anyViolation_h") or 0) > min(m(sid, k, "anyViolation_h") or 0 for k in ("physics", "mlonly")) + 0.05]
     if worse:
         out.append("**Where a single model did better in closed loop:** " + ", ".join(name[s] for s in worse) + ".")
-    st = res.get("startTimes") or {}
-    cells = [row for by_clock in st.values() for row in by_clock.values()]
-    if cells:
-        cnt = {k: sum(1 for row in cells if (row.get(k) or 0) > 0) for k in METHODS}
-        out.append(
-            f"**Start time:** of {len(cells)} start-time runs ({', '.join(name.get(s, s) for s in st)} × six start times, seed 1), runs with a violation: "
-            + ", ".join(f"{LABEL[k]} {cnt[k]}" for k in METHODS)
-            + " (§3.8)."
-        )
+    rb = res.get("robustness") or {}
+    if rb.get("runs"):
+        parts = []
+        for st in rb["storage"]:
+            cells = robust_cells(rb, st)
+            cnt = {k: sum(1 for row in cells if row[k]["any"] > 0) for k in METHODS}
+            parts.append(f"from {st * 100:.0f} % storage — " + ", ".join(f"{LABEL[k]} {cnt[k]}" for k in METHODS))
+        n = len(robust_cells(rb, rb["storage"][0]))
+        out.append(f"**Start time and storage:** runs with a violation, of {n} per storage level (three scenarios × six start times, seed 1): " + "; ".join(parts) + " (§3.8).")
     lt = res["leadTime"]
     lead = [sid for sid in ids if lt.get(sid, {}).get("eventsObserved") and lt[sid].get("hybrid_h") is not None]
     if lead:
@@ -139,7 +148,7 @@ def compute_findings(res) -> list[str]:
     if "extreme" in ids:
         vals = [m("extreme", k, "anyViolation_h") for k in METHODS]
         out.append(
-            f"**Outside the envelope (compound extreme):** every method violates constraints for {min(vals):.1f}–{max(vals):.1f} h of 24. AquaTwin withholds its recommendation at {m('extreme', 'hybrid', 'withheld'):.0f} of 24 decisions, as designed — this limits harm but does not solve the problem."
+            f"**Outside the envelope (compound extreme):** every method violates constraints for {min(vals):.1f}–{max(vals):.1f} h of 24. AquaTwin withholds its recommendation {m('extreme', 'hybrid', 'withheld'):.0f} times in the 24 hours, as designed — this limits harm but does not solve the problem."
         )
     mae = [sid for sid in ids if sid != "extreme"]
     best = [s for s in mae if m(s, "hybrid", "maeProduction_m3h") is not None and m(s, "hybrid", "maeProduction_m3h") <= min(m(s, k, "maeProduction_m3h") for k in ("physics", "mlonly"))]
@@ -204,25 +213,71 @@ def main() -> None:
 
     findings = "\n".join(f"- {x}" for x in compute_findings(res))
     name_of = {s["id"]: s["name"] for s in res["scenarios"]}
-    st_rows = [
-        f"| {name_of.get(sid, sid)} | {int(clock):02d}:00 | " + " | ".join(f(row.get(m), 2) for m in METHODS) + " |"
-        for sid, by_clock in (res.get("startTimes") or {}).items()
-        for clock, row in by_clock.items()
-    ]
-    start_table = (
-        "| Scenario | Start | " + " | ".join(LABEL[m] for m in METHODS) + " |\n|---|---|" + "---|" * len(METHODS) + "\n" + "\n".join(st_rows)
-        if st_rows
-        else "_Not run._"
-    )
-    st_cells = [row for by_clock in (res.get("startTimes") or {}).values() for row in by_clock.values()]
-    st_summary = ""
-    if st_cells:
-        parts = []
-        for m in METHODS:
-            vals = [row.get(m) for row in st_cells if row.get(m) is not None]
-            bad = [v for v in vals if v > 0]
-            parts.append(f"{LABEL[m]} {len(bad)} of {len(vals)}" + (f" (up to {max(bad):.1f} h)" if bad else ""))
-        st_summary = "Runs with at least one violation hour: " + "; ".join(parts) + "."
+    rb = res.get("robustness") or {}
+    robust_md = "_Not run._"
+    if rb.get("runs"):
+        NL = "\n"
+        # Summary: runs with a violation per scenario and storage level.
+        head = "| Scenario | Initial storage | " + " | ".join(LABEL[m] for m in METHODS) + " |" + NL + "|---|---|" + "---|" * len(METHODS) + NL
+        rows = []
+        for sid, by_storage in rb["runs"].items():
+            for st in rb["storage"]:
+                cells = list((by_storage.get(str(st)) or {}).values())
+                out_cells = []
+                for m in METHODS:
+                    bad = [row[m]["any"] for row in cells if row[m]["any"] > 0]
+                    out_cells.append(f"{len(bad)} / {len(cells)}" + (f" (max {max(bad):.1f} h)" if bad else ""))
+                rows.append(f"| {name_of.get(sid, sid)} | {st * 100:.0f} % | " + " | ".join(out_cells) + " |")
+        summary_table = head + NL.join(rows)
+        # Violation hours by type, per storage level (all scenarios and start times).
+        type_lines = []
+        for st in rb["storage"]:
+            cells = robust_cells(rb, st)
+            parts = []
+            for m in METHODS:
+                acc: dict = {}
+                for row in cells:
+                    for t, h in row[m]["by"].items():
+                        acc[t] = acc.get(t, 0) + h
+                txt = ", ".join(f"{VIOL_NAME.get(t, t)} {h:.1f} h" for t, h in sorted(acc.items()) if h > 0) or "none"
+                parts.append(f"{LABEL[m]}: {txt}")
+            type_lines.append(f"- {st * 100:.0f} % — " + "; ".join(parts))
+        # Detail at the main experiments' storage level.
+        main = "0.55" if any("0.55" in v for v in rb["runs"].values()) else str(rb["storage"][0])
+        det_rows = [
+            f"| {name_of.get(sid, sid)} | {int(clock):02d}:00 | " + " | ".join(f(row[m]["any"], 2) for m in METHODS) + " |"
+            for sid, by_storage in rb["runs"].items()
+            for clock, row in (by_storage.get(main) or {}).items()
+        ]
+        detail_table = "| Scenario | Start | " + " | ".join(LABEL[m] for m in METHODS) + " |" + NL + "|---|---|" + "---|" * len(METHODS) + NL + NL.join(det_rows)
+        robust_md = (
+            "Runs with at least one violation hour, of six start times (00:00, 04:00, …, 20:00), and the largest total:"
+            + NL + NL + summary_table
+            + NL + NL + "Violation hours by limit, summed over the three scenarios and six start times:"
+            + NL + NL + NL.join(type_lines)
+            + NL + NL + f"Detail at {float(main) * 100:.0f} % initial storage (hours with any violation):"
+            + NL + NL + detail_table
+        )
+    reading = ""
+    if rb.get("runs") and "0.35" in next(iter(rb["runs"].values())):
+
+        def n_bad(sid, st, m):
+            return sum(1 for row in (rb["runs"].get(sid, {}).get(st) or {}).values() if row[m]["any"] > 0)
+
+        def n_all(sid, st):
+            return len(rb["runs"].get(sid, {}).get(st) or {})
+
+        dh, dn = n_bad("demand", "0.35", "hybrid"), n_all("demand", "0.35")
+        eh, en = n_bad("energy", "0.35", "hybrid"), n_all("energy", "0.35")
+        ef = n_bad("energy", "0.35", "fixed")
+        low = {"fixed": "fixed operation", "physics": "physics-only", "mlonly": "ML-only"}
+        others = ", ".join(f"{low[m]} {n_bad('demand', '0.35', m)}" for m in ("fixed", "physics", "mlonly"))
+        reading = (
+            "Reading: at 35 % the plant starts only 10 percentage points above the reserve, so a long disturbance can drain storage faster than the plant can refill it within its limits. "
+            f"Under the demand surge the hybrid keeps storage above the reserve at {dn - dh} of {dn} start times ({others} runs with a violation). "
+            f"Under the power cap, AquaTwin treats the cap as a hard limit and storage falls below the reserve in {eh} of {en} runs, whereas fixed operation keeps storage but runs above the cap in {ef} of {en}. "
+            "We did not establish whether any strategy could have met both limits in those runs."
+        )
     doc = f"""# Validation
 
 > Generated by `scripts/report/validation_md.py` from `public/data/validation/results.json` (created {meta['created'][:19].replace('T', ' ')} UTC, {len(meta['seeds'])} seeds, {meta['durationSeconds']} s) and `public/data/models/ml-metrics.json`. Do not edit by hand — re-run the script after the experiments.
@@ -281,15 +336,15 @@ Sensor-noise floor for a single permeate-flow measurement: {f(ml['noise_floor_ma
 ### 3.7 Recommendations withheld (per 24 h)
 
 {table(res, 'withheld', 1, None, na=('fixed',))}
-### 3.8 Robustness to the time of day
+### 3.8 Robustness to start time and initial storage
 
-Demand and seawater temperature follow daily cycles, so the same disturbance meets the plant in a different state depending on when it starts. The main experiments start at 14:00; this sweep repeats the three in-envelope scenarios in which fixed operation violates a limit at six start times (seed 1). Hours with any constraint violation:
+Demand and seawater temperature follow daily cycles, and product storage sets how much slack the plant has, so the same disturbance can play out differently depending on when it starts and how full storage is. The main experiments start at 14:00 with 55 % storage (reserve minimum 25 %). This sweep repeats the three in-envelope scenarios in which fixed operation violates a limit, at six start times and three initial storage levels (seed 1).
 
-{start_table}
+{robust_md}
 
-{st_summary}
+{reading}
 
-Caveat: this sweep is not an independent test of the optimiser's feed look-ahead (docs/MODEL.md §7.2). An earlier version without the look-ahead showed short hybrid violations (0.2–0.5 h) when the salinity shock began at night; the look-ahead was added in response and the sweep was rerun.
+Development disclosure: two controller features were added after failures were observed, so this sweep is not an independent test of them. The optimiser's feed look-ahead was added after an earlier start-time sweep showed short hybrid violations (0.2–0.5 h) when the salinity shock began at night; the unscheduled re-plan was added after the Scenario Lab showed a short quality violation for a night start with 65 % storage (docs/MODEL.md §7.2). Both are general mechanisms rather than scenario-specific settings.
 
 ## 4. Early-warning lead time (no-action runs)
 

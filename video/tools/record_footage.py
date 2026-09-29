@@ -177,23 +177,23 @@ def clip_twin(page: Page, base: str, rec: Screencast):
     page.mouse.move(-50, -50)
     page._cursor = (1000, 600)  # type: ignore[attr-defined]
     rec.start()
-    page.wait_for_timeout(700)
-    glide(page, (900, 560), 700, start=(1180, 700))
+    page.wait_for_timeout(500)
+    glide(page, (900, 560), 600, start=(1180, 700))
     rec.mark("orbit_start")
     page.mouse.down()
-    for i in range(1, 71):  # slow orbit: 210 px over ~2.8 s
+    for i in range(1, 51):  # slow orbit: 150 px over ~2 s
         page.mouse.move(900 - i * 3, 560 + i * 0.35)
         page.wait_for_timeout(40)
     page.mouse.up()
     rec.mark("orbit_end")
-    page._cursor = (690, 585)  # type: ignore[attr-defined]
-    page.wait_for_timeout(900)
-    glide(page, center(page, "text=RO train 2"), 800)
-    rec.mark("inspector")
-    page.wait_for_timeout(1400)
+    page._cursor = (750, 577.5)  # type: ignore[attr-defined]
+    page.wait_for_timeout(400)
     glide(page, center(page, "text=ML residual"), 800)
     rec.mark("equation")
-    page.wait_for_timeout(2200)
+    page.wait_for_timeout(1800)
+    glide(page, center(page, "text=Cleaning due"), 800)
+    rec.mark("cleaning")
+    page.wait_for_timeout(2600)
     rec.stop()
 
 
@@ -210,10 +210,10 @@ def clip_scenario(page: Page, base: str, rec: Screencast):
     rec.mark("play")
     page.wait_for_selector("text=Constraint violated", timeout=15_000)
     rec.mark("violation")
-    page.wait_for_timeout(1600)
+    page.wait_for_timeout(1300)
     click_at(page, center(page, "role=button[name='+6h']"), 450)
     rec.mark("pause")
-    page.wait_for_timeout(2200)
+    page.wait_for_timeout(1000)
     click_at(page, center(page, "role=tab[name='AquaTwin response']"), 900)
     rec.mark("aquatwin")
     try:
