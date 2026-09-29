@@ -123,7 +123,7 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
       </Section>
 
       <Section n={2} title="Initial state" tone={tone}>
-        <div className="grid grid-cols-4 gap-x-6 gap-y-2">
+        <div className="grid grid-cols-4 gap-x-6 gap-y-2 max-sm:grid-cols-2">
           {[
             ["Production", `${fmtInt(r.initial.production)} m³/h`],
             ["Permeate TDS", `${fmtInt(r.initial.tds)} mg/L`],
@@ -213,7 +213,7 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
       </Section>
 
       <Section n={5} title="Constraint checks and confidence" tone={tone}>
-        <div className="grid grid-cols-4 gap-x-6">
+        <div className="grid grid-cols-4 gap-x-6 max-sm:grid-cols-2 max-sm:gap-y-2">
           <div>
             <div className={`text-[11px] ${s.faint}`}>Approved</div>
             <div className={`num ${s.ok}`}>{counts.APPROVED}</div>
@@ -240,35 +240,37 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
       </Section>
 
       <Section n={6} title="Final state at +24 h" tone={tone}>
-        <table className="w-full">
-          <thead>
-            <tr className={`text-left text-[11px] ${s.head}`}>
-              <th className="pb-1.5 font-normal" />
-              <th className="pb-1.5 text-right font-normal">Production</th>
-              <th className="pb-1.5 text-right font-normal">Permeate TDS</th>
-              <th className="pb-1.5 text-right font-normal">SEC</th>
-              <th className="pb-1.5 text-right font-normal">Storage</th>
-              <th className="pb-1.5 text-right font-normal">Membrane health</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(
-              [
-                ["No action", r.noAction],
-                ["AquaTwin", r.aquatwin],
-              ] as const
-            ).map(([k, b]) => (
-              <tr key={k} className={`border-t ${s.rule}`}>
-                <td className="py-1.5">{k}</td>
-                <td className={`num py-1.5 text-right ${s.strong}`}>{fmtInt(b.final.production)} m³/h</td>
-                <td className={`num py-1.5 text-right ${s.strong}`}>{fmtInt(b.final.tds)} mg/L</td>
-                <td className={`num py-1.5 text-right ${s.strong}`}>{fmt(b.final.sec, 2)}</td>
-                <td className={`num py-1.5 text-right ${s.strong}`}>{fmt(b.final.reservoir, 1)}%</td>
-                <td className={`num py-1.5 text-right ${s.strong}`}>{b.final.health.map((h) => fmt(h * 100, 1)).join(" · ")}%</td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px]">
+            <thead>
+              <tr className={`text-left text-[11px] ${s.head}`}>
+                <th className="pb-1.5 font-normal" />
+                <th className="pb-1.5 text-right font-normal">Production</th>
+                <th className="pb-1.5 text-right font-normal">Permeate TDS</th>
+                <th className="pb-1.5 text-right font-normal">SEC</th>
+                <th className="pb-1.5 text-right font-normal">Storage</th>
+                <th className="pb-1.5 text-right font-normal">Membrane health</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(
+                [
+                  ["No action", r.noAction],
+                  ["AquaTwin", r.aquatwin],
+                ] as const
+              ).map(([k, b]) => (
+                <tr key={k} className={`border-t ${s.rule}`}>
+                  <td className="py-1.5">{k}</td>
+                  <td className={`num py-1.5 text-right ${s.strong}`}>{fmtInt(b.final.production)} m³/h</td>
+                  <td className={`num py-1.5 text-right ${s.strong}`}>{fmtInt(b.final.tds)} mg/L</td>
+                  <td className={`num py-1.5 text-right ${s.strong}`}>{fmt(b.final.sec, 2)}</td>
+                  <td className={`num py-1.5 text-right ${s.strong}`}>{fmt(b.final.reservoir, 1)}%</td>
+                  <td className={`num py-1.5 text-right ${s.strong}`}>{b.final.health.map((h) => fmt(h * 100, 1)).join(" · ")}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Section>
 
       <p className={`border-t pt-3 text-[11px] ${s.rule} ${s.faint}`}>

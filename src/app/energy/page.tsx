@@ -28,7 +28,7 @@ function Breakdown({ b, total }: { b: Record<string, number>; total: number }) {
           <div key={s.key} title={`${s.label}: ${fmt(b[s.key], 3)} kWh/m³`} style={{ width: `${(b[s.key] / total) * 100}%`, background: s.color }} className="h-full" />
         ))}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5">
+      <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 max-sm:grid-cols-1">
         {STAGES.map((s) => (
           <div key={s.key} className="flex items-center justify-between gap-3 text-[12px]">
             <span className="inline-flex items-center gap-2 text-fg-muted">
@@ -77,8 +77,8 @@ export default function EnergyPage() {
   const res = results[selected];
 
   return (
-    <div className="grid h-full min-h-[880px] grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-4 p-5 pt-4">
-      <div data-reveal="header" className="flex items-end justify-between gap-6">
+    <div className="grid h-full min-h-[880px] grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
+      <div data-reveal="header" className="flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Energy &amp; Carbon</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Energy and carbon</h1>
@@ -86,22 +86,22 @@ export default function EnergyPage() {
             Where the plant&apos;s energy goes, and what AquaTwin&apos;s strategies change. Energy is modelled; carbon is an estimate.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
+        <div className="flex items-center gap-4 max-lg:flex-wrap max-lg:gap-x-6 max-lg:gap-y-2">
+          <div className="text-right max-lg:text-left">
             <div className="label">Specific energy</div>
             <div className="num text-[26px] font-medium tracking-tight text-fg">
               {fmt(t?.sec_kWh_m3, 2)} <span className="text-[12px] font-normal text-fg-subtle">kWh/m³</span>
             </div>
           </div>
-          <div className="h-10 w-px bg-line" />
-          <div className="text-right">
+          <div className="h-10 w-px bg-line max-lg:hidden" />
+          <div className="text-right max-lg:text-left">
             <div className="label">Plant power</div>
             <div className="num text-[26px] font-medium tracking-tight text-fg">
               {fmt(t ? t.power_kW / 1000 : null, 2)} <span className="text-[12px] font-normal text-fg-subtle">MW</span>
             </div>
           </div>
-          <div className="h-10 w-px bg-line" />
-          <div className="text-right">
+          <div className="h-10 w-px bg-line max-lg:hidden" />
+          <div className="text-right max-lg:text-left">
             <div className="label">Carbon intensity of water</div>
             <div className="num text-[26px] font-medium tracking-tight text-fg">
               {fmt(perM3, 2)} <span className="text-[12px] font-normal text-fg-subtle">kg CO₂e/m³</span>
@@ -110,7 +110,7 @@ export default function EnergyPage() {
         </div>
       </div>
 
-      <div className="grid min-h-0 grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-4">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
         <Panel title="Energy by process stage · live" right={<Provenance kind="modeled" />} reveal="panel1" bodyClassName="p-4">
           {b ? (
             <>
@@ -164,14 +164,14 @@ export default function EnergyPage() {
         title="Power and grid carbon · last 24 h"
         right={
           <div className="flex items-center gap-3 text-[11px] text-fg-subtle">
-            <span>
+            <span className="max-sm:hidden">
               Estimated emissions <span className="num text-fg">{fmt(daily, 1)} t CO₂e</span> / 24 h
             </span>
             <Provenance kind="estimated" />
           </div>
         }
         reveal="panel3"
-        bodyClassName="grid min-h-0 grid-cols-2 gap-6 p-4"
+        bodyClassName="grid min-h-0 grid-cols-2 gap-6 p-4 max-lg:grid-cols-1 max-lg:grid-rows-[240px_240px_auto]"
       >
         {chart ? (
           <>
@@ -193,7 +193,7 @@ export default function EnergyPage() {
             />
           </>
         ) : null}
-        <p className="col-span-2 -mt-2 text-[11px] text-fg-subtle">
+        <p className="col-span-2 -mt-2 text-[11px] text-fg-subtle max-lg:col-span-1 max-lg:mt-0">
           Carbon is an estimate: an illustrative diurnal profile around {GRID_CARBON_BASE} kg CO₂e/kWh (UAE, 2024, lifecycle basis — Ember). It is not metered data and is
           not specific to any plant or supplier.
         </p>

@@ -89,7 +89,7 @@ export function OodProbe({ className = "", reveal }: { className?: string; revea
         </>
       }
     >
-      <div className="grid h-full min-h-0 grid-cols-[300px_minmax(0,1fr)] gap-5">
+      <div className="grid h-full min-h-0 grid-cols-[300px_minmax(0,1fr)] gap-5 max-lg:grid-cols-1">
         <div className="space-y-2.5">
           {SLIDERS.map((s) => {
             const v = input[s.key];
@@ -157,45 +157,47 @@ export function OodProbe({ className = "", reveal }: { className?: string; revea
           {res?.ood?.outOfRange.length ? (
             <div className="text-[11.5px] text-warn">Outside training range: {res.ood.outOfRange.map((f) => OOD_FEATURE_LABEL[f] ?? f).join(", ")}</div>
           ) : null}
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="text-left text-[10.5px] text-fg-subtle">
-                <th className="pb-1.5 font-normal">One train, what-if</th>
-                <th className="pb-1.5 text-right font-normal">Reference plant</th>
-                <th className="pb-1.5 text-right font-normal">Physics</th>
-                <th className="pb-1.5 text-right font-normal">ML only</th>
-                <th className="pb-1.5 text-right font-normal text-accent">Hybrid</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => {
-                if (!res) return null;
-                const ref = res.reference[r.key];
-                const cell = (v: number | undefined) =>
-                  v === undefined ? (
-                    "—"
-                  ) : (
-                    <>
-                      {r.d ? fmt(v, r.d) : fmtInt(v)}
-                      <span className={`ml-1.5 text-[10px] ${Math.abs(err(v, ref)) > 3 ? "text-warn" : "text-fg-subtle"}`}>
-                        {(err(v, ref) >= 0 ? "+" : "") + fmt(err(v, ref), 1)}%
-                      </span>
-                    </>
+          <div className="max-lg:overflow-x-auto">
+            <table className="w-full text-[12px] max-lg:min-w-[540px]">
+              <thead>
+                <tr className="text-left text-[10.5px] text-fg-subtle">
+                  <th className="pb-1.5 font-normal">One train, what-if</th>
+                  <th className="pb-1.5 text-right font-normal">Reference plant</th>
+                  <th className="pb-1.5 text-right font-normal">Physics</th>
+                  <th className="pb-1.5 text-right font-normal">ML only</th>
+                  <th className="pb-1.5 text-right font-normal text-accent">Hybrid</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => {
+                  if (!res) return null;
+                  const ref = res.reference[r.key];
+                  const cell = (v: number | undefined) =>
+                    v === undefined ? (
+                      "—"
+                    ) : (
+                      <>
+                        {r.d ? fmt(v, r.d) : fmtInt(v)}
+                        <span className={`ml-1.5 text-[10px] ${Math.abs(err(v, ref)) > 3 ? "text-warn" : "text-fg-subtle"}`}>
+                          {(err(v, ref) >= 0 ? "+" : "") + fmt(err(v, ref), 1)}%
+                        </span>
+                      </>
+                    );
+                  return (
+                    <tr key={r.k} className="border-t border-line">
+                      <td className="py-1.5 text-fg-muted">
+                        {r.k} <span className="text-[10.5px] text-fg-faint">{r.unit}</span>
+                      </td>
+                      <td className="num py-1.5 text-right text-fg">{r.d ? fmt(ref, r.d) : fmtInt(ref)}</td>
+                      <td className="num py-1.5 text-right text-fg">{cell(res.physics[r.key])}</td>
+                      <td className="num py-1.5 text-right text-fg">{cell(res.mlonly?.[r.key])}</td>
+                      <td className="num py-1.5 text-right text-fg">{cell(res.hybrid[r.key])}</td>
+                    </tr>
                   );
-                return (
-                  <tr key={r.k} className="border-t border-line">
-                    <td className="py-1.5 text-fg-muted">
-                      {r.k} <span className="text-[10.5px] text-fg-faint">{r.unit}</span>
-                    </td>
-                    <td className="num py-1.5 text-right text-fg">{r.d ? fmt(ref, r.d) : fmtInt(ref)}</td>
-                    <td className="num py-1.5 text-right text-fg">{cell(res.physics[r.key])}</td>
-                    <td className="num py-1.5 text-right text-fg">{cell(res.mlonly?.[r.key])}</td>
-                    <td className="num py-1.5 text-right text-fg">{cell(res.hybrid[r.key])}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                })}
+              </tbody>
+            </table>
+          </div>
           <p className="text-[11px] text-fg-subtle">
             Reference plant = the higher-fidelity simulator used as ground truth in this prototype (not a real plant); errors are relative to it.
           </p>

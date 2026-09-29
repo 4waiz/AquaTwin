@@ -9,7 +9,7 @@
  */
 
 import { evaluateGuard, type GuardDecision } from "@/sim/aquaguard";
-import { runScenario, type RunResult, type StepRecord } from "@/sim/closedLoop";
+import { extrapolateFeed, runScenario, type RunResult, type StepRecord } from "@/sim/closedLoop";
 import { INITIAL_TRAIN_FOULING, LIMITS, PLANT } from "@/sim/config";
 import { cleaningStatus } from "@/sim/cleaning";
 import { fitTrend, forecastThreshold } from "@/sim/forecast";
@@ -403,6 +403,7 @@ export class ComputeRuntime {
     let hoursToCap = Infinity;
     let inCap = false;
     let label: string;
+    let feedHist: { t: number; s: number; T: number }[] = [];
     const clockNow = clockHours(live.simTime);
 
     if (source === "live") {
@@ -413,6 +414,10 @@ export class ComputeRuntime {
       demandNext = demandAt(clockNow + 0.5);
       health = live.health;
       label = "Live plant — now";
+      feedHist = Array.from({ length: 7 }, (_, k) => {
+        const e = baseEnvironment(clockNow - 1 + k / 6);
+        return { t: -1 + k / 6, s: e.salinity_gL, T: e.temperature_C };
+      });
     } else {
       const res = this.runScenarioLab(live, source, weights);
       const run = this.scenarioCache.get(this.key(source, weights))?.aquatwinRun;
@@ -439,6 +444,7 @@ export class ComputeRuntime {
         }
       }
       label = `${sc.name} · +${t.toFixed(0)} h`;
+      feedHist = steps.slice(Math.max(0, idx - 6), idx + 1).map((x) => ({ t: x.t, s: x.env.salinity_gL, T: x.env.temperature_C }));
     }
 
     const plan = planProduction({ reservoir_m3: reservoir, demandNext_m3h: demandNext, hoursToCap, inCapWindow: inCap, interval_h: 1 });
@@ -468,6 +474,7 @@ export class ComputeRuntime {
       foulingState: ctxs.map((c) => Math.max(0, 1 - c.theta.A25 / cleanA)),
       focusTrain: focus,
       weights,
+      envAhead: extrapolateFeed(env, feedHist, 1),
     });
     return {
       context: { scenario: source, t, label },

@@ -95,8 +95,8 @@ export default function WaterQualityPage() {
   }, [h, s.perm, snap]);
 
   return (
-    <div className="grid h-full min-h-[940px] grid-rows-[auto_auto_minmax(600px,1fr)] gap-4 p-5 pt-4">
-      <div data-reveal="header" className="flex items-end justify-between gap-6">
+    <div className="grid h-full min-h-[940px] grid-rows-[auto_auto_minmax(600px,1fr)] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
+      <div data-reveal="header" className="flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Water Quality</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Water quality and safe operating envelope</h1>
@@ -107,7 +107,7 @@ export default function WaterQualityPage() {
         <Provenance kind="simulated" />
       </div>
 
-      <div data-reveal="panel1" className="grid grid-cols-7 gap-3">
+      <div data-reveal="panel1" className="grid grid-cols-7 gap-3 max-lg:grid-cols-2 md:max-lg:grid-cols-4">
         <Tile label="Feed TDS" value={fmtInt(snap ? snap.env.salinity_gL * 1000 : null)} unit="mg/L" series={s.feed} />
         <Tile label="Permeate TDS" value={fmtInt(t?.permeateTDS_mgL)} unit="mg/L" series={s.perm} spec={`Spec ≤ ${LIMITS.maxPermeateTDS_mgL} mg/L`} />
         <Tile label="Salt rejection" value={fmt(snap && t ? 100 * (1 - t.permeateTDS_mgL / (snap.env.salinity_gL * 1000)) : null, 2)} unit="%" series={s.rej} />
@@ -117,7 +117,7 @@ export default function WaterQualityPage() {
         <Tile label="Temperature" value={fmt(snap?.env.temperature_C, 2)} unit="°C" series={s.temp} />
       </div>
 
-      <div className="grid min-h-0 grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-4">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
         <Panel
           title="Safe operating envelope"
           right={
@@ -129,6 +129,7 @@ export default function WaterQualityPage() {
             </div>
           }
           reveal="panel2"
+          className="max-lg:h-[520px]"
           bodyClassName="flex min-h-0 flex-col p-4"
         >
           {grid ? (

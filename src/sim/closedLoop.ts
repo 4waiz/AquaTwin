@@ -165,6 +165,28 @@ function meanDemand(sc: ScenarioSpec, clock0: number, t: number, span: number): 
   return s / n;
 }
 
+/**
+ * Feed conditions extrapolated `horizon` hours ahead from a recent history of
+ * measured feed salinity and temperature (linear trend, bounded), or null if
+ * the trend is flat. Used for look-ahead decisions and the quality outlook.
+ */
+export function extrapolateFeed(env: Environment, hist: { t: number; s: number; T: number }[], horizon: number): Environment | null {
+  if (hist.length < 4) return null;
+  const ts = hist.map((e) => e.t);
+  const sFit = fitTrend(
+    ts,
+    hist.map((e) => e.s),
+  );
+  const tFit = fitTrend(
+    ts,
+    hist.map((e) => e.T),
+  );
+  const dS = Math.max(-3, Math.min(6, (sFit?.slope ?? 0) * horizon));
+  const dT = Math.max(-2, Math.min(3, (tFit?.slope ?? 0) * horizon));
+  if (Math.abs(dS) <= 0.05 && Math.abs(dT) <= 0.05) return null;
+  return { ...env, salinity_gL: env.salinity_gL + dS, temperature_C: env.temperature_C + dT };
+}
+
 export function runScenario(opts: RunOptions): RunResult {
   const sc = opts.scenario;
   const horizon = opts.horizon_h ?? sc.horizon_h;
@@ -196,6 +218,7 @@ export function runScenario(opts: RunOptions): RunResult {
   const decisions: DecisionRecord[] = [];
   const healthHist: { t: number; h: number[] }[] = [];
   const envHist: { t: number; s: number; T: number }[] = [];
+  const extrapolateEnv = (env: Environment, horizon: number) => extrapolateFeed(env, envHist, horizon);
   let lastPrediction: PlantSnapshot | null = null;
   let firstWarning: number | null = null;
   let firstAlarm: number | null = null;
@@ -225,6 +248,8 @@ export function runScenario(opts: RunOptions): RunResult {
     const demand = demandAt(clock, sc.demandMultiplier(t));
     const sensor = sc.sensor(t);
     const foulMult = sc.trainFoulingMultiplier(t);
+    envHist.push({ t, s: env.salinity_gL, T: env.temperature_C });
+    while (envHist.length && envHist[0].t < t - ENV_TREND_WINDOW_h - 1e-9) envHist.shift();
 
     // --- decision -----------------------------------------------------------
     const ctxNow: TrainContext[] =
@@ -275,6 +300,7 @@ export function runScenario(opts: RunOptions): RunResult {
         foulingState,
         focusTrain: focus,
         weights: opts.weights,
+        envAhead: extrapolateEnv(env, decisionEvery),
       });
       confidence = res.current.prediction.confidence;
       if (res.best) {
@@ -370,26 +396,10 @@ export function runScenario(opts: RunOptions): RunResult {
       const outlook = predictPlant(monitorKind, env, applied, ctxs, opts.bundle, true);
       // Quality outlook: extrapolate the last hour's feed salinity / temperature
       // trend QUALITY_HORIZON_h ahead (bounded) and predict permeate TDS there.
-      envHist.push({ t, s: env.salinity_gL, T: env.temperature_C });
-      while (envHist.length && envHist[0].t < t - ENV_TREND_WINDOW_h - 1e-9) envHist.shift();
-      let tdsAhead = outlook.snapshot.totals.permeateTDS_mgL;
-      if (envHist.length >= 4) {
-        const ts = envHist.map((e) => e.t);
-        const sFit = fitTrend(
-          ts,
-          envHist.map((e) => e.s),
-        );
-        const tFit = fitTrend(
-          ts,
-          envHist.map((e) => e.T),
-        );
-        const dS = Math.max(-3, Math.min(6, (sFit?.slope ?? 0) * QUALITY_HORIZON_h));
-        const dT = Math.max(-2, Math.min(3, (tFit?.slope ?? 0) * QUALITY_HORIZON_h));
-        if (Math.abs(dS) > 0.05 || Math.abs(dT) > 0.05) {
-          const envAhead = { ...env, salinity_gL: env.salinity_gL + dS, temperature_C: env.temperature_C + dT };
-          tdsAhead = predictPlant(monitorKind, envAhead, applied, ctxs, opts.bundle, true).snapshot.totals.permeateTDS_mgL;
-        }
-      }
+      const envAhead = extrapolateEnv(env, QUALITY_HORIZON_h);
+      const tdsAhead = envAhead
+        ? predictPlant(monitorKind, envAhead, applied, ctxs, opts.bundle, true).snapshot.totals.permeateTDS_mgL
+        : outlook.snapshot.totals.permeateTDS_mgL;
       if (outlook.snapshot.totals.permeateTDS_mgL > 0.97 * LIMITS.maxPermeateTDS_mgL || tdsAhead > LIMITS.maxPermeateTDS_mgL) warnings.push("quality");
       const deficit = demand - outlook.snapshot.totals.production_m3h;
       const hoursLeft = deficit > 0 ? (reservoir - LIMITS.minReservoirFraction * PLANT.reservoirCapacity_m3) / deficit : Infinity;

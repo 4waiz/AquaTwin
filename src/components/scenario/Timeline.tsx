@@ -96,7 +96,7 @@ export function Timeline({ startClock }: { startClock: number | null }) {
                 setCursor(m);
               }}
               onPointerDown={(e) => e.stopPropagation()}
-              className="absolute top-0 -translate-x-1/2 text-center"
+              className={`absolute top-0 -translate-x-1/2 text-center ${m === 1 || m === 3 ? "max-sm:hidden" : ""}`}
               style={{ left: `${(m / 24) * 100}%` }}
             >
               <span className={`mx-auto block h-[9px] w-px ${cursor >= m ? "bg-accent" : "bg-line-bright"}`} />
@@ -109,7 +109,7 @@ export function Timeline({ startClock }: { startClock: number | null }) {
           />
         </div>
       </div>
-      <div className="w-[84px] text-right leading-tight">
+      <div className="w-[84px] text-right leading-tight max-sm:w-[64px]">
         <div className="num font-mono text-[12px] text-fg">+{cursor.toFixed(1)} h</div>
         <div className="num font-mono text-[10px] text-fg-subtle">{startClock === null ? "—" : hourOfDay(startClock + cursor)}</div>
       </div>

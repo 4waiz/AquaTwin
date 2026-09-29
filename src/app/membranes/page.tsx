@@ -23,7 +23,7 @@ function CriteriaRow({ npf, nsp, ndp }: { npf: number; nsp: number; ndp: number 
   return (
     <div>
       <div className="label mb-1.5">Cleaning criteria · FilmTec manual</div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 max-sm:grid-cols-1">
         {items.map((c) => (
           <div key={c.k} className={`rounded-md border px-2.5 py-1.5 ${c.due ? "border-warn/50 bg-warn-soft/30" : "border-line bg-ink-900"}`}>
             <div className="text-[10.5px] text-fg-subtle">{c.k}</div>
@@ -133,8 +133,8 @@ export default function MembraneHealthPage() {
   const fouling = results.fouling;
 
   return (
-    <div className="grid h-full min-h-[960px] grid-rows-[auto_auto_minmax(560px,1fr)] gap-4 p-5 pt-4">
-      <div data-reveal="header" className="flex items-end justify-between gap-6">
+    <div className="grid h-full min-h-[960px] grid-rows-[auto_auto_minmax(560px,1fr)] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
+      <div data-reveal="header" className="flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Membrane Health</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Membrane health and degradation outlook</h1>
@@ -145,7 +145,7 @@ export default function MembraneHealthPage() {
         <Provenance kind="estimated" />
       </div>
 
-      <div data-reveal="panel1" className="grid grid-cols-3 gap-4">
+      <div data-reveal="panel1" className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
         {(trains ?? []).map((t) => {
           const active = t.i === sel;
           return (
@@ -194,12 +194,12 @@ export default function MembraneHealthPage() {
         })}
       </div>
 
-      <div className="grid min-h-0 grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
         <Panel
           title={`Train ${sel + 1} · NPF and projection`}
           right={
             cur && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 max-md:hidden">
                 {cur.tr.hours !== null ? (
                   <Chip tone="warn">
                     Flow criterion in {fmtHours(cur.tr.lo)}–{fmtHours(cur.tr.hi ?? cur.tr.hours)} (90%)
@@ -212,8 +212,17 @@ export default function MembraneHealthPage() {
             )
           }
           reveal="panel2"
+          className="max-lg:h-[420px]"
           bodyClassName="flex min-h-0 flex-col p-4"
         >
+          {cur && (
+            <div className="mb-2 text-[11.5px] md:hidden">
+              <span className={cur.tr.hours !== null ? "text-warn" : "text-fg-muted"}>
+                {cur.tr.hours !== null ? `Flow criterion in ${fmtHours(cur.tr.lo)}–${fmtHours(cur.tr.hi ?? cur.tr.hours)} (90%)` : "No flow-criterion crossing projected"}
+              </span>
+              <span className="text-fg-subtle"> · P(cross ≤ 24 h) {fmt(cur.tr.probWithin * 100, 0)}%</span>
+            </div>
+          )}
           {chart ? (
             <LineChart
               x={chart.x}
@@ -249,7 +258,7 @@ export default function MembraneHealthPage() {
           <Panel title="Why AquaTwin flags this train" reveal="panel3" className="shrink-0" bodyClassName="space-y-3 p-4">
             {snap && cur ? (
               <>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
                   <div className="rounded-md border border-line bg-ink-900 px-3 py-2">
                     <div className="label">Observed</div>
                     <div className="num mt-1 text-[17px] text-fg">{fmtInt(snap.hybrid[sel].measured.Qp)}</div>

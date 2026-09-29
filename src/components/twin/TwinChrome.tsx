@@ -43,7 +43,7 @@ export function GuardStrip() {
   const warn = rules.filter((r) => r.status === "warn").length;
   const allOk = pass === rules.length;
   return (
-    <div className="flex items-center gap-3 rounded-md border border-line bg-ink-900/90 px-3 py-1.5 text-[11.5px]">
+    <div className="flex items-center gap-3 rounded-md border border-line bg-ink-900/90 px-3 py-1.5 text-[11.5px] max-lg:flex-wrap max-lg:gap-x-3 max-lg:gap-y-1">
       <IconShield size={14} className={allOk ? "text-ok" : "text-crit"} />
       <span className="text-fg-muted">
         AquaGuard{" "}
@@ -53,7 +53,7 @@ export function GuardStrip() {
         constraints satisfied
         {warn > 0 && <span className="text-warn"> · {warn} near limit</span>}
       </span>
-      <span className="h-3 w-px bg-line" />
+      <span className="h-3 w-px bg-line max-lg:hidden" />
       <ConfidenceText />
     </div>
   );

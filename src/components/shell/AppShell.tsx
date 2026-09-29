@@ -2,6 +2,7 @@
 import { useEffect, type ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { MobileNav } from "./MobileNav";
 import { TwinHost } from "@/twin/react/TwinHost";
 import { IntroOverlay } from "@/twin/intro/IntroOverlay";
 import { PerfPanel } from "@/twin/react/PerfPanel";
@@ -31,9 +32,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div id="app-root" className="flex h-screen w-screen overflow-hidden bg-ink-950">
+    <div id="app-root" className="flex h-screen w-screen overflow-hidden bg-ink-950 max-lg:h-dvh">
       <Sidebar />
       <main className="flex min-w-0 flex-1 flex-col">
+        <MobileNav />
         <TopBar />
         <div id="page-scroll" className="scroll-quiet min-h-0 flex-1 overflow-y-auto">
           {children}

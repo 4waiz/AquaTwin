@@ -46,8 +46,8 @@ export default function DigitalTwinPage() {
   const inspector = selected && snap ? inspectorFromLive(selected, snap) : null;
 
   return (
-    <div className="grid h-full min-h-[860px] grid-cols-[minmax(0,1fr)_440px] grid-rows-[auto_minmax(0,1fr)_168px] gap-4 p-5 pt-4">
-      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6">
+    <div className="grid h-full min-h-[860px] grid-cols-[minmax(0,1fr)_440px] grid-rows-[auto_minmax(0,1fr)_168px] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
+      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Digital Twin</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Hybrid digital twin</h1>
@@ -55,7 +55,7 @@ export default function DigitalTwinPage() {
             Reduced-order physics, self-calibrated from telemetry, corrected by a learned residual. Select a subsystem in 3D or in the flow below.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 max-lg:justify-start">
           <Chip tone="ok" dot>
             Physics 0D · calibrated
           </Chip>
@@ -70,9 +70,9 @@ export default function DigitalTwinPage() {
         </div>
       </div>
 
-      <TwinViewport preset="twin" className="rounded-[10px] border border-line">
+      <TwinViewport preset="twin" className="rounded-[10px] border border-line max-lg:h-[62vw] max-lg:max-h-[460px] max-lg:min-h-[240px] max-lg:shrink-0">
         <Callouts items={calloutItems(snap)} compact />
-        <div data-reveal="panel4" className="absolute left-3 top-3 z-[2]">
+        <div data-reveal="panel4" className="absolute left-3 top-3 z-[2] max-sm:hidden">
           <FlowLegend />
         </div>
         <div data-reveal="panel4" className="absolute right-3 top-3 z-[2]">
@@ -101,7 +101,7 @@ export default function DigitalTwinPage() {
         <Panel title={`Hybrid estimate · RO train ${trainIdx + 1}`} right={<Provenance kind="modeled" />} reveal="panel2" bodyClassName="flex min-h-0 flex-col gap-3 p-4">
           <Segmented size="sm" value={target} onChange={setTarget} options={HYBRID_TARGETS.map((k) => ({ value: k, label: HYBRID_META[k].label }))} />
           {h ? <HybridEquation h={h} target={target} /> : <div className="text-[12px] text-fg-subtle">Waiting for telemetry…</div>}
-          <div className="grid grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-2 gap-x-6 max-sm:grid-cols-1">
             <div>
               <div className="label mb-1">Inputs (now)</div>
               <Row k="Feed pressure" v={fmt(tr?.feedPressure_bar, 1)} unit="bar" />
@@ -124,7 +124,12 @@ export default function DigitalTwinPage() {
         </Panel>
       </div>
 
-      <Panel title="Process flow" right={<span className="text-[11px] text-fg-subtle">Click a step to inspect it</span>} reveal="panel3" bodyClassName="px-4 py-2">
+      <Panel
+        title="Process flow"
+        right={<span className="text-[11px] text-fg-subtle max-sm:hidden">Click a step to inspect it</span>}
+        reveal="panel3"
+        bodyClassName="px-4 py-2 max-lg:overflow-x-auto"
+      >
         <ProcessSchematic
           values={
             snap

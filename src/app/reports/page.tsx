@@ -96,8 +96,8 @@ export default function ReportsPage() {
 
   return (
     <>
-      <div className="no-print flex h-full min-h-[760px] flex-col gap-4 p-5 pt-4">
-        <div data-reveal="header" className="flex items-end justify-between gap-6">
+      <div className="no-print flex h-full min-h-[760px] flex-col gap-4 p-5 pt-4 max-lg:h-auto max-lg:min-h-0 max-lg:p-4">
+        <div data-reveal="header" className="flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
           <div>
             <div className="label">Reports</div>
             <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Run records</h1>
@@ -140,7 +140,7 @@ export default function ReportsPage() {
             />
           </Panel>
         ) : (
-          <div className="grid min-h-0 flex-1 grid-cols-[340px_minmax(0,1fr)] gap-4">
+          <div className="grid min-h-0 flex-1 grid-cols-[340px_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
             <Panel
               title={`${records.length} run${records.length === 1 ? "" : "s"}`}
               right={

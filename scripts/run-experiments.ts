@@ -36,8 +36,9 @@ const bundle = loadMlBundle();
 const degradation = loadDegradation();
 const t0 = Date.now();
 
-function run(id: ScenarioId, method: Method, seed: number, monitor?: ModelKind): RunResult {
+function run(id: ScenarioId, method: Method, seed: number, monitor?: ModelKind, startClock_h?: number): RunResult {
   return runScenario({
+    startClock_h,
     scenario: SCENARIOS[id],
     strategy: method === "fixed" ? "fixed" : "aquatwin",
     model: method === "fixed" ? "hybrid" : method,
@@ -258,11 +259,32 @@ for (const id of SCENARIO_IDS) {
   };
 }
 
+// Robustness to the time of day at which the disturbance starts (demand and
+// seawater follow daily cycles): scenarios where fixed operation violates a
+// limit, 6 start times, seed 1.
+const START_CLOCKS = [0, 4, 8, 12, 16, 20];
+const startTimes: Record<string, Record<string, Record<Method, number>>> = {};
+for (const id of ["salinity", "energy", "demand"] as ScenarioId[]) {
+  startTimes[id] = {};
+  for (const clock of START_CLOCKS) {
+    const row = {} as Record<Method, number>;
+    for (const method of METHODS) row[method] = +run(id, method, 1, method === "fixed" ? "hybrid" : undefined, clock).metrics.anyViolation_h.toFixed(2);
+    startTimes[id][String(clock)] = row;
+  }
+  console.log(`start-time sweep ${id} done (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
+}
+
 let commit = "unknown";
+let codeDirty: boolean | null = null;
 try {
   commit = execSync("git rev-parse --short HEAD", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] })
     .toString()
     .trim();
+  // uncommitted changes to the code that produces these numbers (src/, scripts/, ml/)
+  codeDirty =
+    execSync("git status --porcelain -- src scripts ml", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim().length > 0;
 } catch {
   /* repository without commits */
 }
@@ -271,6 +293,7 @@ const out = {
   meta: {
     created: new Date().toISOString(),
     gitCommit: commit,
+    codeDirty,
     seeds: SEEDS,
     horizon_h: 24,
     dt_h: 1 / 6,
@@ -286,6 +309,7 @@ const out = {
   methods: METHODS,
   results,
   leadTime,
+  startTimes,
   trajectories,
   decisions: decisionLog,
 };

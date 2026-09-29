@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { evaluateGuard } from "../src/sim/aquaguard";
 import { fitTrend, forecastThreshold } from "../src/sim/forecast";
 import { cleaningStatus } from "../src/sim/cleaning";
+import { extrapolateFeed } from "../src/sim/closedLoop";
 import { solveTrain0D } from "../src/sim/physics0d";
 import { aggregate } from "../src/sim/plant";
 import { DESIGN_ENV, DESIGN_SETPOINT, cleanBaseline, trainPowerRating } from "../src/sim/twin";
@@ -123,5 +124,30 @@ describe("cleaning criteria (FilmTec manual)", () => {
   it("flags an approaching criterion or a projected flow crossing", () => {
     expect(cleaningStatus(0.97, 1.06, 1.05, null).approaching).toBe(true);
     expect(cleaningStatus(0.97, 1.01, 1.02, 30).label).toBe("Fouling trend detected");
+  });
+});
+
+describe("feed look-ahead (optimizer and quality warning)", () => {
+  const ramp = (slope_s: number, slope_T = 0) =>
+    [0, 1, 2, 3, 4, 5, 6].map((i) => ({ t: i / 6, s: 40 + slope_s * (i / 6), T: 30 + slope_T * (i / 6) }));
+
+  it("needs at least four observations", () => {
+    expect(extrapolateFeed(DESIGN_ENV, ramp(2).slice(0, 3), 1)).toBeNull();
+  });
+
+  it("returns nothing for a steady feed", () => {
+    expect(extrapolateFeed(DESIGN_ENV, ramp(0), 1)).toBeNull();
+  });
+
+  it("projects a rising salinity over the decision interval", () => {
+    const ahead = extrapolateFeed(DESIGN_ENV, ramp(2), 1)!;
+    expect(ahead.salinity_gL - DESIGN_ENV.salinity_gL).toBeCloseTo(2, 6);
+    expect(ahead.temperature_C).toBe(DESIGN_ENV.temperature_C);
+  });
+
+  it("clamps implausible extrapolations", () => {
+    const ahead = extrapolateFeed(DESIGN_ENV, ramp(40, -20), 1)!;
+    expect(ahead.salinity_gL - DESIGN_ENV.salinity_gL).toBe(6);
+    expect(ahead.temperature_C - DESIGN_ENV.temperature_C).toBe(-2);
   });
 });

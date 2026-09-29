@@ -35,8 +35,11 @@ export function TopBar() {
   const env = snap?.env;
 
   return (
-    <header data-reveal="telemetry" className="no-print flex h-[68px] shrink-0 items-center gap-8 border-b border-line px-6">
-      <div className="flex min-w-0 items-center gap-3">
+    <header
+      data-reveal="telemetry"
+      className="no-print scroll-quiet flex h-[68px] shrink-0 items-center gap-8 border-b border-line px-6 max-lg:h-14 max-lg:gap-5 max-lg:overflow-x-auto max-lg:px-4"
+    >
+      <div className="flex min-w-0 shrink-0 items-center gap-3">
         <span
           className={`inline-flex h-6 items-center gap-1.5 rounded-md border px-2 font-mono text-[10.5px] tracking-wider uppercase ${
             live ? "border-ok/30 text-ok" : "border-line-strong text-fg-subtle"
@@ -51,16 +54,16 @@ export function TopBar() {
         <span className="hidden truncate text-[12.5px] text-fg-muted xl:inline">Reference SWRO plant · 3 trains · 57,500 m³/d</span>
       </div>
 
-      <div className="ml-auto flex items-center gap-7">
+      <div className="ml-auto flex shrink-0 items-center gap-7 max-lg:gap-5">
         <Condition icon={<IconThermo size={15} />} value={fmt(env?.temperature_C, 1)} unit="°C" label="Temperature" />
         <Condition icon={<IconWave size={15} />} value={fmt(env?.salinity_gL, 1)} unit="g/L" label="Salinity" />
         <Condition icon={<IconEye size={15} />} value={fmt(env?.turbidity_NTU, 1)} unit="NTU" label="Turbidity" />
         <Condition icon={<IconDroplet size={15} />} value={fmt(env?.pH, 2)} unit="" label="pH" />
       </div>
 
-      <div className="h-8 w-px bg-line" aria-hidden />
+      <div className="h-8 w-px shrink-0 bg-line" aria-hidden />
 
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-4">
         <div className="text-right leading-tight">
           <div className="num text-[15px] font-medium text-fg">{now === null ? "--:--:--" : clockLabel(now)}</div>
           <div className="text-[10.5px] text-fg-subtle">{now === null ? "" : dateLabel(now)}</div>

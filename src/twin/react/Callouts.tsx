@@ -99,7 +99,7 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
   return (
     <div
       ref={hostRef}
-      className={`pointer-events-none absolute inset-0 z-[2] transition-opacity duration-700 ${introPhase !== "done" ? "opacity-0" : "opacity-100"}`}
+      className={`pointer-events-none absolute inset-0 z-[2] transition-opacity duration-700 max-md:hidden ${introPhase !== "done" ? "opacity-0" : "opacity-100"}`}
       aria-hidden={false}
     >
       {items.map((it) => {

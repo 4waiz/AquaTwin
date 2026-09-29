@@ -7,7 +7,11 @@ export function AssetInspector({ data, onClose, provenance = "simulated" }: { da
   const toneText = data.tone === "ok" ? "text-ok" : data.tone === "warn" ? "text-warn" : "text-crit";
   const toneDot = data.tone === "ok" ? "bg-ok" : data.tone === "warn" ? "bg-warn" : "bg-crit";
   return (
-    <div className="w-[272px] rounded-[10px] border border-line-strong bg-ink-900/95 shadow-[0_12px_40px_rgba(0,0,0,0.45)]" role="dialog" aria-label={data.title}>
+    <div
+      className="w-[272px] rounded-[10px] border border-line-strong max-lg:w-full bg-ink-900/95 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+      role="dialog"
+      aria-label={data.title}
+    >
       <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
         <div>
           {data.index && <div className="label">{data.index}</div>}

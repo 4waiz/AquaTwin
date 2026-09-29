@@ -14,12 +14,15 @@ interface UiState {
   /** Twin rendering failed (WebGL unavailable) — pages show the 2D schematic instead. */
   twinFailed: boolean;
   perfOpen: boolean;
+  /** Touch devices: the 3D view only captures gestures after "Explore 3D" is tapped (so pages still scroll). */
+  touch3d: boolean;
   select: (a: AssetId | null) => void;
   hover: (a: AssetId | null) => void;
   resetCamera: () => void;
   setIntroPhase: (p: IntroPhase) => void;
   setTwinFailed: (f: boolean) => void;
   togglePerf: () => void;
+  setTouch3d: (v: boolean) => void;
 }
 
 export const useUi = create<UiState>((set) => ({
@@ -29,10 +32,12 @@ export const useUi = create<UiState>((set) => ({
   introPhase: "pending",
   twinFailed: false,
   perfOpen: false,
+  touch3d: false,
   select: (selected) => set({ selected }),
   hover: (hovered) => set({ hovered }),
   resetCamera: () => set((s) => ({ cameraReset: s.cameraReset + 1, selected: null })),
   setIntroPhase: (introPhase) => set({ introPhase }),
   setTwinFailed: (twinFailed) => set({ twinFailed }),
   togglePerf: () => set((s) => ({ perfOpen: !s.perfOpen })),
+  setTouch3d: (touch3d) => set({ touch3d }),
 }));

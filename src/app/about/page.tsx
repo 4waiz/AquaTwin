@@ -76,7 +76,7 @@ const SOFTWARE: [string, string][] = [
 export default function AboutPage() {
   useEffect(() => useScenario.getState().setActive(false), []);
   return (
-    <div className="mx-auto flex max-w-[1280px] flex-col gap-4 p-5 pt-6">
+    <div className="mx-auto flex max-w-[1280px] flex-col gap-4 p-5 pt-6 max-lg:p-4">
       <div data-reveal="header" className="flex items-center gap-4 pb-2">
         <AquaTwinMark size={40} />
         <div>
@@ -85,7 +85,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-4">
+      <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
         <div className="flex flex-col gap-4">
           <Block title="About this prototype" reveal="panel1">
             <p>
@@ -114,7 +114,7 @@ export default function AboutPage() {
           <Block title="Where the numbers come from" reveal="panel2">
             <dl className="divide-y divide-line">
               {PROVENANCE.map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 py-2 first:pt-0 last:pb-0">
+                <div key={k} className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 py-2 first:pt-0 last:pb-0 max-sm:grid-cols-1 max-sm:gap-1">
                   <dt className="font-mono text-[10.5px] uppercase tracking-wider text-fg-subtle">{k}</dt>
                   <dd className="text-[12.5px]">{v}</dd>
                 </div>
@@ -150,7 +150,7 @@ export default function AboutPage() {
           </Block>
 
           <Block title="Open-source software" reveal="panel3">
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5 max-sm:grid-cols-1">
               {SOFTWARE.map(([k, v]) => (
                 <li key={k} className="flex items-baseline justify-between gap-3 text-[12.5px]">
                   <span className="text-fg">{k}</span>

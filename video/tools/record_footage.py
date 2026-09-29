@@ -59,7 +59,12 @@ class Screencast:
         self.t_start = 0.0
         self.t_stop = 0.0
         self.recording = False
+        self.marks: dict[str, float] = {}
         self.cdp.on("Page.screencastFrame", self._on_frame)
+
+    def mark(self, name: str):
+        """Record the wall-clock time of an on-screen event (aligned to frame timestamps at encode)."""
+        self.marks[name] = time.time()
 
     def _on_frame(self, params):
         if not self.recording:
@@ -106,7 +111,12 @@ class Screencast:
             check=True,
         )
         span = fr[-1][0] - fr[0][0]
-        info = {"frames": len(fr), "seconds": round(span, 2), "capture_fps": round((len(fr) - 1) / span, 1) if span > 0 else None}
+        info = {
+            "frames": len(fr),
+            "seconds": round(span, 2),
+            "capture_fps": round((len(fr) - 1) / span, 1) if span > 0 else None,
+            "marks": {k: round(v - fr[0][0], 3) for k, v in self.marks.items()},
+        }
         shutil.rmtree(self.work, ignore_errors=True)
         return info
 
@@ -154,7 +164,10 @@ def clip_intro(page: Page, base: str, rec: Screencast):
     page.goto(f"{base}/?intro=1&quality=high", wait_until="domcontentloaded", timeout=120_000)
     page.mouse.move(-50, -50)
     rec.start()
-    page.wait_for_function("() => document.documentElement.dataset.intro === 'done'", timeout=30_000)
+    page.wait_for_function("() => /initializing digital twin/i.test(document.body.innerText)", timeout=30_000, polling=16)
+    rec.mark("initializing")
+    page.wait_for_function("() => document.documentElement.dataset.intro === 'done'", timeout=30_000, polling=16)
+    rec.mark("done")
     page.wait_for_timeout(2600)
     rec.stop()
 
@@ -166,16 +179,20 @@ def clip_twin(page: Page, base: str, rec: Screencast):
     rec.start()
     page.wait_for_timeout(700)
     glide(page, (900, 560), 700, start=(1180, 700))
+    rec.mark("orbit_start")
     page.mouse.down()
     for i in range(1, 71):  # slow orbit: 210 px over ~2.8 s
         page.mouse.move(900 - i * 3, 560 + i * 0.35)
         page.wait_for_timeout(40)
     page.mouse.up()
+    rec.mark("orbit_end")
     page._cursor = (690, 585)  # type: ignore[attr-defined]
     page.wait_for_timeout(900)
     glide(page, center(page, "text=RO train 2"), 800)
+    rec.mark("inspector")
     page.wait_for_timeout(1400)
     glide(page, center(page, "text=ML residual"), 800)
+    rec.mark("equation")
     page.wait_for_timeout(2200)
     rec.stop()
 
@@ -187,13 +204,24 @@ def clip_scenario(page: Page, base: str, rec: Screencast):
     rec.start()
     page.wait_for_timeout(700)
     click_at(page, center(page, "role=tab[name='No action']"), 800)
+    rec.mark("noaction")
     page.wait_for_timeout(700)
     click_at(page, center(page, "role=button[name='Play timeline']"), 750)
-    page.wait_for_timeout(3700)  # 24 h in 14 s → ≈ +6.3 h
+    rec.mark("play")
+    page.wait_for_selector("text=Constraint violated", timeout=15_000)
+    rec.mark("violation")
+    page.wait_for_timeout(1600)
     click_at(page, center(page, "role=button[name='+6h']"), 450)
+    rec.mark("pause")
     page.wait_for_timeout(2200)
     click_at(page, center(page, "role=tab[name='AquaTwin response']"), 900)
-    page.wait_for_timeout(3200)
+    rec.mark("aquatwin")
+    try:
+        page.wait_for_selector("text=Constraint violated", state="detached", timeout=4000)
+        rec.mark("resolved")
+    except Exception:
+        pass
+    page.wait_for_timeout(3000)
     rec.stop()
 
 
@@ -213,11 +241,13 @@ def clip_optimization(page: Page, base: str, rec: Screencast):
     page.wait_for_timeout(800)
     if ring:
         glide(page, (ring[0] + 1, ring[1] + 1), 900)
+        rec.mark("ring")
         page.wait_for_timeout(1300)
     for p in pareto[:: max(1, len(pareto) // 3)][:3]:
         glide(page, (p[0], p[1]), 500)
         page.wait_for_timeout(450)
     glide(page, center(page, "text=RECOMMENDATION APPROVED"), 900)
+    rec.mark("banner")
     page.wait_for_timeout(2400)
     rec.stop()
 
@@ -227,7 +257,10 @@ def clip_withheld(page: Page, base: str, rec: Screencast):
     rec.start()
     page.wait_for_timeout(900)
     click_at(page, center(page, "role=button[name='Compound extreme']"), 900)
-    page.wait_for_timeout(1600)
+    rec.mark("extreme")
+    page.wait_for_selector("text=LOW MODEL CONFIDENCE", timeout=15_000)
+    rec.mark("withheld")
+    page.wait_for_timeout(1400)
     glide(page, center(page, "text=LOW MODEL CONFIDENCE"), 900)
     page.wait_for_timeout(2600)
     rec.stop()
@@ -238,6 +271,7 @@ def clip_validation(page: Page, base: str, rec: Screencast):
     rec.start()
     page.wait_for_timeout(1000)
     click_at(page, center(page, "role=tab[name='Outside envelope']"), 900)
+    rec.mark("outside")
     page.wait_for_timeout(3200)
     rec.stop()
 

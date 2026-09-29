@@ -103,9 +103,9 @@ export default function ScenarioLabPage() {
   }, [res]);
 
   return (
-    <div className="grid h-full min-h-[960px] grid-rows-[auto_auto_minmax(400px,1fr)_280px] gap-4 p-5 pt-4">
+    <div className="grid h-full min-h-[960px] grid-rows-[auto_auto_minmax(400px,1fr)_280px] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
       {/* Header */}
-      <div data-reveal="header" className="flex items-end justify-between gap-6">
+      <div data-reveal="header" className="flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Scenario Lab</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Stress-test the plant before the plant is stressed.</h1>
@@ -113,7 +113,7 @@ export default function ScenarioLabPage() {
             24-hour forecasts from the calibrated hybrid twin, starting from the live plant state. <span className="text-fg-subtle">Simulated.</span>
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 max-lg:flex-wrap">
           <Segmented<Branch>
             ariaLabel="Branch shown in 3D"
             value={branch}
@@ -131,7 +131,7 @@ export default function ScenarioLabPage() {
       </div>
 
       {/* Scenario cards */}
-      <div data-reveal="panel1" className="grid grid-cols-6 gap-3">
+      <div data-reveal="panel1" className="grid grid-cols-6 gap-3 max-lg:grid-cols-2 md:max-lg:grid-cols-3">
         {LAB_SCENARIOS.map((id) => {
           const s = SCENARIOS[id];
           const r = results[id];
@@ -174,13 +174,13 @@ export default function ScenarioLabPage() {
       </div>
 
       {/* 3D + outcomes */}
-      <div className="grid min-h-0 grid-cols-[minmax(0,1.55fr)_minmax(420px,1fr)] gap-4">
-        <TwinViewport preset="scenario" className="rounded-[10px] border border-line">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1.55fr)_minmax(420px,1fr)] gap-4 max-lg:grid-cols-1">
+        <TwinViewport preset="scenario" className="rounded-[10px] border border-line max-lg:h-[64vw] max-lg:max-h-[480px] max-lg:min-h-[280px]">
           <div data-reveal="panel4" className="absolute left-3 top-3 z-[2] flex items-center gap-2">
             <Chip tone={branch === "aquatwin" ? "accent" : "default"} dot>
               {branch === "aquatwin" ? "AquaTwin response" : "No action"}
             </Chip>
-            <Chip>{res ? `+${cursor.toFixed(1)} h · ${hourOfDay(res.startClock_h + cursor)}` : "forecast"}</Chip>
+            <Chip className="max-sm:hidden">{res ? `+${cursor.toFixed(1)} h · ${hourOfDay(res.startClock_h + cursor)}` : "forecast"}</Chip>
             {point && point.violations.length > 0 && (
               <Chip tone="crit" dot>
                 Constraint violated
@@ -191,7 +191,7 @@ export default function ScenarioLabPage() {
             <ResetViewButton />
           </div>
           {selectedAsset && point && (
-            <div className="absolute right-3 top-14 z-[3]">
+            <div className="absolute right-3 top-14 z-[3] max-lg:hidden">
               <AssetInspector data={inspectorFromScenario(selectedAsset, point)} onClose={() => selectAsset(null)} provenance="estimated" />
             </div>
           )}
@@ -242,9 +242,9 @@ export default function ScenarioLabPage() {
       </div>
 
       {/* Charts + decisions */}
-      <div className="grid min-h-0 grid-cols-[1fr_1fr_1fr_minmax(380px,1.05fr)] gap-4">
+      <div className="grid min-h-0 grid-cols-[1fr_1fr_1fr_minmax(380px,1.05fr)] gap-4 max-lg:grid-cols-1 md:max-lg:grid-cols-2">
         {charts.map((c, i) => (
-          <Panel key={c.id} title={c.title} reveal={i === 0 ? "panel3" : "panel3"} bodyClassName="p-3 pt-2">
+          <Panel key={c.id} title={c.title} reveal={i === 0 ? "panel3" : "panel3"} className="max-lg:h-[260px]" bodyClassName="p-3 pt-2">
             {res ? (
               <ScenarioChart
                 spec={c}
@@ -264,7 +264,8 @@ export default function ScenarioLabPage() {
           title="AquaTwin decisions"
           right={<span className="text-[11px] text-fg-subtle">hourly · click to jump</span>}
           reveal="panel3"
-          bodyClassName="min-h-0 p-3 pt-2"
+          className="max-lg:h-[360px]"
+          bodyClassName="min-h-0 p-3 pt-2 max-lg:overflow-x-auto"
         >
           {res ? (
             <DecisionLog

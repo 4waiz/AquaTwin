@@ -98,6 +98,8 @@ export function TwinHost() {
         const q = new URLSearchParams(window.location.search).get("quality");
         const forced = q === "high" ? 2 : q === "medium" ? 1 : q === "low" ? 0 : null;
         if (forced !== null) engine.setQuality(forced, true);
+        // Phones and tablets start one tier down; the governor can still step further.
+        else if (window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 1024) engine.setQuality(1, false);
         await engine.warmup();
         if (cancelled) return;
         // The page's slot may have registered before the engine existed.
@@ -160,21 +162,44 @@ export function TwinHost() {
         return;
       }
       const r = slot.getBoundingClientRect();
-      const key = `${Math.round(r.left)}:${Math.round(r.top)}:${Math.round(r.width)}:${Math.round(r.height)}`;
+      // Clip the fixed canvas to the scrolling page area so it never covers the
+      // header or navigation when the page scrolls (clip-path also clips hit-testing).
+      const sc = document.getElementById("page-scroll")?.getBoundingClientRect();
+      const clipT = sc ? Math.max(0, Math.round(sc.top - r.top)) : 0;
+      const clipB = sc ? Math.max(0, Math.round(r.bottom - sc.bottom)) : 0;
+      const hiddenByScroll = clipT + clipB >= r.height - 1;
+      const key = `${Math.round(r.left)}:${Math.round(r.top)}:${Math.round(r.width)}:${Math.round(r.height)}:${clipT}:${clipB}`;
       // Re-apply when the slot moves/resizes or when the engine appears (it is created asynchronously).
       if (key !== last || engine !== sizedEngine) {
         sizedEngine = engine;
-        wrap.style.visibility = "visible";
+        wrap.style.visibility = hiddenByScroll ? "hidden" : "visible";
         wrap.style.transform = `translate3d(${Math.round(r.left)}px, ${Math.round(r.top)}px, 0)`;
         wrap.style.width = `${Math.round(r.width)}px`;
         wrap.style.height = `${Math.round(r.height)}px`;
-        engine?.setSize(r.width, r.height);
+        wrap.style.clipPath = clipT || clipB ? `inset(${clipT}px 0px ${clipB}px 0px)` : "";
+        engine?.setSize(r.width, r.height); // no-op unless the size changed
         last = key;
       }
-      if (engine && r.width > 2 && r.height > 2) engine.setActive(true);
+      if (engine && r.width > 2 && r.height > 2) engine.setActive(!hiddenByScroll);
     };
     raf = requestAnimationFrame(sync);
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // ------------------------------------------------------------------ touch: let pages scroll unless the user opts in
+  useEffect(() => {
+    const coarse = window.matchMedia("(pointer: coarse)");
+    const apply = () => {
+      const wrap = wrapRef.current;
+      if (wrap) wrap.style.pointerEvents = coarse.matches && !useUi.getState().touch3d ? "none" : "auto";
+    };
+    apply();
+    const unsub = useUi.subscribe((s, prev) => s.touch3d !== prev.touch3d && apply());
+    coarse.addEventListener("change", apply);
+    return () => {
+      unsub();
+      coarse.removeEventListener("change", apply);
+    };
   }, []);
 
   // ------------------------------------------------------------------ camera preset per page

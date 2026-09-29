@@ -122,8 +122,8 @@ export default function OptimizationPage() {
     : null;
 
   return (
-    <div className="grid h-full min-h-[880px] grid-cols-[minmax(0,1fr)_460px] grid-rows-[auto_minmax(0,1fr)_300px] gap-4 p-5 pt-4">
-      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6">
+    <div className="grid h-full min-h-[880px] grid-cols-[minmax(0,1fr)_460px] grid-rows-[auto_minmax(0,1fr)_300px] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
+      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Optimization</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">How AquaTwin searches for an operating strategy</h1>
@@ -131,7 +131,7 @@ export default function OptimizationPage() {
             Every candidate is predicted with the hybrid twin, screened by AquaGuard at its 90 % interval edge, then ranked. Nothing below is pre-computed.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 max-lg:flex-wrap">
           <Segmented
             value={source}
             onChange={setSource}
@@ -178,7 +178,7 @@ export default function OptimizationPage() {
         title={snap ? snap.context.label : "Candidate strategies"}
         right={
           counts && (
-            <div className="flex items-center gap-2 text-[11px] text-fg-subtle">
+            <div className="flex items-center gap-2 text-[11px] text-fg-subtle max-md:hidden">
               <span>{counts.total} candidates</span>
               <Chip tone="accent">{counts.feasible} admissible</Chip>
               <Chip>{counts.pareto} Pareto</Chip>
@@ -188,8 +188,15 @@ export default function OptimizationPage() {
           )
         }
         reveal="panel1"
+        className="max-lg:h-[420px]"
         bodyClassName="flex min-h-0 flex-col gap-1 p-3"
       >
+        {counts && (
+          <div className="px-1 text-[11px] text-fg-muted md:hidden">
+            {counts.total} candidates · <span className="text-accent">{counts.feasible} admissible</span> · {counts.rejected} rejected
+            {counts.withheld > 0 ? ` · ${counts.withheld} withheld` : ""}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[10.5px] text-fg-subtle">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-[#5b9dff]" /> Pareto-optimal
@@ -257,7 +264,7 @@ export default function OptimizationPage() {
         )}
       </Panel>
 
-      <div className="col-span-2 grid min-h-0 grid-cols-[1fr_1.15fr_0.9fr] gap-4">
+      <div className="col-span-2 grid min-h-0 grid-cols-[1fr_1.15fr_0.9fr] gap-4 max-lg:grid-cols-1">
         <Panel title="Search space and constraints" reveal="panel3" bodyClassName="grid grid-cols-2 gap-x-6 gap-y-1 p-4 text-[12px]">
           <div>
             <div className="label mb-1.5">Decision variables</div>

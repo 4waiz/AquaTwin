@@ -162,8 +162,8 @@ export default function IntelligencePage() {
   const qOod = metrics?.evaluation?.test_ood?.Q as Record<string, { vs_truth: { mae: number } }> | undefined;
 
   return (
-    <div className="grid min-h-full grid-cols-[minmax(0,1fr)_420px] grid-rows-[auto_minmax(420px,1fr)_auto] gap-4 p-5 pt-4">
-      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6">
+    <div className="grid min-h-full grid-cols-[minmax(0,1fr)_420px] grid-rows-[auto_minmax(420px,1fr)_auto] gap-4 p-5 pt-4 max-lg:flex max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
+      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Model Intelligence</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Physics + machine learning + forecasting + optimisation + safety</h1>
@@ -172,7 +172,7 @@ export default function IntelligencePage() {
         <Provenance kind="modeled" />
       </div>
 
-      <Panel title="Architecture" reveal="panel1" bodyClassName="grid min-h-0 grid-cols-[300px_minmax(0,1fr)] gap-5 p-4">
+      <Panel title="Architecture" reveal="panel1" bodyClassName="grid min-h-0 grid-cols-[300px_minmax(0,1fr)] gap-5 p-4 max-lg:grid-cols-1">
         <ol className="flex flex-col">
           {LAYERS.map((l, i) => (
             <li key={l.id} className="relative">
@@ -270,7 +270,7 @@ export default function IntelligencePage() {
               <div className="label mb-1.5">Permutation importance · permeate-flow residual</div>
               <div className="space-y-1">
                 {imp.map((i) => (
-                  <div key={i.feature} className="grid grid-cols-[150px_1fr_44px] items-center gap-2">
+                  <div key={i.feature} className="grid grid-cols-[150px_1fr_44px] items-center gap-2 max-sm:grid-cols-[120px_1fr_40px]">
                     <span className="truncate text-[11px] text-fg-muted" title={i.feature}>
                       {FEATURE_LABEL[i.feature] ?? i.feature}
                     </span>

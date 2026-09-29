@@ -14,11 +14,15 @@ import { ProcessSchematic } from "@/components/twin/ProcessSchematic";
 export function TwinViewport({ preset = "overview", className = "", children }: { preset?: CameraPreset; className?: string; children?: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const failed = useUi((s) => s.twinFailed);
+  const touch3d = useUi((s) => s.touch3d);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     useViewport.getState().register(el, preset);
-    return () => useViewport.getState().unregister(el);
+    return () => {
+      useViewport.getState().unregister(el);
+      useUi.getState().setTouch3d(false);
+    };
   }, [preset]);
   return (
     <div ref={ref} className={`relative overflow-hidden ${className}`}>
@@ -28,6 +32,18 @@ export function TwinViewport({ preset = "overview", className = "", children }: 
         </div>
       )}
       {children}
+      {!failed && (
+        <button
+          type="button"
+          onClick={() => useUi.getState().setTouch3d(!touch3d)}
+          aria-pressed={touch3d}
+          className={`absolute bottom-3 left-3 z-[4] hidden h-8 items-center gap-1.5 rounded-md border px-2.5 text-[12px] pointer-coarse:inline-flex ${
+            touch3d ? "border-accent/60 bg-accent-soft/60 text-fg" : "border-line-strong bg-ink-900/90 text-fg-muted"
+          }`}
+        >
+          {touch3d ? "Done exploring" : "Explore 3D"}
+        </button>
+      )}
     </div>
   );
 }

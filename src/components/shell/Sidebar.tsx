@@ -19,7 +19,7 @@ import {
 import { useLive } from "@/state/live";
 import { TEAM_URL } from "@/lib/brand";
 
-const NAV = [
+export const NAV = [
   { href: "/", label: "Overview", icon: IconOverview },
   { href: "/twin", label: "Digital Twin", icon: IconTwin },
   { href: "/scenarios", label: "Scenarios", icon: IconScenario },
@@ -32,8 +32,8 @@ const NAV = [
   { href: "/reports", label: "Reports", icon: IconReport },
 ] as const;
 
-const STATUS_TEXT = { stable: "Stable", watch: "Watch", warning: "Warning", critical: "Critical" } as const;
-const STATUS_DOT = {
+export const STATUS_TEXT = { stable: "Stable", watch: "Watch", warning: "Warning", critical: "Critical" } as const;
+export const STATUS_DOT = {
   stable: "bg-ok",
   watch: "bg-accent",
   warning: "bg-warn",
@@ -48,7 +48,7 @@ export function Sidebar() {
   return (
     <aside
       data-reveal="sidebar"
-      className="no-print relative z-20 flex h-full w-[var(--sidebar-w)] shrink-0 flex-col border-r border-line bg-ink-900"
+      className="no-print relative z-20 flex h-full w-[var(--sidebar-w)] shrink-0 flex-col border-r border-line bg-ink-900 max-lg:hidden"
       aria-label="Primary"
     >
       <div className="flex h-[68px] items-center gap-3 px-5">

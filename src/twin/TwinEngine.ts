@@ -274,7 +274,11 @@ export class TwinEngine {
   }
 
   stats(): PerfStats {
-    return this.perf.stats(this.particles.count + this.pour.particleCount, `${this.width}×${this.height}`, `${TIER_NAME[this.tier]} (${this.tierForced ? "forced" : "auto"})`);
+    return this.perf.stats(
+      this.particles.count + this.pour.particleCount,
+      `${this.width}×${this.height}`,
+      `${TIER_NAME[this.tier]} (${this.tierForced ? "forced" : "auto"})`,
+    );
   }
 
   /** Set the rendering quality tier; `forced` disables the automatic governor. */

@@ -120,8 +120,8 @@ export default function ValidationPage() {
   }, [ml, split]);
 
   return (
-    <div className="flex min-h-full flex-col gap-4 p-5 pt-4">
-      <div data-reveal="header" className="flex items-end justify-between gap-6">
+    <div className="flex min-h-full flex-col gap-4 p-5 pt-4 max-lg:p-4">
+      <div data-reveal="header" className="flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
         <div>
           <div className="label">Validation</div>
           <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Does the hybrid twin actually help?</h1>
@@ -131,7 +131,7 @@ export default function ValidationPage() {
           </p>
         </div>
         {res && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Chip>{res.meta.seeds.length} seeds</Chip>
             {res.meta.gitCommit !== "unknown" && <Chip>commit {res.meta.gitCommit}</Chip>}
             <Chip>{new Date(res.meta.created).toLocaleDateString("en-GB")}</Chip>
@@ -140,7 +140,7 @@ export default function ValidationPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-4">
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-4 max-lg:grid-cols-1">
         <Panel
           title="Prediction accuracy · held-out data"
           right={
@@ -225,7 +225,7 @@ export default function ValidationPage() {
         >
           {res ? (
             <>
-              <table className="w-full text-[12px]">
+              <table className="w-full text-[12px] max-lg:min-w-[620px]">
                 <thead>
                   <tr className="text-left text-[11px] text-fg-subtle">
                     <th className="pb-2 font-normal">
@@ -287,11 +287,11 @@ export default function ValidationPage() {
         </Panel>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-4">
-        <Panel title="Early-warning lead time · no-action runs" right={<Provenance kind="simulated" />} reveal="panel3" bodyClassName="p-4">
+      <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
+        <Panel title="Early-warning lead time · no-action runs" right={<Provenance kind="simulated" />} reveal="panel3" bodyClassName="p-4 max-lg:overflow-x-auto">
           {res ? (
             <>
-              <table className="w-full text-[12px]">
+              <table className="w-full text-[12px] max-lg:min-w-[640px]">
                 <thead>
                   <tr className="text-left text-[11px] text-fg-subtle">
                     <th className="pb-2 font-normal">Scenario</th>
@@ -358,7 +358,7 @@ export default function ValidationPage() {
             ["Check TypeScript ↔ scikit-learn parity", "npx tsx scripts/parity-test.ts"],
             ["Run the closed-loop experiments", "npx tsx scripts/run-experiments.ts"],
           ].map(([k, c]) => (
-            <div key={c} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div key={c} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 max-sm:grid-cols-1 max-sm:gap-1">
               <div className="text-fg-muted">{k}</div>
               <code className="rounded-md border border-line bg-ink-900 px-2.5 py-1 font-mono text-[11.5px] text-fg">{c}</code>
             </div>

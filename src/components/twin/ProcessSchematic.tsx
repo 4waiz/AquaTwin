@@ -31,7 +31,7 @@ export function ProcessSchematic({ values, compact = false }: { values?: Partial
   const W = 150;
   const H = compact ? 44 : 50;
   return (
-    <svg viewBox="0 0 880 150" className="h-full w-full" role="img" aria-label="Process flow diagram">
+    <svg viewBox="0 0 880 150" className="h-full w-full max-lg:h-auto max-lg:min-w-[620px]" role="img" aria-label="Process flow diagram">
       <defs>
         <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0 0 8 4 0 8z" fill="#3a9be0" />

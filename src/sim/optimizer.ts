@@ -111,6 +111,12 @@ export interface OptimizationInput {
   foulingState: number[];
   focusTrain: number | null;
   weights?: ObjectiveWeights;
+  /**
+   * Feed conditions extrapolated to the end of the decision interval from the
+   * measured trend. When given, the chosen strategy must also satisfy every
+   * hard limit there (look-ahead), not only under present conditions.
+   */
+  envAhead?: Environment | null;
   /** Grid resolution (for tests / UI). */
   grid?: { P: number[]; Qv: number[] };
 }
@@ -290,6 +296,24 @@ function evaluate(
   };
 }
 
+/** Does a strategy still satisfy every hard limit if the measured feed trend continues to the end of the interval? */
+function holdsAhead(c: Candidate, input: OptimizationInput): boolean {
+  const env = input.envAhead;
+  if (!env) return true;
+  const trains = c.setpoints.map((sp, i) => predictTrain(input.kind, env, sp, input.ctxs[i], input.bundle));
+  const outs = trains.map((t) => t.out);
+  const guard = evaluateGuard({
+    snapshot: { trains: outs, totals: aggregate(outs, env) },
+    setpoints: c.setpoints,
+    minProduction_m3h: 0, // the service target is re-planned at the next decision
+    powerCap_kW: input.powerCap_kW,
+    confidence: 1, // model confidence is judged on present inputs
+    trainPowerRating_kW: trainPowerRating(),
+    trainMargins: trains.map((t) => t.margins),
+  });
+  return guard.rules.every((r) => r.status !== "fail");
+}
+
 export function optimize(input: OptimizationInput): OptimizationResult {
   const grid = input.grid ?? DEFAULT_GRID;
   const modes: FocusMode[] = input.focusTrain === null ? ["normal"] : ["normal", "derate3", "derate6", "offline"];
@@ -361,12 +385,20 @@ export function optimize(input: OptimizationInput): OptimizationResult {
   }
   // Holding the current setpoints is always an option when it is admissible.
   const pool = current.feasible ? [...feasible, current] : feasible;
-  const best = pool.reduce((a, b) => (b.score < a.score ? b : a));
+  const ranked = [...pool].sort((a, b) => a.score - b.score);
+  // Look-ahead: take the best-scoring strategy that also holds if the measured
+  // feed trend continues through the decision interval.
+  const ahead = input.envAhead ? ranked.find((c) => holdsAhead(c, input)) : ranked[0];
+  const best = ahead ?? ranked[0];
   return {
     candidates,
     best,
     current,
     verdict: "APPROVED",
-    message: best === current ? "Current strategy remains the best admissible option." : "Recommended strategy passes every AquaGuard constraint.",
+    message: !ahead
+      ? "Recommended strategy passes every AquaGuard constraint now, but none holds if the current feed trend continues for the full interval. Operator attention advised."
+      : best === current
+        ? "Current strategy remains the best admissible option."
+        : "Recommended strategy passes every AquaGuard constraint.",
   };
 }
