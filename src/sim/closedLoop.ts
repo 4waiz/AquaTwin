@@ -8,14 +8,16 @@
  *   Used for Scenario Lab forecasts (what AquaTwin predicts will happen).
  *
  * strategy = "fixed": setpoints held at their initial values (no action).
- * strategy = "aquatwin": hourly re-optimisation with AquaGuard screening.
+ * strategy = "aquatwin": hourly re-optimisation with AquaGuard screening, plus
+ *   an unscheduled re-plan when the current setpoints would break a hard limit
+ *   if the measured feed trend continued (see REPLAN_MIN_GAP_h).
  */
 
 import { INITIAL_TRAIN_FOULING, LIMITS, PLANT } from "./config";
 import { evaluateGuard, trueViolations, type Verdict } from "./aquaguard";
 import { fitTrend, forecastThreshold } from "./forecast";
 import type { MlBundle } from "./ml";
-import { optimize, type Candidate, type FocusMode, type ObjectiveWeights, type Objectives } from "./optimizer";
+import { optimize, setpointsHoldAt, type Candidate, type FocusMode, type ObjectiveWeights, type Objectives } from "./optimizer";
 import { planProduction, type ProductionPlan } from "./planner";
 import { aggregate, demandAt } from "./plant";
 import { makeTrainState, measureTrain, solveTrainRef, stepFouling } from "./referencePlant";
@@ -91,6 +93,8 @@ export interface StepRecord {
 
 export interface DecisionRecord {
   t: number;
+  /** "schedule": the hourly decision; "outlook": an unscheduled re-plan triggered by the feed trend. */
+  trigger: "schedule" | "outlook";
   verdict: Verdict | "HOLD";
   message: string;
   reasons: string[];
@@ -122,6 +126,8 @@ export interface RunMetrics {
   withheldDecisions: number;
   rejectedDecisions: number;
   decisions: number;
+  /** Unscheduled re-plans triggered by the feed-trend outlook. */
+  replans: number;
   predMAE: { production_m3h: number; tds_mgL: number; sec_kWh_m3: number } | null;
   predRMSE: { production_m3h: number; tds_mgL: number; sec_kWh_m3: number } | null;
   finalHealth: number[];
@@ -142,6 +148,14 @@ const FOCUS_HEALTH = 0.95;
 /** Quality outlook: the last hour's feed-condition trend is extrapolated this far ahead. */
 const QUALITY_HORIZON_h = 2;
 const ENV_TREND_WINDOW_h = 1;
+/**
+ * Between hourly decisions, AquaTwin re-plans as soon as its current setpoints
+ * would break a hard limit if the measured feed trend continued for another
+ * decision interval — at most this often, and not while recommendations are
+ * withheld. Hourly decisions alone react up to an hour late to a ramp that
+ * starts just after a decision.
+ */
+const REPLAN_MIN_GAP_h = 1 / 3;
 
 /** Power of the plant at its initial fixed operating point, used to express caps. */
 function baselinePower(env: Environment, states: TrainTrueState[]): number {
@@ -224,6 +238,8 @@ export function runScenario(opts: RunOptions): RunResult {
   let firstAlarm: number | null = null;
   const initialMeasuredQp: number[] = [];
   const foulingLatched = new Array<boolean>(nT).fill(false);
+  let lastDecisionT = -Infinity;
+  let lastVerdict: Verdict | null = null;
 
   const nSteps = Math.round(horizon / dt);
   // Warm up the estimators on the initial state so calibration is converged at t = 0.
@@ -255,7 +271,15 @@ export function runScenario(opts: RunOptions): RunResult {
     const ctxNow: TrainContext[] =
       opts.plant === "twin" ? twinPhi.map((phi, i) => contextFromFouling(phi, wear[i], opts.degradation)) : estimators.map((e) => e.context()!);
 
-    const isDecision = opts.strategy === "aquatwin" && k < nSteps && Math.abs(t / decisionEvery - Math.round(t / decisionEvery)) < 1e-6;
+    const scheduled = opts.strategy === "aquatwin" && k < nSteps && Math.abs(t / decisionEvery - Math.round(t / decisionEvery)) < 1e-6;
+    const capNext = sc.powerCapFraction(t + 0.5);
+    const decisionCap_kW = capFrac !== null || capNext !== null ? (capFrac ?? capNext!) * basePower : null;
+    let replan = false;
+    if (!scheduled && opts.strategy === "aquatwin" && k < nSteps && lastVerdict === "APPROVED" && t - lastDecisionT >= REPLAN_MIN_GAP_h - 1e-9) {
+      const ahead = extrapolateEnv(env, decisionEvery);
+      replan = ahead !== null && !setpointsHoldAt(opts.model, ahead, setpoints, ctxNow, opts.bundle, decisionCap_kW);
+    }
+    const isDecision = scheduled || replan;
     let confidence = 1;
     if (isDecision) {
       const cap = hoursToCap(sc, t, 12);
@@ -284,7 +308,6 @@ export function runScenario(opts: RunOptions): RunResult {
       // Lumped fouling state for the fouling objective (twin degradation model variable).
       const cleanA = cleanBaseline().theta.A25;
       const foulingState = opts.plant === "twin" ? twinPhi.slice() : ctxNow.map((c) => Math.max(0, 1 - c.theta.A25 / cleanA));
-      const capNext = sc.powerCapFraction(t + 0.5);
       const res = optimize({
         kind: opts.model,
         env,
@@ -294,7 +317,7 @@ export function runScenario(opts: RunOptions): RunResult {
         productionTarget_m3h: plan.target_m3h,
         minProduction_m3h: plan.min_m3h,
         maxProduction_m3h: plan.max_m3h,
-        powerCap_kW: capFrac !== null || capNext !== null ? (capFrac ?? capNext!) * basePower : null,
+        powerCap_kW: decisionCap_kW,
         foulingMultipliers: foulMult,
         degradation: opts.degradation,
         foulingState,
@@ -309,8 +332,11 @@ export function runScenario(opts: RunOptions): RunResult {
       } else {
         lastPrediction = res.current.prediction.snapshot;
       }
+      lastDecisionT = t;
+      lastVerdict = res.verdict;
       decisions.push({
         t,
+        trigger: scheduled ? "schedule" : "outlook",
         verdict: res.verdict,
         message: res.message,
         reasons: res.best ? [] : summariseReasons(res.candidates, res.current),
@@ -549,6 +575,7 @@ export function computeMetrics(steps: StepRecord[], decisions: DecisionRecord[],
     withheldDecisions: decisions.filter((d) => d.verdict === "WITHHELD").length,
     rejectedDecisions: decisions.filter((d) => d.verdict === "REJECTED").length,
     decisions: decisions.length,
+    replans: decisions.filter((d) => d.trigger === "outlook").length,
     predMAE: errs.p.length ? { production_m3h: mae(errs.p), tds_mgL: mae(errs.c), sec_kWh_m3: mae(errs.s) } : null,
     predRMSE: errs.p.length ? { production_m3h: rmse(errs.p), tds_mgL: rmse(errs.c), sec_kWh_m3: rmse(errs.s) } : null,
     finalHealth: last.health,

@@ -296,22 +296,37 @@ function evaluate(
   };
 }
 
-/** Does a strategy still satisfy every hard limit if the measured feed trend continues to the end of the interval? */
-function holdsAhead(c: Candidate, input: OptimizationInput): boolean {
-  const env = input.envAhead;
-  if (!env) return true;
-  const trains = c.setpoints.map((sp, i) => predictTrain(input.kind, env, sp, input.ctxs[i], input.bundle));
+/**
+ * Do these setpoints still satisfy every hard limit under the given (extrapolated)
+ * feed conditions? Checked at the edge of the prediction interval, like AquaGuard.
+ * Used for the optimiser's look-ahead and to trigger an unscheduled re-plan.
+ */
+export function setpointsHoldAt(
+  kind: ModelKind,
+  env: Environment,
+  setpoints: TrainSetpoint[],
+  ctxs: TrainContext[],
+  bundle: MlBundle | null,
+  powerCap_kW: number | null,
+): boolean {
+  const trains = setpoints.map((sp, i) => predictTrain(kind, env, sp, ctxs[i], bundle));
   const outs = trains.map((t) => t.out);
   const guard = evaluateGuard({
     snapshot: { trains: outs, totals: aggregate(outs, env) },
-    setpoints: c.setpoints,
+    setpoints,
     minProduction_m3h: 0, // the service target is re-planned at the next decision
-    powerCap_kW: input.powerCap_kW,
+    powerCap_kW,
     confidence: 1, // model confidence is judged on present inputs
     trainPowerRating_kW: trainPowerRating(),
     trainMargins: trains.map((t) => t.margins),
   });
   return guard.rules.every((r) => r.status !== "fail");
+}
+
+/** Does a strategy still satisfy every hard limit if the measured feed trend continues to the end of the interval? */
+function holdsAhead(c: Candidate, input: OptimizationInput): boolean {
+  if (!input.envAhead) return true;
+  return setpointsHoldAt(input.kind, input.envAhead, c.setpoints, input.ctxs, input.bundle, input.powerCap_kW);
 }
 
 export function optimize(input: OptimizationInput): OptimizationResult {

@@ -52,9 +52,10 @@ try {
   /* repository without commits */
 }
 
-function run(id: ScenarioId, method: Method, seed: number, monitor?: ModelKind, startClock_h?: number): RunResult {
+function run(id: ScenarioId, method: Method, seed: number, monitor?: ModelKind, startClock_h?: number, initialReservoirFraction?: number): RunResult {
   return runScenario({
     startClock_h,
+    initialReservoirFraction,
     scenario: SCENARIOS[id],
     strategy: method === "fixed" ? "fixed" : "aquatwin",
     model: method === "fixed" ? "hybrid" : method,
@@ -97,6 +98,7 @@ function summarise(ms: RunMetrics[]): Summary {
     restore_h: (m) => (m.lastViolation_h === null ? 0 : Math.max(0, m.lastViolation_h - 1)),
     withheld: (m) => m.withheldDecisions,
     rejected: (m) => m.rejectedDecisions,
+    replans: (m) => m.replans,
     maeProduction_m3h: (m) => m.predMAE?.production_m3h ?? null,
     maeTds_mgL: (m) => m.predMAE?.tds_mgL ?? null,
     maeSec_kWh_m3: (m) => m.predMAE?.sec_kWh_m3 ?? null,
@@ -178,7 +180,7 @@ const leadTime: Record<string, Record<string, unknown>> = {};
 const trajectories: Record<string, Record<string, ReturnType<typeof downsample>>> = {};
 const decisionLog: Record<string, unknown[]> = {};
 const csvRows: string[] = [
-  "scenario,method,seed,sec_kWh_m3,energy_MWh,production_m3,mean_recovery_pct,mean_tds,max_tds,tds_violation_h,any_violation_h,min_reservoir_pct,withheld,rejected,mae_prod,mae_tds,mae_sec",
+  "scenario,method,seed,sec_kWh_m3,energy_MWh,production_m3,mean_recovery_pct,mean_tds,max_tds,tds_violation_h,any_violation_h,min_reservoir_pct,withheld,rejected,replans,mae_prod,mae_tds,mae_sec",
 ];
 
 for (const id of SCENARIO_IDS) {
@@ -209,6 +211,7 @@ for (const id of SCENARIO_IDS) {
           m.minReservoirFraction * 100,
           m.withheldDecisions,
           m.rejectedDecisions,
+          m.replans,
           m.predMAE?.production_m3h ?? "",
           m.predMAE?.tds_mgL ?? "",
           m.predMAE?.sec_kWh_m3 ?? "",
@@ -218,7 +221,8 @@ for (const id of SCENARIO_IDS) {
         trajectories[id][method] = downsample(r);
         if (method === "hybrid") {
           decisionLog[id] = r.decisions.map((d) => ({
-            t: d.t,
+            t: +d.t.toFixed(3),
+            trigger: d.trigger,
             verdict: d.verdict,
             message: d.message,
             focusTrain: d.focusTrain,
@@ -275,19 +279,30 @@ for (const id of SCENARIO_IDS) {
   };
 }
 
-// Robustness to the time of day at which the disturbance starts (demand and
-// seawater follow daily cycles): scenarios where fixed operation violates a
-// limit, 6 start times, seed 1.
+// Robustness: the in-envelope scenarios in which fixed operation violates a
+// limit, started at 6 times of day (demand and seawater temperature follow daily
+// cycles) and from 3 product-storage levels (the main runs start at 55 %), seed 1.
 const START_CLOCKS = [0, 4, 8, 12, 16, 20];
-const startTimes: Record<string, Record<string, Record<Method, number>>> = {};
+const START_STORAGE = [0.35, 0.55, 0.75];
+type RobustCell = { any: number; by: Record<string, number> };
+const robustness: Record<string, Record<string, Record<string, Record<Method, RobustCell>>>> = {};
 for (const id of ["salinity", "energy", "demand"] as ScenarioId[]) {
-  startTimes[id] = {};
-  for (const clock of START_CLOCKS) {
-    const row = {} as Record<Method, number>;
-    for (const method of METHODS) row[method] = +run(id, method, 1, method === "fixed" ? "hybrid" : undefined, clock).metrics.anyViolation_h.toFixed(2);
-    startTimes[id][String(clock)] = row;
+  robustness[id] = {};
+  for (const storage of START_STORAGE) {
+    robustness[id][String(storage)] = {};
+    for (const clock of START_CLOCKS) {
+      const row = {} as Record<Method, RobustCell>;
+      for (const method of METHODS) {
+        const m = run(id, method, 1, method === "fixed" ? "hybrid" : undefined, clock, storage).metrics;
+        row[method] = {
+          any: +m.anyViolation_h.toFixed(2),
+          by: Object.fromEntries(Object.entries(m.violationHoursBy).map(([k, v]) => [k, +v.toFixed(2)])),
+        };
+      }
+      robustness[id][String(storage)][String(clock)] = row;
+    }
   }
-  console.log(`start-time sweep ${id} done (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
+  console.log(`robustness sweep ${id} done (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
 }
 
 const out = {
@@ -310,7 +325,7 @@ const out = {
   methods: METHODS,
   results,
   leadTime,
-  startTimes,
+  robustness: { clocks: START_CLOCKS, storage: START_STORAGE, runs: robustness },
   trajectories,
   decisions: decisionLog,
 };

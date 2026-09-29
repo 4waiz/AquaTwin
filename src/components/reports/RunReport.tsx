@@ -7,7 +7,7 @@
  */
 import type { ReactNode } from "react";
 import type { RunRecord, BranchSummary } from "@/state/runs";
-import { fmt, fmtHours, fmtInt, fmtSigned, hourOfDay } from "@/lib/format";
+import { fmt, fmtHours, fmtInt, fmtOffset, fmtSigned, hourOfDay } from "@/lib/format";
 import { HACKATHON, TEAM_NAME, TEAM_URL } from "@/lib/brand";
 
 type Tone = "dark" | "light";
@@ -182,8 +182,8 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
       <Section n={4} title="Recommended response" tone={tone}>
         {firstAction ? (
           <p>
-            First approved action at +{fmt(firstAction.t, 0)} h: <span className={`num ${s.strong}`}>{firstAction.action}</span>. AquaTwin re-optimises hourly; the full
-            decision log follows.
+            First approved action at {fmtOffset(firstAction.t)}: <span className={`num ${s.strong}`}>{firstAction.action}</span>. AquaTwin re-optimises hourly, and
+            re-plans in between when the feed trend would take the current setpoints past a limit; the full decision log follows.
           </p>
         ) : (
           <p className={s.warn}>No action was approved in this run — AquaGuard rejected or withheld every candidate strategy.</p>
@@ -200,7 +200,10 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
           <tbody>
             {r.decisions.map((d) => (
               <tr key={d.t} className={`border-t align-top ${s.rule}`}>
-                <td className="num py-1">+{fmt(d.t, 0)} h</td>
+                <td className="num py-1 whitespace-nowrap">
+                  {fmtOffset(d.t)}
+                  {d.trigger === "outlook" && <span className={`ml-1 text-[10px] ${s.head}`}>re-plan</span>}
+                </td>
                 <td className={`py-1 font-mono text-[10.5px] tracking-wider ${d.verdict === "APPROVED" ? s.ok : d.verdict === "WITHHELD" ? s.warn : s.crit}`}>
                   {d.verdict}
                 </td>
@@ -275,7 +278,7 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
 
       <p className={`border-t pt-3 text-[11px] ${s.rule} ${s.faint}`}>
         Method: the calibrated hybrid twin (reduced-order solution–diffusion model + gradient-boosted residual) is run forward from the live state, once with setpoints
-        held (no action) and once with hourly AquaTwin optimisation screened by AquaGuard. Compute time {fmtInt(r.computeMs)} ms. Record id {r.id}.
+        held (no action) and once with AquaTwin optimisation screened by AquaGuard (hourly, plus re-plans when the feed trend threatens a limit). Compute time {fmtInt(r.computeMs)} ms. Record id {r.id}.
       </p>
     </article>
   );

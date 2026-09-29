@@ -226,7 +226,10 @@ export default function ScenarioLabPage() {
               <OutcomeTable res={res} />
               {headline && (
                 <div className="text-[11px] text-fg-subtle">
-                  Forecast computed in {fmt(res.computeMs / 1000, 1)} s · {res.aquatwin.decisions.length} hourly decisions · first no-action violation{" "}
+                  Forecast computed in {fmt(res.computeMs / 1000, 1)} s · {res.aquatwin.decisions.length} decisions
+                  {res.aquatwin.decisions.some((d) => d.trigger === "outlook") &&
+                    ` (${res.aquatwin.decisions.filter((d) => d.trigger === "outlook").length} unscheduled re-plans)`}{" "}
+                  · first no-action violation{" "}
                   {headline.na.firstViolation === null ? "none" : `at +${fmtHours(headline.na.firstViolation)}`}
                 </div>
               )}
@@ -262,7 +265,7 @@ export default function ScenarioLabPage() {
         ))}
         <Panel
           title="AquaTwin decisions"
-          right={<span className="text-[11px] text-fg-subtle">hourly · click to jump</span>}
+          right={<span className="text-[11px] text-fg-subtle">hourly and on feed trend · click to jump</span>}
           reveal="panel3"
           className="max-lg:h-[360px]"
           bodyClassName="min-h-0 p-3 pt-2 max-lg:overflow-x-auto"

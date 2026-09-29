@@ -22,7 +22,7 @@ export interface RunRecord {
   represents: string;
   noAction: BranchSummary;
   aquatwin: BranchSummary;
-  decisions: { t: number; verdict: string; action: string; confidence: number }[];
+  decisions: { t: number; verdict: string; action: string; confidence: number; trigger?: "schedule" | "outlook" }[];
 }
 
 export interface BranchSummary {
@@ -105,6 +105,7 @@ export const useRuns = create<RunsState>((set, get) => ({
       aquatwin: summarise(r.aquatwin),
       decisions: r.aquatwin.decisions.map((d) => ({
         t: d.t,
+        trigger: d.trigger,
         verdict: d.verdict,
         action: d.chosen
           ? `${d.chosen.P.toFixed(1)} bar · ${d.chosen.Qv.toFixed(1)} m³/h per vessel · ${

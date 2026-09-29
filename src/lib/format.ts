@@ -41,6 +41,14 @@ export function fmtHours(h: number | null | undefined): string {
   return `${h.toFixed(h < 10 ? 1 : 0)} h`;
 }
 
+/** Offset from the start of a forecast: "+3h", or "+1h20" between whole hours. */
+export function fmtOffset(h: number): string {
+  const mins = Math.round(h * 60);
+  const hh = Math.floor(mins / 60);
+  const mm = mins - hh * 60;
+  return mm === 0 ? `+${hh}h` : `+${hh}h${String(mm).padStart(2, "0")}`;
+}
+
 export function clockLabel(ms: number, withSeconds = true): string {
   const d = new Date(ms);
   const p = (n: number) => String(n).padStart(2, "0");

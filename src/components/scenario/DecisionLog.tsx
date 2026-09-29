@@ -1,8 +1,8 @@
 "use client";
-/** AquaTwin's hourly decisions for the forecast (verdict + chosen setpoints). */
+/** AquaTwin's decisions for the forecast: hourly, plus re-plans triggered by the feed trend (verdict + chosen setpoints). */
 import type { ScenarioBranch } from "@/runtime/protocol";
 import { FOCUS_LABEL } from "@/sim/optimizer";
-import { fmt, fmtInt } from "@/lib/format";
+import { fmt, fmtInt, fmtOffset } from "@/lib/format";
 
 const VERDICT_CLS: Record<string, string> = {
   APPROVED: "text-ok border-ok/30",
@@ -27,15 +27,23 @@ export function DecisionLog({ branch, cursor, onSeek }: { branch: ScenarioBranch
           </tr>
         </thead>
         <tbody>
-          {decisions.map((d) => {
-            const active = cursor >= d.t && cursor < d.t + 1;
+          {decisions.map((d, i) => {
+            const next = decisions[i + 1]?.t ?? d.t + 1;
+            const active = cursor >= d.t && cursor < next;
             return (
               <tr
                 key={d.t}
                 onClick={() => onSeek(d.t)}
                 className={`cursor-pointer border-t border-line transition-colors ${active ? "bg-accent-soft/40" : "hover:bg-ink-800"}`}
               >
-                <td className="num py-1.5 font-mono text-fg-muted">+{d.t}h</td>
+                <td className="num py-1.5 font-mono whitespace-nowrap text-fg-muted">
+                  {fmtOffset(d.t)}
+                  {d.trigger === "outlook" && (
+                    <span className="ml-1 font-sans text-[9.5px] text-accent" title="Unscheduled re-plan: the current setpoints would break a limit if the feed trend continued">
+                      re-plan
+                    </span>
+                  )}
+                </td>
                 <td className="py-1.5">
                   <span className={`rounded border px-1.5 py-px font-mono text-[9.5px] ${VERDICT_CLS[d.verdict] ?? VERDICT_CLS.HOLD}`}>{d.verdict}</span>
                 </td>
