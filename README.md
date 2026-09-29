@@ -6,6 +6,8 @@ Built by [Team Kanban](https://kanbanstudios.ae/team-kanban) for the Khalifa Uni
 
 AquaTwin watches a seawater reverse-osmosis (SWRO) plant through the signals it already records, keeps a reduced-order physical model calibrated to it in real time, corrects that model with a machine-learning residual, forecasts membrane fouling and the effect of disturbances, and recommends operating strategies — but only after a deterministic safety layer, **AquaGuard**, has checked every limit at the edge of the model's uncertainty. When the plant leaves the conditions the model knows, AquaTwin says so and withholds its recommendation.
 
+**Live:** [aquatwin.kanbanstudios.ae](https://aquatwin.kanbanstudios.ae) — runs entirely in the browser; best on a desktop with a dedicated GPU, and usable on phones and tablets.
+
 > **Status: research prototype on a simulated plant.** The "plant" is a higher-fidelity reference simulator that stands in for a real facility, so that every claim can be tested against known ground truth. Nothing here has been validated on an industrial plant, and no organisation has endorsed it. Every number in the interface is labelled *simulated*, *modeled*, *estimated* or *external reference*.
 
 ![AquaTwin overview](docs/screenshots/01-overview.png)
@@ -22,7 +24,7 @@ AquaTwin watches a seawater reverse-osmosis (SWRO) plant through the signals it 
 | Optimiser | 676 candidate strategies scored on energy, water quality, production, membrane stress and fouling. |
 | AquaGuard | Deterministic hard constraints: APPROVED / REJECTED (with reasons) / WITHHELD. |
 
-Validation on the simulator ([docs/VALIDATION.md](docs/VALIDATION.md)): the hybrid predicts permeate flow with 4.9 m³/h mean absolute error per train inside the training envelope (physics 48.0, ML-only 9.7) and 12.1 outside it (ML-only 35.1). In closed loop it removes the constraint violations that fixed operation incurs under the salinity shock, energy cap and demand surge, typically at equal or slightly higher specific energy, and it warns that a membrane train will reach the flow cleaning criterion about 12 h ahead, where conventional alarms give no warning. Outside its envelope it fails like every other method — and withholds its recommendations.
+Validation on the simulator ([docs/VALIDATION.md](docs/VALIDATION.md)): the hybrid predicts permeate flow with 4.9 m³/h mean absolute error per train inside the training envelope (physics 48.0, ML-only 9.7) and 12.1 outside it (ML-only 35.1). In closed loop it removes the constraint violations that fixed operation incurs under the salinity shock, energy cap and demand surge — also when these start at any of six times of day — typically at equal or slightly higher specific energy, and it warns that a membrane train will reach the flow cleaning criterion about 12 h ahead, where conventional alarms give no warning. Outside its envelope it fails like every other method — and withholds its recommendations.
 
 ## Quick start
 
@@ -35,12 +37,14 @@ npm run dev
 
 Open http://localhost:3000. The intro plays once per browser session on the Overview page (skip with Esc; add `?intro=1` to replay, `?intro=0` to skip).
 
-Production build:
+Production build (static export to `out/`, served locally with Wrangler at http://localhost:3200):
 
 ```bash
 npm run build
 npm run start
 ```
+
+Deployment: the static export is served by Cloudflare Workers static assets (`wrangler.jsonc`); `npm run deploy` builds and deploys it (requires access to the Cloudflare account).
 
 The trained model (`public/data/models/`) and the experiment results (`public/data/validation/`) are committed, so the app runs without Python.
 
@@ -59,7 +63,7 @@ npm test                  # unit tests: physics, safety layer, ML parity
 | `npm run ml:train` | Trains hybrid and ML-only models, conformal intervals, OOD statistics → `public/data/models/` |
 | `npm run ml:parity` | Checks the browser tree runtime against scikit-learn (tolerance 1e-9) |
 | `npm run experiments` | Closed-loop experiments: 10 scenarios × 4 methods × 5 seeds → `public/data/validation/results.json`, `data/experiments/` |
-| `npm run qa:capture` / `npm run qa:perf` | Screenshot / console / rendering-performance QA in Chrome (Python Playwright) |
+| `npm run qa:capture` / `npm run qa:perf` / `npm run qa:mobile` | Screenshot / console / rendering-performance QA in Chrome, and phone/tablet layout checks (Python Playwright) |
 | `npm run typecheck`, `npm run lint`, `npm test` | Static checks and unit tests |
 
 All steps are deterministic (fixed seeds, no early stopping); rerunning the pipeline reproduces the committed artefacts.

@@ -4,7 +4,7 @@ frame rate with requestAnimationFrame over a fixed window, opens the hidden
 developer performance panel (Ctrl+Shift+P) and records its readout.
 
 Usage:
-  python scripts/qa/perf.py --base http://localhost:3200 --size 1920x1080 --nvidia --out docs/qa/perf
+  python scripts/qa/perf.py --base http://localhost:3200 --size 1920x1080 --nvidia --out qa-output/perf
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://localhost:3200")
     ap.add_argument("--size", default="1920x1080")
-    ap.add_argument("--out", default="docs/qa/perf")
+    ap.add_argument("--out", default="qa-output/perf")
     ap.add_argument("--nvidia", action="store_true")
     ap.add_argument("--headed", action="store_true")
     ap.add_argument("--seconds", type=float, default=6)

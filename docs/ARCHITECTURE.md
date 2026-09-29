@@ -94,7 +94,7 @@ Pages subscribe to stores with selectors; the 3D view is fed a `TwinVisualState`
 
 The brief asked for WebGPU *if it materially improves the effect*, without sacrificing stability. We stayed on WebGL2:
 
-1. **No material visual gain for this scene.** Measured on the target class of hardware (RTX 5080 Laptop GPU, Chrome, production build, 1920×1080): Overview ≈ 195 fps, Digital Twin ≈ 198 fps, Scenario Lab during playback ≈ 181 fps with the full effect stack (`scripts/qa/perf.py`). The frame budget at 60 fps is not the constraint, so WebGPU's lower driver overhead and compute shaders would not change what judges see.
+1. **No material visual gain for this scene.** Measured on the target class of hardware (RTX 5080 Laptop GPU, Chrome, production build, 1920×1080, headless without vsync): Overview ≈ 235 fps, Digital Twin ≈ 238 fps, Scenario Lab during playback ≈ 132 fps with the full effect stack (`scripts/qa/perf.py`, 30 September 2026). The frame budget at 60 fps is not the constraint, so WebGPU's lower driver overhead and compute shaders would not change what judges see.
 2. **Stability.** The post-processing we rely on (GTAO, bloom, bokeh) is mature on WebGL2; its WebGPU/TSL equivalents in three.js are newer. On Windows laptops with hybrid graphics, WebGPU adapter selection and driver maturity vary more than WebGL2/ANGLE.
 3. **Reach.** Judges may open the prototype on integrated graphics. WebGL2 plus an adaptive quality governor (below) keeps it usable there.
 
@@ -102,7 +102,7 @@ The hidden performance panel (Ctrl+Shift+P) reports whether a WebGPU adapter is 
 
 ### 4.2 Adaptive quality
 
-`TwinEngine.governQuality`: after the intro, if the smoothed frame time stays above 22 ms (< 45 fps) for 2.5 s, the renderer steps down one tier (never up automatically): **high** (default) → **medium** (no GTAO, 2048² shadows, reflection ⅓ resolution, pixel ratio ≤ 1.5) → **low** (no bloom, 1024² shadows, reflection ¼, pixel ratio 0.85). `?quality=high|medium|low` pins a tier for demos and QA. Measured on the integrated GPU of the development laptop (Intel Graphics, 1920×1080): Overview 30 → 47 fps, Digital Twin 32 → 42 fps, Scenario Lab 41 → 62 fps. The RTX GPU never leaves the high tier.
+`TwinEngine.governQuality`: after the intro, if the smoothed frame time stays above 22 ms (< 45 fps) for 2.5 s, the renderer steps down one tier (never up automatically): **high** (default) → **medium** (no GTAO, 2048² shadows, reflection ⅓ resolution, pixel ratio ≤ 1.5) → **low** (no bloom, 1024² shadows, reflection ¼, pixel ratio 0.85). `?quality=high|medium|low` pins a tier for demos and QA. On the integrated GPU of the development laptop (Intel Graphics, 1920×1080) the current build holds the high tier: Overview ≈ 55 fps, Digital Twin ≈ 59 fps, Scenario Lab ≈ 79 fps. An earlier build measured 30–41 fps at the high tier on this GPU, and the governor stepped it down to reach 42–62 fps. The RTX GPU never leaves the high tier. Phones (coarse pointer, narrow screen) start at the medium tier.
 
 ### 4.3 Developer performance panel
 

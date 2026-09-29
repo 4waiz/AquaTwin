@@ -41,6 +41,8 @@ interface Results {
       falseWarningHours?: Record<Monitor, number | null>;
     }
   >;
+  /** Violation hours (seed 1) by disturbance start time of day: scenario → start clock → method. */
+  startTimes?: Record<string, Record<string, Record<Method, number>>>;
 }
 interface ErrStats {
   vs_truth: { mae: number };
@@ -286,6 +288,61 @@ export default function ValidationPage() {
           )}
         </Panel>
       </div>
+
+      {res?.startTimes && Object.keys(res.startTimes).length > 0 && (
+        <Panel title="Robustness to start time" right={<Provenance kind="simulated" />} reveal="panel3" bodyClassName="p-4">
+          <div className="grid grid-cols-3 gap-6 max-xl:grid-cols-1">
+            {Object.entries(res.startTimes).map(([id, byClock]) => {
+              const clocks = Object.keys(byClock).sort((a, b) => Number(a) - Number(b));
+              const name = res.scenarios.find((x) => x.id === id)?.name ?? id;
+              return (
+                <div key={id} className="scroll-quiet overflow-x-auto">
+                  <div className="mb-1.5 text-[12px] text-fg">{name}</div>
+                  <table className="w-full min-w-[420px] text-[12px]">
+                    <thead>
+                      <tr className="text-[11px] text-fg-subtle">
+                        <th className="pb-1.5 text-left font-normal">Starts at</th>
+                        {clocks.map((c) => (
+                          <th key={c} className="num pb-1.5 text-right font-normal">
+                            {c.padStart(2, "0")}:00
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {res.methods.map((k) => (
+                        <tr key={k} className="border-t border-line">
+                          <td className="py-[5px] pr-2 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1.5 text-fg-muted">
+                              <span className="h-2 w-2 rounded-[2px]" style={{ background: METHOD_COLOR[k] }} />
+                              {METHOD_LABEL[k]}
+                            </span>
+                          </td>
+                          {clocks.map((c) => {
+                            const v = byClock[c]?.[k];
+                            return (
+                              <td
+                                key={c}
+                                className={`num py-[5px] text-right ${v === undefined ? "text-fg-faint" : v > 0 ? "text-warn" : k === "hybrid" ? "text-fg" : "text-fg-subtle"}`}
+                              >
+                                {v === undefined ? "—" : fmt(v, v > 0 ? 1 : 0)}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[11px] leading-relaxed text-fg-subtle">
+            The same 24 h scenario started at six times of day (seed 1): demand and seawater temperature follow a daily cycle, so the disturbance meets the plant in a different
+            state each time. Values are hours with any constraint violation on the true plant; amber marks a violation.
+          </p>
+        </Panel>
+      )}
 
       <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
         <Panel title="Early-warning lead time · no-action runs" right={<Provenance kind="simulated" />} reveal="panel3" bodyClassName="p-4 max-lg:overflow-x-auto">

@@ -55,3 +55,8 @@ data/experiments/*log*.txt
 
 # video intermediates
 video/footage/_work_*/
+
+# QA output (screenshots, perf traces)
+qa-output/
+docs/qa/
+docs/screenshots/qa/

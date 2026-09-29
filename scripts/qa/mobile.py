@@ -4,7 +4,7 @@ horizontal overflow and console errors, and saves full-length screenshots
 (the app scrolls inside #page-scroll, so the layout is expanded for capture).
 
 Usage:
-  python scripts/qa/mobile.py --base http://localhost:3300 --out docs/qa/mobile
+  python scripts/qa/mobile.py --base http://localhost:3200 --out qa-output/mobile
 """
 
 from __future__ import annotations
@@ -45,8 +45,8 @@ EXPAND_JS = """() => {
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", default="http://localhost:3300")
-    ap.add_argument("--out", default="docs/qa/mobile")
+    ap.add_argument("--base", default="http://localhost:3200")
+    ap.add_argument("--out", default="qa-output/mobile")
     ap.add_argument("--devices", nargs="+", default=list(DEVICES))
     ap.add_argument("--pages", nargs="+", default=PAGES)
     a = ap.parse_args()

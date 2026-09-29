@@ -5,7 +5,7 @@ collects console errors, failed requests and forbidden strings (NaN,
 undefined, Infinity).
 
 Usage:
-  python scripts/qa/capture.py --base http://localhost:3100 --size 1920x1080 --pages / /twin --out docs/screenshots/qa
+  python scripts/qa/capture.py --base http://localhost:3100 --size 1920x1080 --pages / /twin --out qa-output/capture
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def main() -> int:
     ap.add_argument("--base", default="http://localhost:3100")
     ap.add_argument("--size", default="1920x1080")
     ap.add_argument("--pages", nargs="+", default=["/"])
-    ap.add_argument("--out", default="docs/screenshots/qa")
+    ap.add_argument("--out", default="qa-output/capture")
     ap.add_argument("--wait", type=float, default=6.0)
     ap.add_argument("--intro", action="store_true", help="capture the intro sequence on the first page")
     ap.add_argument("--frames", type=str, default="", help="comma separated seconds for intro frames")
