@@ -36,6 +36,22 @@ const bundle = loadMlBundle();
 const degradation = loadDegradation();
 const t0 = Date.now();
 
+// provenance is captured before the runs, i.e. for the code that was loaded
+let commit = "unknown";
+let codeDirty: boolean | null = null;
+try {
+  commit = execSync("git rev-parse --short HEAD", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] })
+    .toString()
+    .trim();
+  // uncommitted changes to the code that produces these numbers (src/, scripts/, ml/)
+  codeDirty =
+    execSync("git status --porcelain -- src scripts ml", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim().length > 0;
+} catch {
+  /* repository without commits */
+}
+
 function run(id: ScenarioId, method: Method, seed: number, monitor?: ModelKind, startClock_h?: number): RunResult {
   return runScenario({
     startClock_h,
@@ -272,21 +288,6 @@ for (const id of ["salinity", "energy", "demand"] as ScenarioId[]) {
     startTimes[id][String(clock)] = row;
   }
   console.log(`start-time sweep ${id} done (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
-}
-
-let commit = "unknown";
-let codeDirty: boolean | null = null;
-try {
-  commit = execSync("git rev-parse --short HEAD", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] })
-    .toString()
-    .trim();
-  // uncommitted changes to the code that produces these numbers (src/, scripts/, ml/)
-  codeDirty =
-    execSync("git status --porcelain -- src scripts ml", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] })
-      .toString()
-      .trim().length > 0;
-} catch {
-  /* repository without commits */
 }
 
 const out = {
