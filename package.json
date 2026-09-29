@@ -20,6 +20,8 @@
     "report": "python scripts/report/validation_md.py && python scripts/report/figures.py && python scripts/report/build.py",
     "qa:screenshots": "python scripts/qa/screenshots.py",
     "qa:mobile": "python scripts/qa/mobile.py",
+    "video:footage": "python video/tools/record_footage.py",
+    "video:compose": "python video/tools/build_composition.py",
     "preview": "wrangler dev --port 3200",
     "deploy": "npm run build && wrangler deploy"
   },

@@ -1,14 +1,18 @@
 {
   // Static deployment of the exported Next.js app (npm run build → out/)
   // on Cloudflare Workers static assets, served at aquatwin.kanbanstudios.ae.
+  // A small Worker handles /media/* only, to answer byte-range requests for the film.
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "aquatwin",
   "account_id": "f8dc06dc6cc06ecfe499b2fdbcf45196",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-09-29",
   "assets": {
     "directory": "./out",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/media/*"]
   },
   "routes": [{ "pattern": "aquatwin.kanbanstudios.ae", "custom_domain": true }],
   "workers_dev": false,

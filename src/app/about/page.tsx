@@ -135,6 +135,27 @@ export default function AboutPage() {
         </div>
 
         <div className="flex flex-col gap-4">
+          <Block title="The one-minute film" reveal="panel2">
+            <video
+              className="aspect-video w-full rounded-md border border-line bg-ink-950"
+              controls
+              preload="none"
+              playsInline
+              poster="/media/aquatwin-film.jpg"
+              aria-label="AquaTwin: the one-minute film"
+            >
+              <source src="/media/aquatwin-film.mp4" type="video/mp4" />
+              <track kind="captions" src="/media/aquatwin-film.vtt" srcLang="en" label="English (also burned in)" />
+            </video>
+            <p className="text-[12px] text-fg-subtle">
+              The prototype in 60 seconds, recorded from this application running on the simulated plant; every result shown is simulated. By{" "}
+              <a href={TEAM_URL} target="_blank" rel="noopener noreferrer" className="text-fg-muted underline decoration-line-bright underline-offset-2 hover:decoration-accent">
+                {TEAM_NAME}
+              </a>
+              . Voice: Kokoro-82M. Music: “Happy Beats / Business Moves Vol. 12” by ende.app. Sound effects: Kenney (CC0).
+            </p>
+          </Block>
+
           <Block title="Methods and data sources" reveal="panel2">
             <ul className="divide-y divide-line">
               {METHODS.map((m) => (

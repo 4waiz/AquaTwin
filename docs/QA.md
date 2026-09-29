@@ -13,6 +13,7 @@ Status of the checks run on the release build (30 September 2026). Scripts are i
 | Phone and tablet | 11 pages on an emulated touch phone (390×844, 3×) and tablet (820×1180, 2×) | no horizontal overflow, 0 console errors |
 | Rendering | Frame rate, production build, 1920×1080 (below) | RTX 5080 Laptop ≈ 235 fps; Intel integrated graphics 55–80 fps |
 | Deployment | Live site over HTTPS (below) | all routes 200, valid TLS, 0 console errors |
+| Film | `hyperframes check`; file and loudness checks (below) | 0 errors, 0 warnings, 8/8 WCAG AA; 59.5 s, 1080p30, −16 LUFS |
 
 ## 1. Unit tests
 
@@ -67,7 +68,16 @@ The static export (`out/`) is served by Cloudflare Workers static assets (`wrang
 - `X-Content-Type-Options`, `Referrer-Policy` and `X-Frame-Options` headers are set;
 - the live pages load with 0 console errors.
 
-## 6. Not covered
+## 6. Film
+
+- `npx hyperframes check` on the composition: lint, runtime, layout and motion 0 errors / 0 warnings; 8 of 8 text elements pass WCAG AA contrast.
+- Render: H.264 1920×1080 at 30 fps, 1,785 frames (59.5 s; the container reports 59.6 s because of AAC padding), stereo AAC. Frame 0 is the poster frame.
+- Audio: integrated loudness −16.0 LUFS, peak −1.3 dBFS; narration sits about 10 dB above the music bed.
+- Content: every shot is the real application recorded from the production build; cuts are placed from logged event times, and each narration claim was checked against the footage (for example, the Scenario Lab shows the no-action branch breaking the quality limit first at +2.8 h and the AquaTwin branch holding every constraint for 24 h).
+- Captions: burned in, plus `video/captions.srt`; the web copy on the About page carries the same captions as an optional WebVTT track (off by default, to avoid doubling the burned-in ones).
+- Web delivery: the About-page copy (11 MB, below the 25 MiB static-asset limit) is served with byte ranges by `worker/index.ts`; checked live for 206 partial responses, suffix ranges and 416 for unsatisfiable ranges.
+
+## 7. Not covered
 
 - Browsers other than Chrome/Chromium (Safari, Firefox) and physical phones and tablets. Mobile layouts were checked with Chrome's device emulation.
 - Screen-reader accessibility beyond semantic HTML, labelled controls and keyboard focus styles.

@@ -1,0 +1,61 @@
+{
+  "intro": {
+    "frames": 616,
+    "seconds": 8.77,
+    "capture_fps": 70.2,
+    "marks": {
+      "initializing": 2.748,
+      "done": 6.058
+    }
+  },
+  "twin": {
+    "frames": 1244,
+    "seconds": 13.12,
+    "capture_fps": 94.7,
+    "marks": {
+      "orbit_start": 1.652,
+      "orbit_end": 4.954,
+      "equation": 7.029,
+      "cleaning": 10.412
+    }
+  },
+  "scenario": {
+    "frames": 1428,
+    "seconds": 15.78,
+    "capture_fps": 90.4,
+    "marks": {
+      "noaction": 2.623,
+      "play": 5.027,
+      "violation": 7.006,
+      "pause": 9.576,
+      "aquatwin": 12.66,
+      "resolved": 12.674
+    }
+  },
+  "optimization": {
+    "frames": 1064,
+    "seconds": 10.98,
+    "capture_fps": 96.8,
+    "marks": {
+      "ring": 2.539,
+      "banner": 8.471
+    }
+  },
+  "withheld": {
+    "frames": 1043,
+    "seconds": 11.97,
+    "capture_fps": 87.0,
+    "marks": {
+      "extreme": 2.907,
+      "withheld": 5.957
+    }
+  },
+  "validation": {
+    "frames": 776,
+    "seconds": 8.03,
+    "capture_fps": 96.5,
+    "marks": {
+      "outside": 3.131
+    }
+  }
+}

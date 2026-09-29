@@ -6,7 +6,7 @@ Built by [Team Kanban](https://kanbanstudios.ae/team-kanban) for the Khalifa Uni
 
 AquaTwin watches a seawater reverse-osmosis (SWRO) plant through the signals it already records, keeps a reduced-order physical model calibrated to it in real time, corrects that model with a machine-learning residual, forecasts membrane fouling and the effect of disturbances, and recommends operating strategies — but only after a deterministic safety layer, **AquaGuard**, has checked every limit at the edge of the model's uncertainty. When the plant leaves the conditions the model knows, AquaTwin says so and withholds its recommendation.
 
-**Live:** [aquatwin.kanbanstudios.ae](https://aquatwin.kanbanstudios.ae) — runs entirely in the browser; best on a desktop with a dedicated GPU, and usable on phones and tablets.
+**Live:** [aquatwin.kanbanstudios.ae](https://aquatwin.kanbanstudios.ae) — runs entirely in the browser; best on a desktop with a dedicated GPU, and usable on phones and tablets. **One-minute film:** [`video/brag.mp4`](video/brag.mp4), also on the app's About page.
 
 > **Status: research prototype on a simulated plant.** The "plant" is a higher-fidelity reference simulator that stands in for a real facility, so that every claim can be tested against known ground truth. Nothing here has been validated on an industrial plant, and no organisation has endorsed it. Every number in the interface is labelled *simulated*, *modeled*, *estimated* or *external reference*.
 
@@ -44,7 +44,7 @@ npm run build
 npm run start
 ```
 
-Deployment: the static export is served by Cloudflare Workers static assets (`wrangler.jsonc`); `npm run deploy` builds and deploys it (requires access to the Cloudflare account).
+Deployment: the static export is served by Cloudflare Workers static assets (`wrangler.jsonc`), with a small Worker (`worker/index.ts`) that answers byte-range requests for `/media/*` so the film plays on iOS; `npm run deploy` builds and deploys it (requires access to the Cloudflare account).
 
 The trained model (`public/data/models/`) and the experiment results (`public/data/validation/`) are committed, so the app runs without Python.
 
@@ -90,6 +90,7 @@ All steps are deterministic (fixed seeds, no early stopping); rerunning the pipe
 - [docs/REFERENCES.md](docs/REFERENCES.md) — sources, with what was and was not verified
 - [docs/QA.md](docs/QA.md) — quality-assurance report
 - [report/](report/) — final report (PDF and editable source)
+- [video/](video/) — the one-minute film, captions, script and its Hyperframes source
 
 ## Technology
 

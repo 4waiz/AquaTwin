@@ -108,6 +108,10 @@ The hidden performance panel (Ctrl+Shift+P) reports whether a WebGPU adapter is 
 
 Ctrl+Shift+P toggles a small panel (not part of the judge-facing interface): FPS, CPU frame time, GPU time (timer query, where available), draw calls, triangles, points, textures, geometries, shader programs, JS heap, particle count, backend, WebGPU availability, canvas size and pixel ratio, quality tier.
 
+### Deployment
+
+`npm run build` produces a static export (`out/`). Cloudflare Workers static assets serve it at aquatwin.kanbanstudios.ae (`wrangler.jsonc`). Only `/media/*` is routed through a Worker (`worker/index.ts`, `assets.run_worker_first`), which answers HTTP byte-range requests so the film plays in Safari on iOS; every other request is a plain static-asset response.
+
 ## 5. Path to a real plant
 
 AquaTwin's inputs are the signals every SWRO plant already records (feed pressure and flow, permeate flow and conductivity, vessel ΔP, pump power, feed salinity/conductivity and temperature, turbidity). A deployment would replace `live.worker`'s reference plant with a historian or OPC UA/SCADA adapter and keep everything else:

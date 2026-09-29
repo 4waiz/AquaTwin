@@ -63,20 +63,12 @@ AquaTwin: a physics-informed digital twin for seawater desalination that rehears
 - Audio-coupled moments: branch switch click; violation chip; withheld banner; end-card title.
 - Restraint rule: no whooshes, no risers, no cue louder than the voice; nothing on every beat.
 
-## Voiceover script (Kokoro, af_heart, calm)
-Separate lines so each scene can be timed to its line:
-
-1. "Gulf desalination plants run on fixed setpoints and fixed alarms. By the time an alarm fires, the plant is already reacting."
-2. "AquaTwin keeps a physical model of every reverse-osmosis train calibrated to live data, and corrects it with machine learning. Right now it's telling us Train 2 is due for cleaning."
-3. "Before a salinity shock arrives, it simulates the next day. Doing nothing breaks the water-quality limit within three hours. AquaTwin's plan holds every constraint."
-4. "It searches six hundred and seventy-six operating strategies, and a safety layer, AquaGuard, checks every limit at the edge of the model's uncertainty."
-5. "And when conditions go beyond what the model has learned, it says so — and withholds its advice."
-6. "Every result is simulated, tested against a hidden plant, and reproducible — including where it doesn't help."
-7. "AquaTwin. Predict, simulate, adapt — before the plant is forced to react."
-
-Facts checked against the app and `docs/VALIDATION.md`: 676 candidates; no-action first violation at +2.7 h; Train 2 pressure-drop criterion met; compound extreme withheld at 35 % confidence.
+## Voiceover script (Kokoro, af_heart, speed 1.05)
+The final lines, with their positions in the video, are in `video/voiceover.md`. Facts checked against the app and `docs/VALIDATION.md`: 676 candidates; in the Scenario Lab the no-action branch first breaks the quality limit at +2.8 h and the AquaTwin branch holds every constraint for 24 h (recorded at a night start, after the unscheduled re-plan was added — see docs/VALIDATION.md §3.8); Train 2 meets the pressure-drop cleaning criterion; the compound extreme is withheld at 35 % confidence.
 
 ## Storyboard
+Planned beats below; the timings as built are in `video/composition-brief.md` and `video/composition/timing.json`.
+
 
 ### Scene 1 — The problem — ~6.5 s (VO 1)
 Near-black frame; the first frame of the real intro (dark, dry plant) sits behind, dimmed. Line 1 fades up, then line 2 beneath it. Small top label: "SWRO desalination · Arabian Gulf".

@@ -8,7 +8,7 @@ visible cursor is injected into the page (headless Chrome draws none) so
 viewers can follow the simulated clicks.
 
 Usage:
-  python video/tools/record_footage.py --base http://localhost:3200 --out video/footage [--clips intro twin ...]
+  python video/tools/record_footage.py --base http://localhost:3200 --out video/composition/assets/footage [--clips intro twin ...]
 """
 
 from __future__ import annotations
@@ -272,7 +272,7 @@ def clip_validation(page: Page, base: str, rec: Screencast):
     page.wait_for_timeout(1000)
     click_at(page, center(page, "role=tab[name='Outside envelope']"), 900)
     rec.mark("outside")
-    page.wait_for_timeout(3200)
+    page.wait_for_timeout(4800)
     rec.stop()
 
 
@@ -289,7 +289,7 @@ CLIPS = {
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://localhost:3200")
-    ap.add_argument("--out", default="video/footage")
+    ap.add_argument("--out", default="video/composition/assets/footage")
     ap.add_argument("--clips", nargs="+", default=list(CLIPS))
     ap.add_argument("--integrated-gpu", action="store_true", help="do not request the high-performance GPU")
     a = ap.parse_args()
@@ -298,7 +298,9 @@ def main() -> int:
     flags = ["--use-angle=d3d11", "--enable-gpu", "--ignore-gpu-blocklist", "--enable-gpu-rasterization", f"--window-size={W},{H}", "--hide-scrollbars"]
     if not a.integrated_gpu:
         flags.append("--force_high_performance_gpu")
-    report = {}
+    meta_path = out / "footage.json"
+    # Keep the metadata of clips that are not re-recorded in this run.
+    report = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     with sync_playwright() as p:
         b = p.chromium.launch(channel="chrome", headless=True, args=flags)
         for name in a.clips:
@@ -316,7 +318,7 @@ def main() -> int:
             print(f"{name}: {info}")
             ctx.close()
         b.close()
-    (out / "footage.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    meta_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     return 0
 
 

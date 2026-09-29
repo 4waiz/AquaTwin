@@ -1,0 +1,69 @@
+WEBVTT
+
+1
+00:00:00.550 --> 00:00:04.716
+Gulf desalination plants run on fixed setpoints and fixed alarms.
+
+2
+00:00:05.150 --> 00:00:08.670
+By the time an alarm fires, the plant is already reacting.
+
+3
+00:00:09.300 --> 00:00:14.448
+AquaTwin keeps a physics model of each reverse-osmosis train calibrated to live data,
+
+4
+00:00:14.731 --> 00:00:16.551
+and corrects it with machine learning.
+
+5
+00:00:17.022 --> 00:00:19.852
+Train 2, it tells us, is due for cleaning.
+
+6
+00:00:20.500 --> 00:00:24.107
+Before a salinity shock arrives, it simulates the next day.
+
+7
+00:00:24.486 --> 00:00:27.677
+Doing nothing breaks the water-quality limit within three hours.
+
+8
+00:00:28.053 --> 00:00:30.561
+AquaTwin's plan holds every constraint.
+
+9
+00:00:31.150 --> 00:00:33.934
+It weighs 676 strategies,
+
+10
+00:00:34.254 --> 00:00:36.209
+and a safety layer, AquaGuard,
+
+11
+00:00:36.426 --> 00:00:39.398
+checks every limit at the edge of the model's uncertainty.
+
+12
+00:00:39.950 --> 00:00:42.762
+And when conditions go beyond what the model has learned,
+
+13
+00:00:42.956 --> 00:00:45.403
+it says so, and withholds its advice.
+
+14
+00:00:45.950 --> 00:00:49.376
+Every result is simulated, tested against a hidden plant,
+
+15
+00:00:49.525 --> 00:00:52.257
+and reproducible, including where it doesn't help.
+
+16
+00:00:53.100 --> 00:00:55.923
+AquaTwin. Predict, simulate, adapt,
+
+17
+00:00:56.006 --> 00:00:57.785
+before the plant is forced to react.
