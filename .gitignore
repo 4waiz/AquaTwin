@@ -60,3 +60,6 @@ video/footage/_work_*/
 qa-output/
 docs/qa/
 docs/screenshots/qa/
+
+# third-party music (see video/composition/assets/music/README.md)
+video/composition/assets/music/*.mp3
