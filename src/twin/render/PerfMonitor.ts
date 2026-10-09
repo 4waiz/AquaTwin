@@ -2,6 +2,8 @@
  * Frame statistics for the hidden developer panel (Ctrl+Shift+P): FPS, CPU
  * frame time, GPU time (EXT_disjoint_timer_query_webgl2 where the browser
  * exposes it), draw calls, triangles, textures, geometries and JS heap.
+ * The recent per-frame GPU and CPU costs of busy frames (the view moving)
+ * also drive the quality governor.
  */
 import type * as THREE from "three";
 
@@ -29,6 +31,13 @@ interface TimerExt {
   GPU_DISJOINT_EXT: number;
 }
 
+const RECENT = 40;
+
+function median(xs: number[]) {
+  const s = [...xs].sort((a, b) => a - b);
+  return s[s.length >> 1];
+}
+
 export class PerfMonitor {
   private frames = 0;
   private acc = 0;
@@ -40,15 +49,23 @@ export class PerfMonitor {
   private gpuN = 0;
   private gl: WebGL2RenderingContext;
   private ext: TimerExt | null;
-  private pending: WebGLQuery[] = [];
+  private pending: { q: WebGLQuery; busy: boolean }[] = [];
   private active: WebGLQuery | null = null;
+  private probed = false;
   webgpuAvailable: boolean | null = null;
+  private gpuRecent: number[] = [];
+  private cpuRecent: number[] = [];
 
   constructor(private renderer: THREE.WebGLRenderer) {
     this.gl = renderer.getContext() as WebGL2RenderingContext;
     this.ext = this.gl.getExtension("EXT_disjoint_timer_query_webgl2") as TimerExt | null;
-    const nav = typeof navigator !== "undefined" ? (navigator as Navigator & { gpu?: { requestAdapter: () => Promise<unknown> } }) : null;
-    if (nav?.gpu) {
+  }
+
+  /** Asking for a WebGPU adapter starts a second GPU device, so only do it when someone looks. */
+  private probeWebGpu() {
+    this.probed = true;
+    const nav = navigator as Navigator & { gpu?: { requestAdapter: () => Promise<unknown> } };
+    if (nav.gpu) {
       nav.gpu
         .requestAdapter()
         .then((a) => (this.webgpuAvailable = !!a))
@@ -64,27 +81,57 @@ export class PerfMonitor {
     this.active = q;
   }
 
-  endGpu() {
+  /**
+   * `busy`: the frame was rendered while the view moves. Only those frames inform the governor:
+   * a still view renders 30 frames a second, and a GPU that idles between frames clocks itself
+   * down, so its per-frame time reads high without saying anything about capacity.
+   */
+  endGpu(busy: boolean) {
     if (!this.ext || !this.active) return;
     this.gl.endQuery(this.ext.TIME_ELAPSED_EXT);
-    this.pending.push(this.active);
+    this.pending.push({ q: this.active, busy });
     this.active = null;
     // Collect finished queries.
     while (this.pending.length) {
-      const q = this.pending[0];
+      const { q, busy: wasBusy } = this.pending[0];
       const available = this.gl.getQueryParameter(q, this.gl.QUERY_RESULT_AVAILABLE);
       const disjoint = this.gl.getParameter(this.ext.GPU_DISJOINT_EXT);
       if (!available) break;
       if (!disjoint) {
-        this.gpuAcc += this.gl.getQueryParameter(q, this.gl.QUERY_RESULT) / 1e6;
+        const ms = this.gl.getQueryParameter(q, this.gl.QUERY_RESULT) / 1e6;
+        this.gpuAcc += ms;
         this.gpuN++;
+        if (wasBusy) {
+          this.gpuRecent.push(ms);
+          if (this.gpuRecent.length > RECENT) this.gpuRecent.shift();
+        }
       }
       this.gl.deleteQuery(q);
       this.pending.shift();
     }
   }
 
-  frame(dtSeconds: number, cpuMs: number) {
+  /**
+   * Typical cost of one busy frame (ms): the larger of the median GPU time and the median CPU
+   * time of the loop over the last busy frames. Medians ignore one-off spikes (shader compiles,
+   * uploads). Null without the timer extension or before enough frames are measured.
+   */
+  frameCost(): number | null {
+    if (!this.ext || this.gpuRecent.length < RECENT / 2) return null;
+    return Math.max(median(this.gpuRecent), median(this.cpuRecent));
+  }
+
+  /** Forget recent costs (after a quality change they describe the old settings). */
+  resetCost() {
+    this.gpuRecent.length = 0;
+    this.cpuRecent.length = 0;
+  }
+
+  frame(dtSeconds: number, cpuMs: number, busy: boolean) {
+    if (busy) {
+      this.cpuRecent.push(cpuMs);
+      if (this.cpuRecent.length > RECENT) this.cpuRecent.shift();
+    }
     this.frames++;
     this.acc += dtSeconds;
     this.cpuAcc += cpuMs;
@@ -101,6 +148,7 @@ export class PerfMonitor {
   }
 
   stats(particles: number, size: string, quality: string): PerfStats {
+    if (!this.probed) this.probeWebGpu();
     const info = this.renderer.info;
     const perf = performance as Performance & { memory?: { usedJSHeapSize: number } };
     return {

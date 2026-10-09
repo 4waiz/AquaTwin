@@ -47,6 +47,8 @@ export class CameraRig {
   private spherical = new THREE.Spherical();
   private probe = new THREE.PerspectiveCamera();
   private fitCache = new Map<string, Pose>();
+  private dragging = false;
+  private lastChange = -Infinity;
 
   constructor(
     private camera: THREE.PerspectiveCamera,
@@ -62,7 +64,27 @@ export class CameraRig {
     c.minPolarAngle = 0.55;
     // Low enough to look across the site to the horizon, never under the ground.
     c.maxPolarAngle = 1.36;
+    c.addEventListener("start", this.onStart);
+    c.addEventListener("end", this.onEnd);
+    c.addEventListener("change", this.onChange);
     this.applyPose(this.defaultPose(), true);
+  }
+
+  private onStart = () => {
+    this.dragging = true;
+    this.lastChange = performance.now();
+  };
+  private onEnd = () => {
+    this.dragging = false;
+    this.lastChange = performance.now();
+  };
+  private onChange = () => {
+    this.lastChange = performance.now();
+  };
+
+  /** True while the user drags or zooms, the view eases to a new pose, or the orbit is still gliding to rest. */
+  get moving() {
+    return this.dragging || this.anim !== null || performance.now() - this.lastChange < 150;
   }
 
   setAspect(aspect: number) {
@@ -225,6 +247,9 @@ export class CameraRig {
   }
 
   dispose() {
+    this.controls.removeEventListener("start", this.onStart);
+    this.controls.removeEventListener("end", this.onEnd);
+    this.controls.removeEventListener("change", this.onChange);
     this.controls.dispose();
   }
 }

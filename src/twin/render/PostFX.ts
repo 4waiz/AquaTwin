@@ -1,6 +1,6 @@
 /**
  * Restrained post-processing stack (WebGL2):
- *   Render (MSAA 4×, half-float HDR) → GTAO (contact shadows / depth)
+ *   Render (MSAA 4×, half-float HDR) → GTAO (contact shadows / depth, half resolution)
  *   → Bloom (only bright emissive indicators exceed the threshold)
  *   → Depth of field (intro only) → Output (ACES tone map, sRGB)
  *   → Grade (near-imperceptible vignette, cool lift, dither against banding)
@@ -53,6 +53,9 @@ export class PostFX {
   bloom: UnrealBloomPass;
   bokeh: BokehPass;
   grade: ShaderPass;
+  /** Set by the engine each frame: the view is still, so cached occlusion may be reused. */
+  aoStill = false;
+  private aoAge = Infinity;
   private renderPass: RenderPass;
 
   constructor(
@@ -64,6 +67,8 @@ export class PostFX {
   ) {
     const rt = new THREE.WebGLRenderTarget(width, height, { type: THREE.HalfFloatType, samples: 4 });
     this.composer = new EffectComposer(renderer, rt);
+    // Sizes are passed in device pixels already; the composer must not apply the pixel ratio again.
+    this.composer.setPixelRatio(1);
     this.renderPass = new RenderPass(scene, camera);
     this.composer.addPass(this.renderPass);
 
@@ -84,6 +89,25 @@ export class PostFX {
         }
       });
     };
+    // While the view is still, occlusion hardly changes: recompute it four times a second and
+    // otherwise only composite the cached result (skips a G-buffer render and two passes).
+    const gtao = this.gtao;
+    const fullRender = gtao.render.bind(gtao);
+    const pass = gtao as unknown as { _renderPass: (r: THREE.WebGLRenderer, m: THREE.Material, t: THREE.WebGLRenderTarget | null) => void };
+    gtao.render = (r, writeBuffer, readBuffer, deltaTime, maskActive) => {
+      if (!this.aoStill || this.aoAge >= 0.25) {
+        this.aoAge = 0;
+        fullRender(r, writeBuffer, readBuffer, deltaTime, maskActive);
+        return;
+      }
+      const target = gtao.renderToScreen ? null : writeBuffer;
+      gtao.copyMaterial.uniforms.tDiffuse.value = readBuffer.texture;
+      gtao.copyMaterial.blending = THREE.NoBlending;
+      pass._renderPass(r, gtao.copyMaterial, target);
+      gtao.blendMaterial.uniforms.intensity.value = gtao.blendIntensity;
+      gtao.blendMaterial.uniforms.tDiffuse.value = gtao.pdRenderTarget.texture;
+      pass._renderPass(r, gtao.blendMaterial, target);
+    };
     this.composer.addPass(this.gtao);
 
     this.bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.3, 0.5, 1.25);
@@ -100,10 +124,13 @@ export class PostFX {
 
   setSize(w: number, h: number) {
     this.composer.setSize(w, h);
-    this.gtao.setSize(w, h);
+    // Ambient occlusion is soft by nature: half resolution costs a quarter and looks the same once denoised.
+    this.gtao.setSize(Math.max(2, Math.round(w / 2)), Math.max(2, Math.round(h / 2)));
+    this.aoAge = Infinity;
   }
 
   render(dt: number, time: number) {
+    this.aoAge = this.gtao.enabled ? this.aoAge + dt : Infinity;
     this.grade.uniforms.uTime.value = time % 100;
     this.composer.render(dt);
   }

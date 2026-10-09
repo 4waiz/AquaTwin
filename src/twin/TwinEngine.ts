@@ -11,6 +11,11 @@
  * sky and image-based light, a low late-afternoon sun with a tightly fitted
  * shadow map, terrain and seabed, an animated sea with planar reflections,
  * and the surrounding site (roads, fence, rock armour, buildings, palms).
+ *
+ * Cost control: the starting quality tier follows the GPU class, a governor
+ * steps down when frames are slow, the shadow map (fixed sun, fixed plant) is
+ * refreshed ten times a second rather than every frame, and while nothing
+ * moves the view the loop paces itself to 30 frames a second.
  */
 import * as THREE from "three";
 import type { AssetId } from "@/sim/scenarios";
@@ -19,6 +24,7 @@ import { IntroController, type IntroCallbacks, type IntroFrame } from "./intro/I
 import { WaterPour } from "./intro/WaterPour";
 import { PerfMonitor, type PerfStats } from "./render/PerfMonitor";
 import { PostFX } from "./render/PostFX";
+import { classifyGpu, gpuRenderer, startingTier, type GpuClass } from "./render/gpuTier";
 import { Atmosphere, FOG_DENSITY, SUN_COLOR, SUN_DIR } from "./render/Atmosphere";
 import { FlowParticles } from "./scene/FlowParticles";
 import { ASSETS, ASSET_BY_ID, pipeDefs, POUR_TARGET, SEA_LEVEL } from "./scene/layout";
@@ -55,6 +61,13 @@ const TONE_COLOR: Record<Tone, THREE.Color> = {
 const BASE_EXPOSURE = 0.92;
 const BASE_KEY = 3.0;
 const BASE_ENV = 1.0;
+
+/** Minimum frame interval while the view is still (30 fps on 60 / 120 / 144 Hz displays, 37.5 on 75 Hz). */
+const IDLE_FRAME = 0.026;
+/** Shadow map refresh interval once the intro has finished. */
+const SHADOW_INTERVAL = 0.1;
+/** Sea reflection refresh interval while the view is still (every frame while it moves). */
+const REFLECTION_INTERVAL = 0.1;
 
 /** Objects on this layer are rendered by the main camera but skipped by the sea's reflection pass. */
 export const LAYER_NO_REFLECT = 1;
@@ -108,10 +121,19 @@ export class TwinEngine {
   // Quality governor: steps down (never up) when frames are persistently slow.
   private tier: QualityTier = 2;
   private tierForced = false;
+  private resScale = 1;
+  private gpu: GpuClass = "unknown";
   private settle = 0;
-  private emaDt = 1 / 60;
+  private idleDt = 1 / 30;
+  private moveDt = 1 / 60;
+  private movingFor = 0;
   private slowFor = 0;
   private cooldown = 0;
+  private shadowAge = 0;
+  private shadowDirty = true;
+  private reflectionAge = Infinity;
+  private anchors: AnchorScreen[] = ASSETS.map((d) => ({ id: d.id, x: 0, y: 0, visible: false }));
+  private anchorAt = -Infinity;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -125,7 +147,7 @@ export class TwinEngine {
       stencil: false,
     });
     const r = this.renderer;
-    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     r.toneMapping = THREE.AgXToneMapping;
     r.toneMappingExposure = BASE_EXPOSURE;
     r.outputColorSpace = THREE.SRGBColorSpace;
@@ -133,6 +155,8 @@ export class TwinEngine {
     // r186: PCF samples a Vogel disk scaled by shadow.radius (soft). PCFSoft was removed;
     // it must be set explicitly *before* programs are compiled.
     r.shadowMap.type = THREE.PCFShadowMap;
+    // Refreshed on demand from the frame loop (see SHADOW_INTERVAL).
+    r.shadowMap.autoUpdate = false;
     r.info.autoReset = false;
     r.setClearColor(new THREE.Color("#0b1220"), 1);
     this.camera.layers.enable(LAYER_NO_REFLECT);
@@ -150,12 +174,12 @@ export class TwinEngine {
     // --- sun (the only direct light; the sky fills through the environment)
     this.key = new THREE.DirectionalLight(SUN_COLOR.clone(), BASE_KEY);
     this.key.castShadow = true;
-    this.key.shadow.mapSize.set(4096, 4096);
+    this.key.shadow.mapSize.set(2048, 2048);
     // Low sun: horizontal surfaces meet the light at a grazing angle, so the
     // normal offset must cover a shadow texel × tan(67°) to avoid acne.
     this.key.shadow.bias = -0.0004;
     this.key.shadow.normalBias = 0.09;
-    this.key.shadow.radius = 2.5;
+    this.key.shadow.radius = 2;
     this.fitShadow();
     this.scene.add(this.key, this.key.target);
 
@@ -257,6 +281,7 @@ export class TwinEngine {
     this.rig.applyIntro(0);
     await this.renderer.compileAsync(this.scene, this.camera);
     this.applyFrame(this.intro.frame(), 0);
+    this.renderer.shadowMap.needsUpdate = true;
     this.post.render(0, 0);
   }
 
@@ -308,6 +333,7 @@ export class TwinEngine {
     this.ocean.setSize(w * pr, h * pr);
     this.particles.setPixelRatio(pr);
     this.pour.setPixelRatio(pr);
+    this.reflectionAge = Infinity;
     this.rig.setAspect(w / h);
     if (!this.rig.animating && !this.intro.running) this.rig.setPreset(this.rig.preset, false);
   }
@@ -349,8 +375,14 @@ export class TwinEngine {
     return this.perf.stats(
       this.particles.count + this.pour.particleCount,
       `${this.width}×${this.height}`,
-      `${TIER_NAME[this.tier]} (${this.tierForced ? "forced" : "auto"})`,
+      `${TIER_NAME[this.tier]}${this.resScale < 1 ? " (80% res)" : ""}, ${this.tierForced ? "forced" : `auto, ${this.gpu} GPU`}`,
     );
+  }
+
+  /** Pick the starting tier from the GPU the browser reports; the governor can still step down. */
+  autoQuality(coarsePointer: boolean) {
+    this.gpu = classifyGpu(gpuRenderer(this.renderer.getContext()));
+    this.setQuality(startingTier(this.gpu, coarsePointer), false);
   }
 
   /** Set the rendering quality tier; `forced` disables the automatic governor. */
@@ -358,39 +390,79 @@ export class TwinEngine {
     this.tierForced = forced;
     if (tier === this.tier) return;
     this.tier = tier;
-    const dpr = window.devicePixelRatio || 1;
     this.post.gtao.enabled = tier === 2;
     this.post.bloom.enabled = tier > 0;
-    const shadow = tier === 2 ? 4096 : tier === 1 ? 2048 : 1024;
+    const shadow = tier === 0 ? 1024 : 2048;
     if (this.key.shadow.mapSize.x !== shadow) {
       this.key.shadow.mapSize.set(shadow, shadow);
-      this.key.shadow.radius = tier === 2 ? 2.5 : tier === 1 ? 2 : 1;
       this.key.shadow.map?.dispose();
       this.key.shadow.map = null;
     }
+    this.key.shadow.radius = tier === 2 ? 2 : tier === 1 ? 1.6 : 1;
+    this.shadowDirty = true;
     this.ocean.setQuality(tier);
     this.optics.uDetail.value = tier === 0 ? 0 : 1;
     this.context.setQuality(tier);
-    this.renderer.setPixelRatio(tier === 2 ? Math.min(dpr, 2) : tier === 1 ? Math.min(dpr, 1.5) : Math.min(dpr, 1) * 0.85);
+    this.applyPixelRatio();
+  }
+
+  private applyPixelRatio() {
+    const dpr = window.devicePixelRatio || 1;
+    const t = this.tier;
+    const base = t === 2 ? Math.min(dpr, 1.5) : t === 1 ? Math.min(dpr, 1.25) : Math.min(dpr, 1) * 0.85;
+    this.renderer.setPixelRatio(Math.max(0.5, base * this.resScale));
     this.applySize();
   }
 
-  private governQuality(dt: number) {
-    if (this.tierForced || this.tier === 0 || this.intro.running || dt >= 0.1) return;
+  /**
+   * Quality governor. `dt` is the real interval since the previous rendered frame; `paced`
+   * says whether the loop is holding to 30 fps because the view is still.
+   *
+   * Lag is felt while the view moves, so that is when it judges: by the measured cost of our
+   * own frames (median GPU time, and CPU time of the loop) where the browser has GPU timers,
+   * since long intervals caused by other work on the page (React updates, data arriving) are
+   * not something lower 3D quality would fix; otherwise by the frame interval. A still view
+   * only steps down if it cannot even hold ~15 fps.
+   */
+  private governQuality(dt: number, paced: boolean) {
+    if (this.tierForced || this.tier === 0 || this.intro.running) return;
+    // A long gap is a stall (tab switch, page load, garbage collection), not rendering cost.
+    if (dt > 0.5) return;
+    // Page loads and resizes bring a burst of one-off work: give them a few seconds.
     this.settle += dt;
-    if (this.settle < 2) return;
-    this.emaDt += (dt - this.emaDt) * 0.05;
+    if (this.settle < 4) return;
+    let slow: boolean;
+    if (paced) {
+      this.idleDt += (dt - this.idleDt) * 0.1;
+      slow = this.idleDt > 1 / 15;
+    } else {
+      this.moveDt += (dt - this.moveDt) * 0.1;
+      const cost = this.perf.frameCost();
+      // 20 ms of our own work per frame caps the view near 50 fps: time to drop a notch.
+      slow = cost !== null ? cost > 20 : this.moveDt > 1 / 40;
+    }
     if (this.cooldown > 0) {
       this.cooldown -= dt;
       return;
     }
-    this.slowFor = this.emaDt > 1 / 45 ? this.slowFor + dt : Math.max(0, this.slowFor - dt);
-    if (this.slowFor > 2.5) {
-      this.setQuality((this.tier - 1) as QualityTier, false);
+    this.slowFor = slow ? this.slowFor + dt : Math.max(0, this.slowFor - dt * 0.5);
+    if (this.slowFor > 1.2) {
+      this.stepDown();
       this.slowFor = 0;
-      this.cooldown = 3;
-      this.emaDt = 1 / 60;
+      this.cooldown = 2;
+      this.idleDt = 1 / 30;
+      this.moveDt = 1 / 60;
+      this.perf.resetCost();
     }
+  }
+
+  /** One notch cheaper: high, then medium, then medium at 80% resolution, then low. */
+  private stepDown() {
+    if (this.tier === 2) this.setQuality(1, false);
+    else if (this.resScale > 0.8) {
+      this.resScale = 0.8;
+      this.applyPixelRatio();
+    } else this.setQuality(0, false);
   }
 
   dispose() {
@@ -473,21 +545,42 @@ export class TwinEngine {
     if (!this.active || this.disposed) return;
     this.raf = requestAnimationFrame(this.loop);
     const t0 = performance.now();
-    const dt = Math.min((t0 - this.lastFrame) / 1000, 0.1);
+    const elapsed = (t0 - this.lastFrame) / 1000;
+    // While nothing moves the view the sea and the flows still animate, but 30 frames a
+    // second is plenty: it halves the GPU load and leaves headroom for the interface.
+    const paced = !this.intro.running && !this.rig.moving;
+    if (paced && elapsed < IDLE_FRAME) return;
     this.lastFrame = t0;
+    const dt = Math.min(elapsed, 0.1);
     this.time += dt;
     const frame = this.intro.update(dt);
     if (this.intro.running) this.rig.applyIntro(frame.camera);
     else this.rig.update(dt);
     this.applyFrame(frame, dt);
+    // The sun and the plant are fixed; only the slow clarifier bridges move their shadows.
+    this.shadowAge += dt;
+    if (this.shadowDirty || this.intro.running || this.shadowAge >= SHADOW_INTERVAL) {
+      this.renderer.shadowMap.needsUpdate = true;
+      this.shadowDirty = false;
+      this.shadowAge = 0;
+    }
     this.renderer.info.reset();
     this.perf.beginGpu();
-    if (this.ocean.planar) this.ocean.reflection.update(this.renderer, this.scene, this.camera, this.reflectHide);
+    // A still camera sees the same reflection (the sea itself is not in it): refresh it at 10 Hz.
+    this.reflectionAge += dt;
+    if (this.ocean.planar && (!paced || this.reflectionAge >= REFLECTION_INTERVAL)) {
+      this.ocean.reflection.update(this.renderer, this.scene, this.camera, this.reflectHide);
+      this.reflectionAge = 0;
+    }
+    this.post.aoStill = paced;
     this.post.render(dt, this.time);
-    this.perf.endGpu();
-    this.perf.frame(dt, performance.now() - t0);
-    this.governQuality(dt);
-    this.emitAnchors();
+    // Frames count as busy once the view has been moving for a moment (the GPU clocks back up).
+    this.movingFor = paced ? 0 : this.movingFor + dt;
+    const busy = this.movingFor > 0.25;
+    this.perf.endGpu(busy);
+    this.perf.frame(dt, performance.now() - t0, busy);
+    this.governQuality(elapsed, paced);
+    this.emitAnchors(t0);
   };
 
   private applyFrame(frame: IntroFrame, dt: number) {
@@ -652,15 +745,23 @@ export class TwinEngine {
     }
   }
 
-  private emitAnchors() {
+  /** Screen positions for the callouts: sent when they move, plus a refresh twice a second. */
+  private emitAnchors(now: number) {
     if (!this.cb.onAnchors) return;
-    const out: AnchorScreen[] = [];
-    for (const def of ASSETS) {
-      this.anchorTmp.copy(def.anchor).project(this.camera);
-      const visible = this.anchorTmp.z < 1 && Math.abs(this.anchorTmp.x) < 1.05 && Math.abs(this.anchorTmp.y) < 1.05;
-      out.push({ id: def.id, x: (this.anchorTmp.x * 0.5 + 0.5) * this.width, y: (-this.anchorTmp.y * 0.5 + 0.5) * this.height, visible });
-    }
-    this.cb.onAnchors(out);
+    let changed = now - this.anchorAt > 500;
+    const next = ASSETS.map((def, i) => {
+      const p = this.anchorTmp.copy(def.anchor).project(this.camera);
+      const visible = p.z < 1 && Math.abs(p.x) < 1.05 && Math.abs(p.y) < 1.05;
+      const x = (p.x * 0.5 + 0.5) * this.width;
+      const y = (-p.y * 0.5 + 0.5) * this.height;
+      const o = this.anchors[i];
+      if (visible !== o.visible || Math.abs(x - o.x) > 0.05 || Math.abs(y - o.y) > 0.05) changed = true;
+      return { x, y, visible };
+    });
+    if (!changed) return;
+    next.forEach((n, i) => Object.assign(this.anchors[i], n));
+    this.anchorAt = now;
+    this.cb.onAnchors(this.anchors);
   }
 }
 

@@ -1,12 +1,14 @@
 "use client";
 /**
  * Minimal floating callouts (01 Intake … 06 Brine). Positions are written
- * directly to the DOM from the per-frame anchor bus, so tracking the 3D model
- * never triggers React renders. Content (one key value each) updates at the
- * telemetry rate.
+ * directly to the DOM from the anchor bus, so tracking the 3D model never
+ * triggers React renders, and label sizes come from a ResizeObserver, so the
+ * per-frame update never forces a layout. Content (one key value each)
+ * updates at the telemetry rate.
  */
 import { useEffect, useRef } from "react";
 import type { AssetId } from "@/sim/scenarios";
+import type { AnchorScreen } from "../TwinEngine";
 import { anchorBus } from "./viewportStore";
 import { useUi } from "@/state/ui";
 
@@ -34,69 +36,99 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
   const select = useUi((s) => s.select);
   const selected = useUi((s) => s.selected);
   const introPhase = useUi((s) => s.introPhase);
+  const ids = items.map((it) => it.id).join(",");
 
-  useEffect(
-    () =>
-      anchorBus.subscribe((anchors) => {
-        const host = hostRef.current;
-        const W = host?.clientWidth ?? 0;
-        const H = host?.clientHeight ?? 0;
-        // Small viewports show the label only (the value is one click away in the inspector).
-        if (host) host.dataset.small = H < 440 || W < 720 ? "1" : "0";
-        const clampX = (x: number, w: number) => Math.min(Math.max(x, 12 + w / 2), W - 12 - w / 2);
-        const clampY = (y: number, h: number) => Math.min(Math.max(y, 12 + h / 2), H - 12 - h / 2);
-        const boxes = [];
-        for (const a of anchors) {
-          const el = refs.current.get(a.id);
-          if (!el) continue;
-          const [dx0, dy0] = OFFSET[a.id] ?? [0, -50];
-          const label = el.querySelector<HTMLElement>("[data-label]");
-          const line = el.querySelector<SVGLineElement>("line");
-          const lw = label?.offsetWidth ?? 150;
-          const lh = label?.offsetHeight ?? 40;
-          // Keep the label fully inside the viewport (12 px margin); the leader follows it.
-          boxes.push({ a, el, label, line, lw, lh, cx: clampX(a.x + dx0, lw), cy: clampY(a.y + dy0, lh) });
-        }
-        // Separate overlapping labels (a few relaxation passes along the axis of least overlap).
-        for (let pass = 0; pass < 6; pass++) {
-          let moved = false;
-          for (let i = 0; i < boxes.length; i++)
-            for (let j = i + 1; j < boxes.length; j++) {
-              const p = boxes[i];
-              const q = boxes[j];
-              if (!p.a.visible || !q.a.visible) continue;
-              const ox = (p.lw + q.lw) / 2 + 8 - Math.abs(p.cx - q.cx);
-              const oy = (p.lh + q.lh) / 2 + 6 - Math.abs(p.cy - q.cy);
-              if (ox <= 0 || oy <= 0) continue;
-              moved = true;
-              if (oy <= ox) {
-                const s = (p.cy <= q.cy ? -1 : 1) * (oy / 2);
-                p.cy = clampY(p.cy + s, p.lh);
-                q.cy = clampY(q.cy - s, q.lh);
-              } else {
-                const s = (p.cx <= q.cx ? -1 : 1) * (ox / 2);
-                p.cx = clampX(p.cx + s, p.lw);
-                q.cx = clampX(q.cx - s, q.lw);
-              }
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const sizes = new Map<Element, { w: number; h: number }>();
+    const parts = [...refs.current.entries()].map(([id, el]) => ({
+      id,
+      el,
+      label: el.querySelector<HTMLElement>("[data-label]"),
+      line: el.querySelector<SVGLineElement>("line"),
+    }));
+    let last: AnchorScreen[] | null = null;
+    let small = "";
+
+    const layout = (anchors: AnchorScreen[]) => {
+      last = anchors;
+      const hs = sizes.get(host);
+      if (!hs) return; // first measurement pending; the observer lays out again when it lands
+      const W = hs.w;
+      const H = hs.h;
+      // Small viewports show the label only (the value is one click away in the inspector).
+      const sm = H < 440 || W < 720 ? "1" : "0";
+      if (sm !== small) host.dataset.small = small = sm;
+      const clampX = (x: number, w: number) => Math.min(Math.max(x, 12 + w / 2), W - 12 - w / 2);
+      const clampY = (y: number, h: number) => Math.min(Math.max(y, 12 + h / 2), H - 12 - h / 2);
+      const boxes = [];
+      for (const a of anchors) {
+        const part = parts.find((pt) => pt.id === a.id);
+        if (!part) continue;
+        const { el, label, line } = part;
+        const [dx0, dy0] = OFFSET[a.id] ?? [0, -50];
+        const ls = label ? sizes.get(label) : undefined;
+        const lw = ls?.w ?? 150;
+        const lh = ls?.h ?? 40;
+        // Keep the label fully inside the viewport (12 px margin); the leader follows it.
+        boxes.push({ a, el, label, line, lw, lh, cx: clampX(a.x + dx0, lw), cy: clampY(a.y + dy0, lh) });
+      }
+      // Separate overlapping labels (a few relaxation passes along the axis of least overlap).
+      for (let pass = 0; pass < 6; pass++) {
+        let moved = false;
+        for (let i = 0; i < boxes.length; i++)
+          for (let j = i + 1; j < boxes.length; j++) {
+            const p = boxes[i];
+            const q = boxes[j];
+            if (!p.a.visible || !q.a.visible) continue;
+            const ox = (p.lw + q.lw) / 2 + 8 - Math.abs(p.cx - q.cx);
+            const oy = (p.lh + q.lh) / 2 + 6 - Math.abs(p.cy - q.cy);
+            if (ox <= 0 || oy <= 0) continue;
+            moved = true;
+            if (oy <= ox) {
+              const s = (p.cy <= q.cy ? -1 : 1) * (oy / 2);
+              p.cy = clampY(p.cy + s, p.lh);
+              q.cy = clampY(q.cy - s, q.lh);
+            } else {
+              const s = (p.cx <= q.cx ? -1 : 1) * (ox / 2);
+              p.cx = clampX(p.cx + s, p.lw);
+              q.cx = clampX(q.cx - s, q.lw);
             }
-          if (!moved) break;
-        }
-        for (const { a, el, label, line, lh, cx, cy } of boxes) {
-          const dx = cx - a.x;
-          const dy = cy - a.y;
-          el.style.transform = `translate3d(${a.x}px, ${a.y}px, 0)`;
-          el.style.opacity = a.visible ? "" : "0";
-          if (label) label.style.transform = `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
-          if (line) {
-            const len = Math.hypot(dx, dy) || 1;
-            const stop = Math.max(0, len - Math.min(lh * 0.5, len));
-            line.setAttribute("x2", String((dx / len) * stop));
-            line.setAttribute("y2", String((dy / len) * stop));
           }
+        if (!moved) break;
+      }
+      for (const { a, el, label, line, lh, cx, cy } of boxes) {
+        const dx = cx - a.x;
+        const dy = cy - a.y;
+        el.style.transform = `translate3d(${a.x}px, ${a.y}px, 0)`;
+        el.style.opacity = a.visible ? "" : "0";
+        if (label) label.style.transform = `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))`;
+        if (line) {
+          const len = Math.hypot(dx, dy) || 1;
+          const stop = Math.max(0, len - Math.min(lh * 0.5, len));
+          line.setAttribute("x2", String((dx / len) * stop));
+          line.setAttribute("y2", String((dy / len) * stop));
         }
-      }),
-    [],
-  );
+      }
+    };
+
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const b = e.borderBoxSize?.[0];
+        const el = e.target as HTMLElement;
+        sizes.set(el, b ? { w: b.inlineSize, h: b.blockSize } : { w: el.offsetWidth, h: el.offsetHeight });
+      }
+      if (last) layout(last);
+    });
+    ro.observe(host);
+    for (const pt of parts) if (pt.label) ro.observe(pt.label);
+    const unsubscribe = anchorBus.subscribe(layout);
+    return () => {
+      unsubscribe();
+      ro.disconnect();
+    };
+  }, [ids]);
 
   return (
     <div
@@ -128,8 +160,8 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
               data-label
               onClick={() => select(it.id)}
               title={it.value ? `${it.label}: ${it.value}` : it.label}
-              className={`pointer-events-auto absolute whitespace-nowrap rounded-md border px-2 py-1 text-left backdrop-blur-sm transition-colors ${
-                isSel ? "border-accent/60 bg-accent-soft" : "border-line-strong bg-ink-900/90 hover:border-line-bright"
+              className={`pointer-events-auto absolute whitespace-nowrap rounded-md border px-2 py-1 text-left transition-colors ${
+                isSel ? "border-accent/60 bg-accent-soft" : "border-line-strong bg-ink-900/95 hover:border-line-bright"
               }`}
               style={{ transform: `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))` }}
             >

@@ -69,7 +69,7 @@ export function GuidedTour() {
     <aside
       role="dialog"
       aria-label="Guided tour"
-      className="no-print fixed bottom-5 right-5 z-50 w-[360px] max-w-[calc(100vw-24px)] animate-[fadein_300ms_ease-out] rounded-xl border border-accent/35 bg-ink-850/95 p-4 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(64,180,255,0.08)] backdrop-blur max-sm:bottom-3 max-sm:right-3"
+      className="no-print fixed bottom-5 right-5 z-50 w-[360px] max-w-[calc(100vw-24px)] animate-[fadein_300ms_ease-out] rounded-xl border border-accent/35 bg-ink-850/95 p-4 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(64,180,255,0.08)] max-sm:bottom-3 max-sm:right-3"
     >
       <div className="flex items-center gap-2">
         <span className="label text-accent">

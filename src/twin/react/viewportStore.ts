@@ -22,14 +22,20 @@ export const useViewport = create<ViewportState>((set, get) => ({
 
 type AnchorListener = (a: AnchorScreen[]) => void;
 const listeners = new Set<AnchorListener>();
+let latest: AnchorScreen[] | null = null;
 
-/** Lightweight per-frame bus for callout anchors (bypasses React state). */
+/**
+ * Lightweight bus for callout anchors (bypasses React state). The engine emits only
+ * when the positions move, so a new subscriber is handed the latest positions at once.
+ */
 export const anchorBus = {
   emit(a: AnchorScreen[]) {
+    latest = a;
     listeners.forEach((l) => l(a));
   },
   subscribe(l: AnchorListener) {
     listeners.add(l);
+    if (latest) l(latest);
     return () => {
       listeners.delete(l);
     };

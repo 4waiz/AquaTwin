@@ -180,7 +180,7 @@ export default function ScenarioLabPage() {
             <Chip tone={branch === "aquatwin" ? "accent" : "default"} dot>
               {branch === "aquatwin" ? "AquaTwin response" : "No action"}
             </Chip>
-            <Chip className="bg-ink-900/85 backdrop-blur-sm max-sm:hidden">{res ? `+${cursor.toFixed(1)} h · ${hourOfDay(res.startClock_h + cursor)}` : "forecast"}</Chip>
+            <Chip className="bg-ink-900/90 max-sm:hidden">{res ? `+${cursor.toFixed(1)} h · ${hourOfDay(res.startClock_h + cursor)}` : "forecast"}</Chip>
             {point && point.violations.length > 0 && (
               <Chip tone="crit" dot>
                 Constraint violated

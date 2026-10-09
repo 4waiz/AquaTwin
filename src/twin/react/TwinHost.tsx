@@ -98,8 +98,8 @@ export function TwinHost() {
         const q = new URLSearchParams(window.location.search).get("quality");
         const forced = q === "high" ? 2 : q === "medium" ? 1 : q === "low" ? 0 : null;
         if (forced !== null) engine.setQuality(forced, true);
-        // Phones and tablets start one tier down; the governor can still step further.
-        else if (window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 1024) engine.setQuality(1, false);
+        // Otherwise start from the GPU class (built-in graphics, phones and tablets one tier down).
+        else engine.autoQuality(window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 1024);
         await engine.warmup();
         if (cancelled) return;
         // The page's slot may have registered before the engine existed.
@@ -147,6 +147,9 @@ export function TwinHost() {
     let raf = 0;
     let last = "";
     let sizedEngine: TwinEngine | null = null;
+    let sized = "";
+    let pending = "";
+    let pendingAt = 0;
     const sync = () => {
       raf = requestAnimationFrame(sync);
       const wrap = wrapRef.current;
@@ -169,18 +172,30 @@ export function TwinHost() {
       const clipB = sc ? Math.max(0, Math.round(r.bottom - sc.bottom)) : 0;
       const hiddenByScroll = clipT + clipB >= r.height - 1;
       const key = `${Math.round(r.left)}:${Math.round(r.top)}:${Math.round(r.width)}:${Math.round(r.height)}:${clipT}:${clipB}`;
-      // Re-apply when the slot moves/resizes or when the engine appears (it is created asynchronously).
-      if (key !== last || engine !== sizedEngine) {
-        sizedEngine = engine;
+      // Re-apply when the slot moves or resizes.
+      if (key !== last) {
         wrap.style.visibility = hiddenByScroll ? "hidden" : "visible";
         wrap.style.transform = `translate3d(${Math.round(r.left)}px, ${Math.round(r.top)}px, 0)`;
         wrap.style.width = `${Math.round(r.width)}px`;
         wrap.style.height = `${Math.round(r.height)}px`;
         wrap.style.clipPath = clipT || clipB ? `inset(${clipT}px 0px ${clipB}px 0px)` : "";
-        engine?.setSize(r.width, r.height); // no-op unless the size changed
         last = key;
       }
-      if (engine && r.width > 2 && r.height > 2) engine.setActive(!hiddenByScroll);
+      if (!engine) return;
+      // Resizing reallocates every render target, so wait until the slot has settled (the canvas
+      // simply stretches for those few frames). A new engine is sized at once.
+      const size = `${Math.round(r.width)}:${Math.round(r.height)}`;
+      const now = performance.now();
+      if (size !== pending) {
+        pending = size;
+        pendingAt = now;
+      }
+      if (engine !== sizedEngine || (size !== sized && now - pendingAt > 120)) {
+        engine.setSize(r.width, r.height);
+        sizedEngine = engine;
+        sized = size;
+      }
+      if (r.width > 2 && r.height > 2) engine.setActive(!hiddenByScroll);
     };
     raf = requestAnimationFrame(sync);
     return () => cancelAnimationFrame(raf);
