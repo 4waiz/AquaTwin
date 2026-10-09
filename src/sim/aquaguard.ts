@@ -1,5 +1,5 @@
 /**
- * AquaGuard — deterministic safety layer (docs/MODEL.md §8).
+ * AquaGuard: deterministic safety layer (docs/MODEL.md §8).
  *
  * Every candidate operating strategy is checked against hard constraints
  * before it can be recommended. The rules are plain comparisons against
@@ -130,7 +130,7 @@ export function evaluateGuard(input: GuardInput): GuardDecision {
 export function describeFailure(r: RuleResult): string {
   const fmt = (x: number) => (Math.abs(x) >= 100 ? x.toFixed(0) : x.toFixed(1));
   if (r.id === "confidence") {
-    return `Model confidence ${fmt(r.value)}% is below ${fmt(r.limit)}% — inputs are outside the validated envelope.`;
+    return `Model confidence ${fmt(r.value)}% is below ${fmt(r.limit)}%; inputs are outside the validated envelope.`;
   }
   const dir = r.cmp === "≤" ? "exceeds" : "is below";
   return `${r.label} ${fmt(r.value)} ${r.unit} ${dir} the ${fmt(r.limit)} ${r.unit} limit (${r.scope}).`;

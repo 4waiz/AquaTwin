@@ -2,7 +2,7 @@
 /**
  * Run records for the Reports page. Each Scenario Lab simulation produces a
  * compact, self-describing record, persisted per browser in localStorage
- * (a convenience only — records can always be regenerated).
+ * (a convenience only; records can always be regenerated).
  */
 import { create } from "zustand";
 import type { ScenarioResult } from "@/runtime/protocol";
@@ -99,7 +99,7 @@ export const useRuns = create<RunsState>((set, get) => ({
         salinity: first.salinity,
         temperature: first.temperature,
       },
-      disturbance: `${sc.tag} — ${sc.summary}`,
+      disturbance: `${sc.tag}: ${sc.summary}`,
       represents: sc.represents,
       noAction: summarise(r.noAction),
       aquatwin: summarise(r.aquatwin),

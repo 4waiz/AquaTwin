@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, type ReactNode } from "react";
-import { AquaTwinMark, IconExternal } from "@/components/icons";
+import Link from "next/link";
+import { AquaTwinMark, IconChevron, IconExternal } from "@/components/icons";
 import { HACKATHON, TAGLINE, TEAM_NAME, TEAM_URL } from "@/lib/brand";
 import { useScenario } from "@/state/scenario";
 
@@ -23,7 +24,7 @@ function Block({ title, children, reveal }: { title: string; children: ReactNode
 }
 
 const PROVENANCE: [string, string][] = [
-  ["Simulated", "Plant behaviour produced by the reference plant simulator — the stand-in for a real plant in this prototype. All live telemetry is simulated."],
+  ["Simulated", "Plant behaviour produced by the reference plant simulator, the stand-in for a real plant in this prototype. All live telemetry is simulated."],
   ["Modeled", "Outputs of AquaTwin's hybrid model (physics + ML residual), e.g. predictions, expectations and forecasts."],
   ["Estimated", "Derived quantities with material outside uncertainty, e.g. carbon from an average grid intensity."],
   ["Assumed", "Design choices and parameters without a specific source (flagged in the code and model documentation)."],
@@ -58,6 +59,57 @@ const METHODS: { what: string; ref: string; href: string }[] = [
   { what: "Harmful algal blooms and desalination", ref: "IOC-UNESCO Manuals and Guides No. 78 (2017)", href: "https://unesdoc.unesco.org/ark:/48223/pf0000259512" },
 ];
 
+/**
+ * The hackathon's six themes are its "UN Water pillars". AquaTwin is entered
+ * under pillar 3; the others are where its mechanisms contribute. Figures are
+ * simulated results from the Validation page.
+ */
+const PILLARS: { n: string; title: string; body: string; href: string; cta: string; primary?: boolean }[] = [
+  {
+    n: "01",
+    title: "Water security & sustainable desalination",
+    body: "Keeps SWRO output on specification and on demand through Gulf stresses. Under a +15 % salinity shock, fixed setpoints violate a limit for 21.3 h of 24; AquaTwin for none.",
+    href: "/scenarios",
+    cta: "Scenario Lab",
+  },
+  {
+    n: "02",
+    title: "Water reuse, circularity & resource efficiency",
+    body: "Treats membranes as assets: cleaning is planned from a fouling forecast about half a day ahead instead of being triggered by a threshold, and fouling rate is an optimisation objective.",
+    href: "/membranes",
+    cta: "Membrane Health",
+  },
+  {
+    n: "03",
+    title: "Smart, digital & AI-enabled water systems",
+    body: "Physics-informed machine learning with calibrated uncertainty: permeate-flow error 4.9 m³/h per train, against 48.0 for the calibrated physics and 9.7 for machine learning alone.",
+    href: "/intelligence",
+    cta: "Model Intelligence",
+    primary: true,
+  },
+  {
+    n: "04",
+    title: "Water quality, health & environmental protection",
+    body: "Permeate quality is a hard limit, checked at the edge of the model's uncertainty; quality excursions are forecast two hours ahead and rehearsed before they happen.",
+    href: "/water-quality",
+    cta: "Water Quality",
+  },
+  {
+    n: "05",
+    title: "Energy–water nexus & climate resilience",
+    body: "Energy and carbon are first-class objectives. Grid power caps are honoured by pre-filling storage, and the energy cost of resilience is reported, not hidden: 0 to +2.8 % specific energy.",
+    href: "/energy",
+    cta: "Energy & Carbon",
+  },
+  {
+    n: "06",
+    title: "Integrated systems, governance & cooperation",
+    body: "Built to be audited: every number is labelled by provenance, every recommendation states the limits it was checked against, and outside its validated envelope the twin withholds advice.",
+    href: "/validation",
+    cta: "Validation",
+  },
+];
+
 const SOFTWARE: [string, string][] = [
   ["Next.js", "MIT"],
   ["React", "MIT"],
@@ -77,13 +129,69 @@ export default function AboutPage() {
   useEffect(() => useScenario.getState().setActive(false), []);
   return (
     <div className="mx-auto flex max-w-[1280px] flex-col gap-4 p-5 pt-6 max-lg:p-4">
-      <div data-reveal="header" className="flex items-center gap-4 pb-2">
-        <AquaTwinMark size={40} />
-        <div>
-          <h1 className="text-[26px] font-semibold tracking-tight text-fg">AquaTwin</h1>
-          <p className="text-[14px] text-fg-muted">{TAGLINE}</p>
+      <header
+        data-reveal="header"
+        className="relative overflow-hidden rounded-[14px] border border-line bg-ink-900 px-7 py-6 max-sm:px-5"
+        style={{
+          backgroundImage:
+            "radial-gradient(900px 260px at 0% 0%, rgb(34 181 251 / 0.13), transparent 60%), radial-gradient(700px 240px at 100% 120%, rgb(67 203 198 / 0.08), transparent 60%)",
+        }}
+      >
+        <div className="flex items-center gap-6 max-sm:flex-col max-sm:items-start max-sm:gap-4">
+          <AquaTwinMark size={84} glow />
+          <div className="min-w-0">
+            <div className="label">{HACKATHON} · Theme 3</div>
+            <h1 className="mt-1.5 text-[32px] font-semibold leading-none tracking-tight text-fg max-sm:text-[28px]">
+              Aqua<span className="brand-text">Twin</span>
+            </h1>
+            <p className="mt-2 max-w-[720px] text-[14.5px] leading-snug text-fg-muted">{TAGLINE}</p>
+            <div className="mt-3.5 flex flex-wrap gap-2">
+              {["Physics + ML residual", "Calibrated uncertainty", "AquaGuard safety layer", "Withholds outside its envelope", "Runs in the browser"].map((t) => (
+                <span key={t} className="inline-flex h-6 items-center rounded-md border border-line-strong bg-ink-850/80 px-2 text-[11.5px] text-fg-muted">
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
+
+      <section data-reveal="panel1" className="panel px-5 py-4" aria-labelledby="pillars-title">
+        <div className="mb-3 flex items-baseline justify-between gap-4 max-sm:flex-col max-sm:gap-1">
+          <h2 id="pillars-title" className="label">
+            Aligned with the UN Water pillars
+          </h2>
+          <p className="text-[11.5px] text-fg-subtle">The hackathon&apos;s six themes · SDG 6 · simulated results</p>
+        </div>
+        <ul className="grid grid-cols-3 gap-3 max-xl:grid-cols-2 max-sm:grid-cols-1">
+          {PILLARS.map((p) => (
+            <li
+              key={p.n}
+              className={`group relative flex flex-col rounded-[10px] border p-4 transition-colors ${
+                p.primary ? "border-accent/45 bg-accent-soft/35" : "border-line bg-ink-900 hover:border-line-strong"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`num font-mono text-[11px] tracking-wider ${p.primary ? "text-accent" : "text-fg-subtle"}`}>{p.n}</span>
+                {p.primary && (
+                  <span className="inline-flex h-5 items-center rounded border border-accent/40 px-1.5 font-mono text-[9.5px] tracking-wider text-accent uppercase">
+                    Our theme
+                  </span>
+                )}
+              </div>
+              <h3 className="mt-1.5 text-[13.5px] font-medium leading-snug text-fg">{p.title}</h3>
+              <p className="mt-1.5 flex-1 text-[12.5px] leading-relaxed text-fg-muted">{p.body}</p>
+              <Link
+                href={p.href}
+                className="mt-3 inline-flex items-center gap-1 self-start text-[12px] font-medium text-accent transition-colors hover:text-fg"
+              >
+                {p.cta}
+                <IconChevron size={12} className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
         <div className="flex flex-col gap-4">
@@ -124,7 +232,7 @@ export default function AboutPage() {
 
           <Block title="Disclaimers" reveal="panel3">
             <p>
-              No organisation named in this prototype or its documentation — including utilities, plant operators, equipment manufacturers, universities or UN agencies —
+              No organisation named in this prototype or its documentation (including utilities, plant operators, equipment manufacturers, universities or UN agencies)
               has reviewed, endorsed or partnered with AquaTwin. Names appear only to cite published sources or to describe the hackathon.
             </p>
             <p>
@@ -148,11 +256,12 @@ export default function AboutPage() {
               <track kind="captions" src="/media/aquatwin-film.vtt" srcLang="en" label="English (also burned in)" />
             </video>
             <p className="text-[12px] text-fg-subtle">
-              The prototype in 60 seconds, recorded from this application running on the simulated plant; every result shown is simulated. By{" "}
+              AquaTwin in under a minute: a narrated motion-graphics pitch built from this application and its own simulation results. Every result shown is
+              simulated. By{" "}
               <a href={TEAM_URL} target="_blank" rel="noopener noreferrer" className="text-fg-muted underline decoration-line-bright underline-offset-2 hover:decoration-accent">
                 {TEAM_NAME}
               </a>
-              . Voice: Kokoro-82M. Music: “Happy Beats / Business Moves Vol. 12” by ende.app. Sound effects: Kenney (CC0).
+              . Voice: Kokoro-82M. Music: original, generated for the film. Sound effects: Kenney (CC0).
             </p>
           </Block>
 

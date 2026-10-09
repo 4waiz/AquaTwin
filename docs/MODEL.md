@@ -1,4 +1,4 @@
-# AquaTwin — model description
+# AquaTwin: model description
 
 This document describes every model in AquaTwin: what it computes, the equations, the parameters and where each value comes from. Section numbers are referenced from code comments (`docs/MODEL.md §n`).
 
@@ -69,7 +69,7 @@ where C_b is the segment bulk concentration, C_m the membrane-wall concentration
 - HP pump: efficiency η(Q) = 0.86 · (1 − 0.35 (Q/Q_BEP − 1)²) · (1 − wear), motor × VFD 0.93 [assumed; pump × motor ≈ 0.80 as in WaterTAP, ref:WATERTAP-RO]. The HP pump supplies the permeate-equivalent flow plus PX lubrication leakage (1.5 % of brine).
 - Pressure exchanger: 96 % efficiency, 4 % volumetric mixing that raises the membrane feed salinity [ref:ERI-PX]; booster pump 0.78.
 - Motor rating: each train's HP + booster motors are rated at 1.2 × design electrical power; if a setpoint would overload them (e.g. a worn pump), the achievable pressure is reduced until the motor runs at its rating ("motor-limited").
-- Plant auxiliaries per m³ (`plant.ts`): intake pumping, pretreatment (with backwash increasing with turbidity), post-treatment and transfer 0.30 kWh/m³, plant base load 250 kW [assumed]. The resulting specific energy consumption (SEC) of ≈ 3.2–3.3 kWh/m³ is at or below the low end of published SWRO ranges — typically 3.5–4.5 kWh/m³ [ref:VOUTCHKOV-2018], and about 4 kWh/m³ for the Arabian Gulf including pre- and post-treatment [ref:GUDE-2020]. Absolute energy values therefore depend on the assumed auxiliary loads and should not be read as plant-specific; comparisons between strategies on the same plant are the meaningful quantity.
+- Plant auxiliaries per m³ (`plant.ts`): intake pumping, pretreatment (with backwash increasing with turbidity), post-treatment and transfer 0.30 kWh/m³, plant base load 250 kW [assumed]. The resulting specific energy consumption (SEC) of ≈ 3.2–3.3 kWh/m³ is at or below the low end of published SWRO ranges: typically 3.5–4.5 kWh/m³ [ref:VOUTCHKOV-2018], and about 4 kWh/m³ for the Arabian Gulf including pre- and post-treatment [ref:GUDE-2020]. Absolute energy values therefore depend on the assumed auxiliary loads and should not be read as plant-specific; comparisons between strategies on the same plant are the meaningful quantity.
 
 ### 2.4 Fouling dynamics (hidden state)
 
@@ -111,17 +111,17 @@ Telemetry is the true state plus Gaussian noise (1σ): flows 0.5 %, pressures 0.
 
 ### 4.1 Learning task and data
 
-Each synthetic sample reproduces the operational task: the reference plant runs at operating point u₀ in a hidden state; AquaTwin averages 6 noisy telemetry samples at u₀ and self-calibrates θ̂; it must then predict the plant response at a what-if point u₁ (different pressure / flow, and — for 15 % of samples — changed seawater; 30 % are "normalisation" queries at standard conditions). Labels are single noisy measurements at u₁ (what a historian would hold); noise-free truth is stored for evaluation only.
+Each synthetic sample reproduces the operational task: the reference plant runs at operating point u₀ in a hidden state; AquaTwin averages 6 noisy telemetry samples at u₀ and self-calibrates θ̂; it must then predict the plant response at a what-if point u₁ (different pressure / flow, and, for 15 % of samples, changed seawater; 30 % are "normalisation" queries at standard conditions). Labels are single noisy measurements at u₁ (what a historian would hold); noise-free truth is stored for evaluation only.
 
 - Hidden states span fouling 0–0.3 (three fouling profiles), salt-passage ageing, pump wear; seawater 36–48 g/L and 18–36 °C; pressure 52–73 bar; flow 6.5–14 m³/h per vessel.
 - Splits (seed 20261101): train 40,000; conformal calibration 8,000; in-envelope test 8,000; **out-of-envelope test 6,000** (salinity 48.5–54 g/L and/or temperature 36.5–40 °C, or fouling 0.32–0.45).
 
 ### 4.2 Models
 
-For four targets — permeate flow Q, permeate TDS C, vessel ΔP D, RO power W — two model families are trained with scikit-learn `HistGradientBoostingRegressor` (learning rate 0.06, 350 iterations, 31 leaves, min 40 samples per leaf, L2 1.0, no early stopping, `random_state` 20261101):
+For four targets (permeate flow Q, permeate TDS C, vessel ΔP D, RO power W), two model families are trained with scikit-learn `HistGradientBoostingRegressor` (learning rate 0.06, 350 iterations, 31 leaves, min 40 samples per leaf, L2 1.0, no early stopping, `random_state` 20261101):
 
-- **Hybrid (AquaTwin)**: inputs = what-if point, calibration point and conditions, θ̂, and the physics outputs (r, J, C_p, ΔP) — 16 features. Target = residual of the physics prediction: relative for Q and W (y/ŷ_phys − 1), log-ratio for C, absolute for D. Final prediction = physics × (1 + residual) etc. — "Physics prediction + ML residual = AquaTwin prediction".
-- **ML-only baseline**: inputs = what-if point, calibration point and conditions, and the smoothed measurements at u₀ — 12 features, target = the output itself. Same learner and budget.
+- **Hybrid (AquaTwin)**: inputs = what-if point, calibration point and conditions, θ̂, and the physics outputs (r, J, C_p, ΔP), 16 features in all. Target = residual of the physics prediction: relative for Q and W (y/ŷ_phys − 1), log-ratio for C, absolute for D. Final prediction = physics × (1 + residual) etc., i.e. "Physics prediction + ML residual = AquaTwin prediction".
+- **ML-only baseline**: inputs = what-if point, calibration point and conditions, and the smoothed measurements at u₀, 12 features in all; target = the output itself. Same learner and budget.
 
 The fitted trees are exported to JSON and evaluated in the browser by a small TypeScript tree-ensemble runtime. `scripts/parity-test.ts` (and `tests/ml.test.ts`) verify that the browser predictions equal scikit-learn's to within 1·10⁻⁹ on 500 samples per model.
 
@@ -131,7 +131,7 @@ Mean absolute error against noise-free truth, permeate flow per train (m³/h), f
 
 | Model | Inside envelope | Outside envelope |
 |---|---|---|
-| Physics, uncalibrated | 53.2 | — |
+| Physics, uncalibrated | 53.2 | n/a |
 | Physics, self-calibrated | 48.0 | 47.9 |
 | ML only | 9.7 | 35.1 |
 | **AquaTwin hybrid** | **4.9** | **12.1** |
@@ -152,11 +152,11 @@ Sensor-noise floor for a single permeate-flow measurement: 3.0 m³/h. Outside th
 
 `estimateHealth` (`src/sim/twin.ts`). Following the idea of ASTM D4516 [ref:ASTM-D4516], each train's performance is re-expressed at fixed standard conditions (design seawater, pressure and flow) and divided by its post-clean baseline. Where conventional practice uses empirical correction factors, AquaTwin queries its calibrated hybrid model at the standard conditions:
 
-- NPF — normalised permeate flow ("health"; 1 = post-clean baseline);
-- NSP — normalised salt passage (> 1 = more salt passes);
-- NDP — normalised differential pressure (> 1 = more hydraulic resistance).
+- NPF: normalised permeate flow ("health"; 1 = post-clean baseline);
+- NSP: normalised salt passage (> 1 = more salt passes);
+- NDP: normalised differential pressure (> 1 = more hydraulic resistance).
 
-Cleaning (CIP) criteria follow the membrane manufacturer [ref:DUPONT-MANUAL]: clean when normalised permeate flow drops 10 %, **or** normalised salt passage rises 5–10 %, **or** normalised pressure drop rises 10–15 % (`src/sim/cleaning.ts`; AquaTwin uses the upper end of each range as "due" and the lower end as "approaching"). Only the flow criterion (`LIMITS.cipHealthThreshold = 0.9`) is forecast in time and used as the "cleaning threshold" event in the experiments. In the reference plant, lead-end biofouling raises normalised pressure drop about four times faster than normalised flow declines (e.g. NPF 0.954 with NDP 1.20), so — as is typical of biofouling — the pressure-drop criterion is met first; the live plant's Train 2 starts in that state and is reported as "cleaning due". The Membrane Health page shows, per train, the observed flow, the flow a clean train would deliver under the same conditions (hybrid model) and the unexplained loss, together with a symptom → cause matrix (biofouling / particulate: lead-end ΔP rise; scaling: tail-end salt passage) from manufacturer troubleshooting practice [ref:DUPONT-MANUAL].
+Cleaning (CIP) criteria follow the membrane manufacturer [ref:DUPONT-MANUAL]: clean when normalised permeate flow drops 10 %, **or** normalised salt passage rises 5–10 %, **or** normalised pressure drop rises 10–15 % (`src/sim/cleaning.ts`; AquaTwin uses the upper end of each range as "due" and the lower end as "approaching"). Only the flow criterion (`LIMITS.cipHealthThreshold = 0.9`) is forecast in time and used as the "cleaning threshold" event in the experiments. In the reference plant, lead-end biofouling raises normalised pressure drop about four times faster than normalised flow declines (e.g. NPF 0.954 with NDP 1.20), so, as is typical of biofouling, the pressure-drop criterion is met first; the live plant's Train 2 starts in that state and is reported as "cleaning due". The Membrane Health page shows, per train, the observed flow, the flow a clean train would deliver under the same conditions (hybrid model) and the unexplained loss, together with a symptom → cause matrix (biofouling / particulate: lead-end ΔP rise; scaling: tail-end salt passage) from manufacturer troubleshooting practice [ref:DUPONT-MANUAL].
 
 ### 5.2 Degradation model (twin forward mode)
 
@@ -174,7 +174,7 @@ For forecasting beyond the telemetry, the twin carries a lumped fouling state φ
 
 ## 6. Disturbance scenarios
 
-`src/sim/scenarios.ts`. Deterministic functions of time; magnitudes are illustrative stress tests chosen to be physically plausible for Gulf SWRO — they are not reconstructions of specific historical events.
+`src/sim/scenarios.ts`. Deterministic functions of time; magnitudes are illustrative stress tests chosen to be physically plausible for Gulf SWRO; they are not reconstructions of specific historical events.
 
 | Scenario | Disturbance (onset +1 h) | Represents |
 |---|---|---|
@@ -186,7 +186,7 @@ For forecasting beyond the telemetry, the twin carries a lumped fouling state φ
 | Demand surge | demand +20 % for 18 h | heat-wave demand, supply loss elsewhere |
 | Temperature shock* | feed temperature +5 °C | marine heat event |
 | Sensor degradation* | noise × 3, permeate-TDS drift +0.5 %/h | instrument fouling / drift |
-| Compound extreme* | 53 g/L and 37.5 °C | outside the model envelope — tests abstention |
+| Compound extreme* | 53 g/L and 37.5 °C | outside the model envelope; tests abstention |
 
 \* validation only (not in the Scenario Lab).
 
@@ -196,7 +196,7 @@ For forecasting beyond the telemetry, the twin carries a lumped fouling state φ
 
 ### 7.1 Production planning
 
-`src/sim/planner.ts`. From the demand forecast, the reservoir level and any announced power-cap window, the planner sets a hard minimum production (keeps storage above 25 % + 3 % margin over the next interval), a hard maximum (no overflow) and a soft target that steers storage to 60 % with a 5 h time constant — or to 90 % when a cap window starts within 8 h, so storage can carry the plant through it.
+`src/sim/planner.ts`. From the demand forecast, the reservoir level and any announced power-cap window, the planner sets a hard minimum production (keeps storage above 25 % + 3 % margin over the next interval), a hard maximum (no overflow) and a soft target that steers storage to 60 % with a 5 h time constant, or to 90 % when a cap window starts within 8 h, so storage can carry the plant through it.
 
 ### 7.2 Strategy optimisation
 
@@ -204,13 +204,13 @@ For forecasting beyond the telemetry, the twin carries a lumped fouling state φ
 
   score = w_E·SEC/0.1 + w_Q·TDS/100 + w_P·|production gap|/0.03 + w_S·stress/0.1 + w_F·(fouling rate, %/h)/0.05 + move cost,
 
-with default weights energy 0.35, quality 0.10, production 0.25, membrane stress 0.10, fouling 0.20 (editable on the Optimization page). **Look-ahead:** decisions are hourly, so the chosen strategy must satisfy every hard limit not only under present feed conditions but also under the conditions extrapolated to the end of the hour from the last hour's measured salinity and temperature trend (`extrapolateFeed`, bounded); the best-scoring strategy that passes both checks is recommended; if none does, the best-scoring strategy that passes the present check is proposed with a note that the operator's attention is needed. The same extrapolation drives the two-hour permeate-quality outlook. **Unscheduled re-plan:** between hourly decisions, the closed loop checks every 10 minutes whether the current setpoints would still pass the same look-ahead check; if not, AquaTwin re-plans at once (at most every 20 minutes, and not while recommendations are withheld). A ramp that starts just after a decision would otherwise go unanswered for up to an hour: in the Scenario Lab, a night start with 65 % product storage — low demand, so low flux and permeate TDS close to its limit — showed a 20-minute quality violation before this was added. Without the look-ahead, a salinity ramp during a low-demand night could push permeate TDS over its limit before the next decision. The stress index is the envelope utilisation of the most loaded train (flux, pressure, recovery, ΔP relative to their limits). A small move cost (0.012 per bar, 0.03 per 0.5 m³/h, 0.15 per train switch) prevents chattering between near-equal candidates, as in model-predictive control practice; holding the current setpoints is always a candidate. **Constraints are never traded off** — weights only rank strategies that already satisfy every limit. If no candidate satisfies the minimum production, the service constraint is relaxed and AquaTwin maximises production within every safety limit (reported as such). The Pareto set in the (SEC, stress) plane is shown for transparency.
+with default weights energy 0.35, quality 0.10, production 0.25, membrane stress 0.10, fouling 0.20 (editable on the Optimization page). **Look-ahead:** decisions are hourly, so the chosen strategy must satisfy every hard limit not only under present feed conditions but also under the conditions extrapolated to the end of the hour from the last hour's measured salinity and temperature trend (`extrapolateFeed`, bounded); the best-scoring strategy that passes both checks is recommended; if none does, the best-scoring strategy that passes the present check is proposed with a note that the operator's attention is needed. The same extrapolation drives the two-hour permeate-quality outlook. **Unscheduled re-plan:** between hourly decisions, the closed loop checks every 10 minutes whether the current setpoints would still pass the same look-ahead check; if not, AquaTwin re-plans at once (at most every 20 minutes, and not while recommendations are withheld). A ramp that starts just after a decision would otherwise go unanswered for up to an hour: in the Scenario Lab, a night start with 65 % product storage (low demand, so low flux and permeate TDS close to its limit) showed a 20-minute quality violation before this was added. Without the look-ahead, a salinity ramp during a low-demand night could push permeate TDS over its limit before the next decision. The stress index is the envelope utilisation of the most loaded train (flux, pressure, recovery, ΔP relative to their limits). A small move cost (0.012 per bar, 0.03 per 0.5 m³/h, 0.15 per train switch) prevents chattering between near-equal candidates, as in model-predictive control practice; holding the current setpoints is always a candidate. **Constraints are never traded off**: weights only rank strategies that already satisfy every limit. If no candidate satisfies the minimum production, the service constraint is relaxed and AquaTwin maximises production within every safety limit (reported as such). The Pareto set in the (SEC, stress) plane is shown for transparency.
 
 ---
 
 ## 8. AquaGuard (deterministic safety layer)
 
-`src/sim/aquaguard.ts`. Plain comparisons against documented limits — nothing is learned:
+`src/sim/aquaguard.ts`. Plain comparisons against documented limits (nothing is learned):
 
 | Constraint | Limit | Source |
 |---|---|---|
@@ -244,7 +244,7 @@ Model-predicted quantities are checked at the conservative edge of their 90 % co
 ## 10. Limitations
 
 - The plant is simulated. Real plants have phenomena neither model contains (scaling chemistry, fouling heterogeneity between vessels, control-loop dynamics, instrument failures).
-- Only total dissolved solids are modelled. Boron — poorly rejected by single-pass SWRO and subject to a WHO guideline value of 2.4 mg/L [ref:WHO-GDWQ] — is not, so the permeate-quality constraint does not cover it. The hybrid approach is designed to absorb such model-form error through the residual, but that has only been shown against a simulator.
+- Only total dissolved solids are modelled. Boron (poorly rejected by single-pass SWRO and subject to a WHO guideline value of 2.4 mg/L [ref:WHO-GDWQ]) is not, so the permeate-quality constraint does not cover it. The hybrid approach is designed to absorb such model-form error through the residual, but that has only been shown against a simulator.
 - The ML residual is trained on synthetic data from the same reference plant it is evaluated against; the out-of-envelope test and the model-form differences mitigate, but do not remove, this optimism. On a real plant the residual would be trained on historian data and re-validated.
 - Steady-state models: hydraulic and control transients (minutes) are not modelled; decisions are hourly, with re-plans at most every 20 minutes.
 - The degradation model is lumped and fitted to one fouling profile; scaling and chemical degradation are not modelled.

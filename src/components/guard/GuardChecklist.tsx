@@ -31,7 +31,7 @@ export function VerdictBanner({ verdict, reasons, relaxed }: { verdict: GuardDec
         <IconShield size={14} />
         {cfg.title}
       </div>
-      <div className="mt-1 text-[12px] text-fg-muted">{relaxed ? "Minimum production cannot be met safely — maximum safe production selected." : cfg.sub}</div>
+      <div className="mt-1 text-[12px] text-fg-muted">{relaxed ? "Minimum production cannot be met safely; maximum safe production selected." : cfg.sub}</div>
       {reasons && reasons.length > 0 && (
         <ul className="mt-1.5 space-y-0.5 text-[12px] text-fg">
           {reasons.slice(0, 4).map((r) => (

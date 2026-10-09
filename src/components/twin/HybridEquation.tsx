@@ -19,7 +19,7 @@ function Box({ label, value, unit, tone }: { label: string; value: string; unit:
   const cls = {
     physics: "border-line-strong bg-ink-900",
     ml: "border-accent/40 bg-accent-soft/30",
-    hybrid: "border-accent bg-[#0f1a2b]",
+    hybrid: "border-accent bg-[#0b1d2e]",
     measured: "border-line bg-ink-900",
   }[tone];
   return (

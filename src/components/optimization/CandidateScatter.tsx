@@ -83,7 +83,7 @@ export function CandidateScatter({
             <text transform={`translate(-40,${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={10.5} fill="#8a94a4">
               Membrane stress index →
             </text>
-            {frontier && <polyline points={frontier} fill="none" stroke="#5b9dff" strokeOpacity={0.55} strokeWidth={1.4} strokeDasharray="5 4" />}
+            {frontier && <polyline points={frontier} fill="none" stroke="#40b4ff" strokeOpacity={0.55} strokeWidth={1.4} strokeDasharray="5 4" />}
             {[...draw]
               .sort((a, b) => order(a) - order(b))
               .map((c) => {
@@ -128,7 +128,7 @@ export function CandidateScatter({
                     cx={x}
                     cy={y}
                     r={c.pareto ? 4.2 : 3.2}
-                    fill={c.pareto ? "#5b9dff" : "#2f5f9e"}
+                    fill={c.pareto ? "#40b4ff" : "#1b5f94"}
                     stroke={sel ? "#e8edf4" : "none"}
                     strokeWidth={1.5}
                     onMouseEnter={() => setHover(c)}
@@ -154,14 +154,14 @@ export function CandidateScatter({
                 const y = ys(b.objectives.stress);
                 return (
                   <g>
-                    <circle cx={x} cy={y} r={9} fill="none" stroke="#5b9dff" strokeWidth={1.6} />
-                    <line x1={x + 9} y1={y - 9} x2={x + 26} y2={y - 26} stroke="#5b9dff" strokeWidth={1} />
+                    <circle cx={x} cy={y} r={9} fill="none" stroke="#40b4ff" strokeWidth={1.6} />
+                    <line x1={x + 9} y1={y - 9} x2={x + 26} y2={y - 26} stroke="#40b4ff" strokeWidth={1} />
                     <text
                       x={x + 29}
                       y={y - 27}
                       fontSize={10}
                       fontFamily="var(--font-mono)"
-                      fill="#5b9dff"
+                      fill="#40b4ff"
                       letterSpacing="0.08em"
                       stroke="#070a0f"
                       strokeWidth={3}

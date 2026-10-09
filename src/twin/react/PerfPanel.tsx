@@ -1,6 +1,6 @@
 "use client";
 /**
- * Hidden developer performance panel — toggle with Ctrl+Shift+P.
+ * Hidden developer performance panel: toggle with Ctrl+Shift+P.
  * Not part of the judge-facing interface.
  */
 import { useEffect, useState } from "react";

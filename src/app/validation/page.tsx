@@ -58,7 +58,7 @@ interface Metrics {
 }
 
 const METHOD_LABEL: Record<Method, string> = { fixed: "Fixed operation", physics: "Physics only", mlonly: "ML only", hybrid: "AquaTwin hybrid" };
-const METHOD_COLOR: Record<Method, string> = { fixed: "#475163", physics: "#8fb4e6", mlonly: "#c7cdd6", hybrid: "#5b9dff" };
+const METHOD_COLOR: Record<Method, string> = { fixed: "#475163", physics: "#8fb4e6", mlonly: "#c7cdd6", hybrid: "#40b4ff" };
 
 const METRICS: { key: string; label: string; unit: string; digits: number; better: "lower" | "higher" | "none"; na?: Method[] }[] = [
   { key: "anyViolation_h", label: "Constraint violations", unit: "h", digits: 2, better: "lower" },
@@ -78,7 +78,7 @@ const METRICS: { key: string; label: string; unit: string; digits: number; bette
 ];
 
 function eventLabel(kind: string | null): string {
-  if (!kind) return "—";
+  if (!kind) return "–";
   const [type, what] = kind.split(":");
   if (type === "cip") return `Flow cleaning criterion · Train ${what.slice(1)}`;
   if (type === "capacity") return `Capacity loss · Train ${what.slice(1)}`;
@@ -200,7 +200,7 @@ export default function ValidationPage() {
               </div>
               <p className="text-[11.5px] leading-relaxed text-fg-subtle">
                 Task: calibrate on noisy telemetry at one operating point, predict another (what-if, normalisation or changed seawater). Sensor-noise floor for permeate
-                flow: {fmt(ml.noise_floor_mae.Q, 1)} m³/h. Outside the envelope the learned models lose accuracy and their intervals under-cover — which is why AquaTwin
+                flow: {fmt(ml.noise_floor_mae.Q, 1)} m³/h. Outside the envelope the learned models lose accuracy and their intervals under-cover, which is why AquaTwin
                 withholds recommendations there instead of trusting them.
               </p>
             </>
@@ -269,7 +269,7 @@ export default function ValidationPage() {
                           const showSd = v !== null && sd !== null && sd !== undefined && Number(sd.toFixed(m.digits)) > 0;
                           return (
                             <td key={k} className={`num py-[7px] text-right ${v === null ? "text-fg-faint" : isBest ? "font-medium text-fg" : "text-fg-muted"}`}>
-                              {v === null ? (m.na?.includes(k) ? "n/a" : "—") : fmt(v, m.digits)}
+                              {v === null ? (m.na?.includes(k) ? "n/a" : "–") : fmt(v, m.digits)}
                               {showSd && <span className="ml-1 text-[10px] font-normal text-fg-faint">±{fmt(sd, m.digits)}</span>}
                               <span className={`ml-1 inline-block w-1.5 ${isBest ? "text-accent" : "text-transparent"}`}>•</span>
                             </td>
@@ -362,7 +362,7 @@ export default function ValidationPage() {
                                 title={why || undefined}
                                 className={`num py-[5px] text-right ${v === undefined ? "text-fg-faint" : v > 0 ? "text-warn" : k === "hybrid" ? "text-fg" : "text-fg-subtle"}`}
                               >
-                                {v === undefined ? "—" : fmt(v, v > 0 ? 1 : 0)}
+                                {v === undefined ? "–" : fmt(v, v > 0 ? 1 : 0)}
                               </td>
                             );
                           })}

@@ -182,7 +182,7 @@ export default function MembraneHealthPage() {
                 </div>
                 <div>
                   <div className="text-fg-subtle">Rejection</div>
-                  <div className="num text-fg">{snap ? fmtPct(100 * (1 - snap.trains[t.i].permeateTDS_mgL / (snap.env.salinity_gL * 1000)), 2) : "—"}</div>
+                  <div className="num text-fg">{snap ? fmtPct(100 * (1 - snap.trains[t.i].permeateTDS_mgL / (snap.env.salinity_gL * 1000)), 2) : "–"}</div>
                 </div>
                 <div>
                   <div className="text-fg-subtle">Trend</div>
@@ -231,7 +231,7 @@ export default function MembraneHealthPage() {
                 {
                   id: "proj",
                   label: "Projection (trend, 90% band)",
-                  color: "#5b9dff",
+                  color: "#40b4ff",
                   values: chart.proj,
                   dashed: true,
                   width: 1.6,
@@ -291,7 +291,7 @@ export default function MembraneHealthPage() {
             {fouling ? (
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-fg-muted">No action — Train 2 reaches threshold</span>
+                  <span className="text-fg-muted">No action: Train 2 reaches threshold</span>
                   <span className="num text-warn">
                     {fouling.noAction.metrics.cipCrossing[1] === null ? "not within 24 h" : `+${fmtHours(fouling.noAction.metrics.cipCrossing[1])}`}
                   </span>

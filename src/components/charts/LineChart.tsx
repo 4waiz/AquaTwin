@@ -251,8 +251,8 @@ export function LineChart({
               ))}
               {isNum(cursor) && (
                 <g transform={`translate(${xs(cursor as number)},0)`}>
-                  <line y1={-4} y2={ih} stroke="#5b9dff" strokeWidth={1.2} />
-                  <circle cy={-4} r={3} fill="#5b9dff" />
+                  <line y1={-4} y2={ih} stroke="#40b4ff" strokeWidth={1.2} />
+                  <circle cy={-4} r={3} fill="#40b4ff" />
                 </g>
               )}
               {hi >= 0 && hover !== null && (
@@ -278,7 +278,7 @@ export function LineChart({
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: s.color }} />
                   {s.label}
                 </span>
-                <span className="num text-fg">{isNum(s.values[hi]) ? yFormat(s.values[hi] as number) : "—"}</span>
+                <span className="num text-fg">{isNum(s.values[hi]) ? yFormat(s.values[hi] as number) : "–"}</span>
               </div>
             ))}
           </div>

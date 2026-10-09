@@ -1,5 +1,5 @@
 "use client";
-/** Baseline vs No action vs AquaTwin — computed outcomes of the forecast. */
+/** Baseline vs No action vs AquaTwin: computed outcomes of the forecast. */
 import type { ScenarioResult } from "@/runtime/protocol";
 import { VIOLATION_LABEL } from "@/sim/aquaguard";
 import { fmt, fmtHours, fmtInt } from "@/lib/format";
@@ -27,7 +27,7 @@ export function OutcomeTable({ res }: { res: ScenarioResult }) {
       unit: "",
       get: (b) => {
         const hits = b.metrics.cipCrossing.map((c, i) => (c === null ? null : `T${i + 1} +${fmtHours(c)}`)).filter(Boolean);
-        return hits.length ? hits.join(", ") : "—";
+        return hits.length ? hits.join(", ") : "–";
       },
     },
   ];

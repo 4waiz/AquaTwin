@@ -39,6 +39,8 @@ const GradeShader = {
       vec2 d = vUv - 0.5;
       float vig = 1.0 - uVignette * smoothstep(0.35, 0.95, length(d * vec2(1.25, 1.0)));
       c.rgb *= vig;
+      // Gentle scrims along the top and bottom edges keep page controls legible over the bright scene.
+      c.rgb *= 1.0 - (smoothstep(0.78, 1.0, vUv.y) * 0.45 + (1.0 - smoothstep(0.0, 0.16, vUv.y)) * 0.3);
       c.rgb += (rand(vUv * 1000.0) - 0.5) / 255.0; // dither
       c.rgb *= uFade;
       gl_FragColor = c;

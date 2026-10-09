@@ -80,7 +80,7 @@ export function GroupedBars({
                           fill={best ? "#e8edf4" : "#8a94a4"}
                           fontFamily="var(--font-mono)"
                         >
-                          {isNum(v) ? format(v) : "—"}
+                          {isNum(v) ? format(v) : "–"}
                         </text>
                       </g>
                     );

@@ -1,11 +1,16 @@
 /**
- * TwinEngine — the persistent 3D digital twin.
+ * TwinEngine: the persistent 3D digital twin.
  *
  * One WebGL2 renderer for the whole application; pages position its canvas
  * over their viewport slot. Each frame the engine composes:
  *   visual state (live telemetry or scenario step, smoothed)
  *   × intro activation (plant coming online)
  * and renders through the post-processing stack.
+ *
+ * The plant stands on its quay in a procedural coastal site: physically based
+ * sky and image-based light, a low late-afternoon sun with a tightly fitted
+ * shadow map, terrain and seabed, an animated sea with planar reflections,
+ * and the surrounding site (roads, fence, rock armour, buildings, palms).
  */
 import * as THREE from "three";
 import type { AssetId } from "@/sim/scenarios";
@@ -14,13 +19,16 @@ import { IntroController, type IntroCallbacks, type IntroFrame } from "./intro/I
 import { WaterPour } from "./intro/WaterPour";
 import { PerfMonitor, type PerfStats } from "./render/PerfMonitor";
 import { PostFX } from "./render/PostFX";
-import { buildStudioEnvironment } from "./render/StudioEnvironment";
+import { Atmosphere, FOG_DENSITY, SUN_COLOR, SUN_DIR } from "./render/Atmosphere";
 import { FlowParticles } from "./scene/FlowParticles";
-import { ASSETS, ASSET_BY_ID, OUTFALL, pipeDefs, POUR_TARGET, SEA_LEVEL } from "./scene/layout";
-import { makePalette, makeWetUniforms, type WetUniforms } from "./scene/materials";
+import { ASSETS, ASSET_BY_ID, pipeDefs, POUR_TARGET, SEA_LEVEL } from "./scene/layout";
+import { makePalette, makeWetUniforms, withUnderwater, type WetUniforms } from "./scene/materials";
 import { Pipes, WATER_COLORS } from "./scene/Pipes";
 import { buildPlant, type PlantBuild } from "./scene/PlantModel";
-import { SeaSurface } from "./scene/Water";
+import { Ocean } from "./scene/Ocean";
+import { buildTerrain, makeWaterOptics, type WaterOptics } from "./scene/Terrain";
+import { buildBedTexture } from "./scene/site";
+import { buildContext, type ContextBuild } from "./scene/Context";
 import { DEFAULT_VISUAL, type Tone, type TwinVisualState } from "./visualState";
 
 export interface AnchorScreen {
@@ -44,34 +52,40 @@ const TONE_COLOR: Record<Tone, THREE.Color> = {
   off: new THREE.Color("#1b2129"),
 };
 
-const BASE_EXPOSURE = 1.02;
-const BASE_KEY = 2.4;
-const BASE_ENV = 0.85;
+const BASE_EXPOSURE = 0.92;
+const BASE_KEY = 3.0;
+const BASE_ENV = 1.0;
+
+/** Objects on this layer are rendered by the main camera but skipped by the sea's reflection pass. */
+export const LAYER_NO_REFLECT = 1;
 
 function lerp(a: number, b: number, k: number) {
   return a + (b - a) * k;
 }
 
-/** Rendering quality tiers: 2 = full (default), 1 = no GTAO / smaller shadows, 0 = minimal. */
+/** Rendering quality tiers: 2 = full (default), 1 = no GTAO / reflection / smaller shadows, 0 = minimal. */
 export type QualityTier = 0 | 1 | 2;
 const TIER_NAME = ["low", "medium", "high"] as const;
 
 export class TwinEngine {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.5, 400);
+  readonly camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.5, 6000);
   private rig: CameraRig;
   private post: PostFX;
   private perf: PerfMonitor;
   private plant: PlantBuild;
   private pipes: Pipes;
   private particles: FlowParticles;
-  private sea: SeaSurface;
+  private atmosphere: Atmosphere;
+  private optics: WaterOptics;
+  private terrain: THREE.Mesh;
+  private ocean: Ocean;
+  private context: ContextBuild;
   private pour: WaterPour;
   private intro: IntroController;
   private wet: WetUniforms;
   private key: THREE.DirectionalLight;
-  private fill: THREE.DirectionalLight;
   private lastFrame = 0;
   private time = 0;
   private raf = 0;
@@ -90,6 +104,7 @@ export class TwinEngine {
   private introMode: "full" | "skip" = "skip";
   private fadeIn = 1;
   private pipeColors = new Map<string, THREE.Color>();
+  private reflectHide: THREE.Object3D[] = [];
   // Quality governor: steps down (never up) when frames are persistently slow.
   private tier: QualityTier = 2;
   private tierForced = false;
@@ -111,7 +126,7 @@ export class TwinEngine {
     });
     const r = this.renderer;
     r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    r.toneMapping = THREE.ACESFilmicToneMapping;
+    r.toneMapping = THREE.AgXToneMapping;
     r.toneMappingExposure = BASE_EXPOSURE;
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.shadowMap.enabled = true;
@@ -119,55 +134,64 @@ export class TwinEngine {
     // it must be set explicitly *before* programs are compiled.
     r.shadowMap.type = THREE.PCFShadowMap;
     r.info.autoReset = false;
-    r.setClearColor(new THREE.Color("#070a0f"), 1);
+    r.setClearColor(new THREE.Color("#0b1220"), 1);
+    this.camera.layers.enable(LAYER_NO_REFLECT);
 
     canvas.addEventListener("webglcontextlost", this.onContextLost, false);
 
-    // --- scene basics
-    this.scene.background = new THREE.Color("#070a0f");
-    this.scene.fog = new THREE.Fog(new THREE.Color("#070a0f"), 70, 150);
-    this.scene.environment = buildStudioEnvironment(r);
+    // --- sky, image-based lighting, aerial perspective
+    this.atmosphere = new Atmosphere(r);
+    this.scene.background = this.atmosphere.skyCube.texture;
+    this.scene.environment = this.atmosphere.environment;
     this.scene.environmentIntensity = BASE_ENV;
+    const fog = new THREE.FogExp2(this.atmosphere.fogColor.clone(), FOG_DENSITY);
+    this.scene.fog = fog;
 
-    // --- lights
-    this.key = new THREE.DirectionalLight(new THREE.Color("#f4f1ea"), BASE_KEY);
-    this.key.position.set(-26, 42, 22);
-    this.key.target.position.set(0, 0, -1);
+    // --- sun (the only direct light; the sky fills through the environment)
+    this.key = new THREE.DirectionalLight(SUN_COLOR.clone(), BASE_KEY);
     this.key.castShadow = true;
-    const sc = this.key.shadow.camera as THREE.OrthographicCamera;
-    sc.left = -34;
-    sc.right = 34;
-    sc.top = 26;
-    sc.bottom = -26;
-    sc.near = 5;
-    sc.far = 110;
     this.key.shadow.mapSize.set(4096, 4096);
-    this.key.shadow.bias = -0.00025;
-    this.key.shadow.normalBias = 0.035;
-    this.key.shadow.radius = 3;
-    this.fill = new THREE.DirectionalLight(new THREE.Color("#9fb8e6"), 0.35);
-    this.fill.position.set(30, 18, -10);
-    const rim = new THREE.DirectionalLight(new THREE.Color("#c9d8f2"), 0.45);
-    rim.position.set(6, 16, -40);
-    this.scene.add(this.key, this.key.target, this.fill, rim);
+    // Low sun: horizontal surfaces meet the light at a grazing angle, so the
+    // normal offset must cover a shadow texel × tan(67°) to avoid acne.
+    this.key.shadow.bias = -0.0004;
+    this.key.shadow.normalBias = 0.09;
+    this.key.shadow.radius = 2.5;
+    this.fitShadow();
+    this.scene.add(this.key, this.key.target);
 
-    // --- content
+    // --- ground, seabed and sea
+    this.optics = makeWaterOptics(SUN_DIR);
+    this.terrain = buildTerrain(this.optics);
+    this.scene.add(this.terrain);
+    const skyIrr = this.atmosphere.fogColor.clone().multiplyScalar(Math.PI * 0.55);
+    this.ocean = new Ocean(this.optics, buildBedTexture(), this.atmosphere.skyCube.texture, this.atmosphere.sunTint, fog.color, skyIrr);
+    this.ocean.uniforms.uRippleOrigin.value.copy(POUR_TARGET);
+    // The sea is blended over the seabed; ambient occlusion must see the seabed, not a flat proxy plane.
+    this.ocean.mesh.userData.noAO = true;
+    this.scene.add(this.ocean.mesh);
+
+    // --- plant
     this.wet = makeWetUniforms();
     this.wet.uRippleOrigin.value.copy(POUR_TARGET);
     const pal = makePalette(this.wet);
     this.plant = buildPlant(pal);
     this.scene.add(this.plant.root);
-    this.pipes = new Pipes(pipeDefs(), pal.steel(), pal.paintDark());
+    this.pipes = new Pipes(pipeDefs(), pal);
     this.scene.add(this.pipes.group);
     for (const p of this.pipes.pipes) this.pipeColors.set(p.def.id, WATER_COLORS[p.def.kind].clone());
     this.particles = new FlowParticles(this.pipes.pipes);
     this.scene.add(this.particles.points);
-    this.sea = new SeaSurface(2, 2, SEA_LEVEL);
-    this.sea.uniforms.uRippleOrigin.value.copy(POUR_TARGET);
-    this.sea.uniforms.uPlumeOrigin.value.set(OUTFALL.x, SEA_LEVEL, OUTFALL.z);
-    this.scene.add(this.sea.mesh);
+
+    // --- surroundings
+    this.context = buildContext(pal, this.optics, this.plant.lamps);
+    this.scene.add(this.context.root);
+
+    // Anything reaching below the waterline fades into the sea like the seabed does.
+    for (const group of [this.plant.root, this.context.root]) this.applyUnderwater(group);
+
     this.pour = new WaterPour(POUR_TARGET);
     this.scene.add(this.pour.group);
+    this.reflectHide = [this.ocean.mesh, this.particles.points, this.pour.group];
 
     this.rig = new CameraRig(this.camera, canvas);
     this.post = new PostFX(r, this.scene, this.camera, 2, 2);
@@ -178,6 +202,54 @@ export class TwinEngine {
     canvas.addEventListener("pointerdown", this.onPointerDown);
     canvas.addEventListener("pointerup", this.onPointerUp);
     canvas.addEventListener("pointerleave", this.onPointerLeave);
+  }
+
+  private applyUnderwater(root: THREE.Object3D) {
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    root.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || !m.geometry) return;
+      const im = m as THREE.InstancedMesh;
+      if (im.isInstancedMesh) {
+        im.computeBoundingBox();
+        box.copy(im.boundingBox!).applyMatrix4(im.matrixWorld);
+      } else {
+        if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
+        box.copy(m.geometry.boundingBox!).applyMatrix4(m.matrixWorld);
+      }
+      if (box.min.y > SEA_LEVEL + 0.25) return;
+      const mats = Array.isArray(m.material) ? m.material : [m.material];
+      for (const mat of mats) if ((mat as THREE.MeshStandardMaterial).isMeshStandardMaterial) withUnderwater(mat as THREE.MeshStandardMaterial, this.optics);
+    });
+  }
+
+  /** Fit the sun's orthographic shadow frustum tightly around the plant and its near surroundings. */
+  private fitShadow() {
+    const center = new THREE.Vector3(0, 0, -6);
+    const k = this.key;
+    k.target.position.copy(center);
+    k.position.copy(SUN_DIR).multiplyScalar(160).add(center);
+    k.updateMatrixWorld();
+    k.target.updateMatrixWorld();
+    const view = new THREE.Matrix4().lookAt(k.position, center, new THREE.Vector3(0, 1, 0));
+    view.setPosition(k.position);
+    const inv = view.clone().invert();
+    const box = new THREE.Box3(new THREE.Vector3(-50, -5, -48), new THREE.Vector3(50, 12, 24));
+    const ls = new THREE.Box3();
+    const p = new THREE.Vector3();
+    for (let i = 0; i < 8; i++) {
+      p.set(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).applyMatrix4(inv);
+      ls.expandByPoint(p);
+    }
+    const sc = k.shadow.camera as THREE.OrthographicCamera;
+    sc.left = ls.min.x;
+    sc.right = ls.max.x;
+    sc.bottom = ls.min.y;
+    sc.top = ls.max.y;
+    sc.near = Math.max(0.5, -ls.max.z - 2);
+    sc.far = -ls.min.z + 2;
+    sc.updateProjectionMatrix();
   }
 
   /** Compile shaders ahead of time so the intro starts without hitches. */
@@ -233,7 +305,7 @@ export class TwinEngine {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.post.setSize(w * pr, h * pr);
-    this.sea.setSize(w * pr, h * pr);
+    this.ocean.setSize(w * pr, h * pr);
     this.particles.setPixelRatio(pr);
     this.pour.setPixelRatio(pr);
     this.rig.setAspect(w / h);
@@ -292,10 +364,13 @@ export class TwinEngine {
     const shadow = tier === 2 ? 4096 : tier === 1 ? 2048 : 1024;
     if (this.key.shadow.mapSize.x !== shadow) {
       this.key.shadow.mapSize.set(shadow, shadow);
+      this.key.shadow.radius = tier === 2 ? 2.5 : tier === 1 ? 2 : 1;
       this.key.shadow.map?.dispose();
       this.key.shadow.map = null;
     }
-    this.sea.reflectionScale = tier === 2 ? 0.5 : tier === 1 ? 0.35 : 0.25;
+    this.ocean.setQuality(tier);
+    this.optics.uDetail.value = tier === 0 ? 0 : 1;
+    this.context.setQuality(tier);
     this.renderer.setPixelRatio(tier === 2 ? Math.min(dpr, 2) : tier === 1 ? Math.min(dpr, 1.5) : Math.min(dpr, 1) * 0.85);
     this.applySize();
   }
@@ -328,6 +403,8 @@ export class TwinEngine {
     this.canvas.removeEventListener("pointerleave", this.onPointerLeave);
     this.rig.dispose();
     this.post.dispose();
+    this.ocean.dispose();
+    this.atmosphere.dispose();
     this.scene.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.geometry) m.geometry.dispose();
@@ -405,9 +482,7 @@ export class TwinEngine {
     this.applyFrame(frame, dt);
     this.renderer.info.reset();
     this.perf.beginGpu();
-    if (this.sea.mesh.visible && this.sea.uniforms.uLevelFade.value > 0.01) {
-      this.sea.reflection.update(this.renderer, this.scene, this.camera, [this.sea.mesh, this.particles.points, this.pour.group]);
-    }
+    if (this.ocean.planar) this.ocean.reflection.update(this.renderer, this.scene, this.camera, this.reflectHide);
     this.post.render(dt, this.time);
     this.perf.endGpu();
     this.perf.frame(dt, performance.now() - t0);
@@ -445,20 +520,27 @@ export class TwinEngine {
     c.brineTone = tg.brineTone;
     c.constrained = tg.constrained;
 
-    // Lighting ramps (intro) and final fade-in after skip / reduced motion.
+    // Lighting ramps (intro: dusk → late-afternoon sun) and the fade-in after skip / reduced motion.
     this.fadeIn = Math.min(1, this.fadeIn + dt * 2.8);
     this.renderer.toneMappingExposure = BASE_EXPOSURE * act.exposure;
     this.key.intensity = BASE_KEY * act.keyLight;
     this.scene.environmentIntensity = BASE_ENV * act.envIntensity;
+    this.scene.backgroundIntensity = act.envIntensity;
     this.post.grade.uniforms.uFade.value = this.introMode === "full" && this.intro.running ? 1 : 0.35 + 0.65 * this.fadeIn;
+
+    // Water optics follow the light.
+    const o = this.optics;
+    o.uTime.value = this.time;
+    o.uSunColor.value.copy(this.key.color).multiplyScalar(this.key.intensity);
+    o.uLight.value = 0.3 + 0.7 * act.keyLight;
+    o.uTurbidity.value = Math.min(0.75, Math.max(0, (c.turbidity - 2.5) / 14));
 
     // Wet activation + ripple.
     this.wet.uRippleRadius.value = act.rippleRadius;
     this.wet.uWetness.value = act.wetness;
     this.wet.uWetRadius.value = act.wetRadius;
-    this.sea.uniforms.uRippleRadius.value = act.rippleRadius;
-    this.plant.windows.emissiveIntensity = 0.55 * act.windows;
-    this.plant.lamps.emissiveIntensity = 0.55 * act.lamps;
+    this.plant.windows.emissiveIntensity = 0.32 * act.windows;
+    this.plant.lamps.emissiveIntensity = 0.45 * act.lamps;
     this.pipes.setShellOpacity(act.shellOpacity);
 
     // Pipes and particles.
@@ -521,13 +603,13 @@ export class TwinEngine {
     });
     this.plant.productWater.setLevel(c.productLevel * flow.product, flow.product);
     this.plant.productWater.update(this.time);
-    const su = this.sea.uniforms;
-    su.uTime.value = this.time;
-    su.uLevelFade.value = flow.sea;
-    su.uTurbidity.value = Math.min(0.75, Math.max(0, (c.turbidity - 2.5) / 14));
+    this.plant.update(this.time, dt, flow.pretreatTanks);
+    const su = this.ocean.uniforms;
+    su.uActivity.value = 0.12 + 0.88 * flow.sea;
+    su.uEnv.value = this.scene.environmentIntensity;
+    su.uRippleRadius.value = act.rippleRadius;
     su.uPlume.value = flow.outfall * Math.min(1.2, avgBrine);
-    this.sea.mesh.position.y = SEA_LEVEL - (1 - flow.sea) * 0.9;
-    this.sea.mesh.visible = flow.sea > 0.001;
+    this.context.update(this.time, this.ocean, su.uActivity.value);
 
     // Assets: beacons, state tint, hover / selection.
     const tone: Record<AssetId, Tone> = {
@@ -546,7 +628,7 @@ export class TwinEngine {
       const on = act.beacons[def.id];
       for (const b of a.beacons) {
         b.material.emissive.copy(TONE_COLOR[tn]);
-        b.material.emissiveIntensity = (tn === "off" ? 0 : tn === "ok" ? 2.2 : 3.2) * on;
+        b.material.emissiveIntensity = (tn === "off" ? 0 : tn === "ok" ? 2.6 : 3.6) * on;
       }
       const hTarget = this.selected === def.id ? 1 : this.hovered === def.id ? 0.5 : 0;
       a.select = lerp(a.select, hTarget, dt > 0 ? 1 - Math.exp(-dt * 10) : 1);

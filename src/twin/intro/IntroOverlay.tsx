@@ -1,7 +1,7 @@
 "use client";
 /**
  * Intro overlay: minimal branding and stage text while the plant comes online,
- * plus a Skip control (button, Esc, Space). Purely presentational — the
+ * plus a Skip control (button, Esc, Space). Purely presentational; the
  * sequence itself is driven by IntroController inside the engine. The
  * branding is anchored to the lower part of the 3D viewport.
  */
@@ -60,7 +60,7 @@ export function IntroOverlay() {
     <div aria-live="polite" className={`no-print pointer-events-none fixed inset-0 z-40 transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}>
       <div ref={brandRef} className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-center" style={{ left: "50%", top: "50%" }}>
         <div className="flex items-center gap-2.5">
-          <AquaTwinMark size={22} />
+          <AquaTwinMark size={30} glow />
           <span className="text-[17px] font-semibold tracking-tight text-fg">AquaTwin</span>
         </div>
         <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.14em] text-fg-subtle uppercase">

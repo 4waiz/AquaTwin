@@ -7,6 +7,7 @@
  */
 import * as THREE from "three";
 import type { PipeDef } from "./layout";
+import type { Palette } from "./materials";
 
 export const WATER_COLORS = {
   feed: new THREE.Color(0.022, 0.12, 0.33),
@@ -125,7 +126,9 @@ export class Pipes {
   private flanges: THREE.InstancedMesh;
   private supports: THREE.InstancedMesh;
 
-  constructor(defs: PipeDef[], steel: THREE.Material, support: THREE.Material) {
+  constructor(defs: PipeDef[], pal: Palette) {
+    const steel = pal.steel();
+    const support = pal.galv();
     this.group.name = "pipes";
     const flangeMatrices: THREE.Matrix4[] = [];
     const supportMatrices: THREE.Matrix4[] = [];

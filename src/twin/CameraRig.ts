@@ -60,7 +60,8 @@ export class CameraRig {
     c.zoomSpeed = 0.55;
     c.enablePan = false;
     c.minPolarAngle = 0.55;
-    c.maxPolarAngle = 1.22;
+    // Low enough to look across the site to the horizon, never under the ground.
+    c.maxPolarAngle = 1.36;
     this.applyPose(this.defaultPose(), true);
   }
 

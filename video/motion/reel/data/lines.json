@@ -1,0 +1,65 @@
+{
+ "duration": 54.167,
+ "lines": [
+  {
+   "i": 0,
+   "text": "In the Gulf, cities drink the sea.",
+   "s": 0.5,
+   "e": 2.297
+  },
+  {
+   "i": 1,
+   "text": "Yet plants still run on fixed setpoints, and alarms that fire once the trouble has started.",
+   "s": 2.677,
+   "e": 7.722
+  },
+  {
+   "i": 2,
+   "text": "Meet AquaTwin: a physics-informed AI digital twin that stays calibrated to the plant as it runs.",
+   "s": 8.482,
+   "e": 15.025
+  },
+  {
+   "i": 3,
+   "text": "Physics predicts. Machine learning corrects the rest. And every answer carries its uncertainty.",
+   "s": 15.405,
+   "e": 20.918
+  },
+  {
+   "i": 4,
+   "text": "Before a salinity shock, it rehearses the day ahead. Fixed setpoints break limits for twenty-one hours. AquaTwin's plan breaks none.",
+   "s": 21.298,
+   "e": 29.407
+  },
+  {
+   "i": 5,
+   "text": "It flags membrane fouling half a day before cleaning is due.",
+   "s": 29.787,
+   "e": 33.099
+  },
+  {
+   "i": 6,
+   "text": "Its safety layer, AquaGuard, checks every limit, and outside what the model knows, it withholds its advice.",
+   "s": 33.479,
+   "e": 39.895
+  },
+  {
+   "i": 7,
+   "text": "Tested against a hidden plant, fully reproducible, and built for shadow mode on data plants already record.",
+   "s": 40.275,
+   "e": 46.821
+  },
+  {
+   "i": 8,
+   "text": "Smart water, for S D G six.",
+   "s": 47.201,
+   "e": 49.366
+  },
+  {
+   "i": 9,
+   "text": "AquaTwin. Predict, simulate, adapt. By Team Kanban.",
+   "s": 50.126,
+   "e": 53.567
+  }
+ ]
+}

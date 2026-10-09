@@ -51,13 +51,13 @@ export function DecisionLog({ branch, cursor, onSeek }: { branch: ScenarioBranch
                   <span className={`rounded border px-1.5 py-px font-mono text-[9.5px] ${VERDICT_CLS[d.verdict] ?? VERDICT_CLS.HOLD}`}>{d.verdict}</span>
                 </td>
                 <td className="num py-1.5 pl-2 text-right whitespace-nowrap text-fg">{d.chosen ? `${fmt(d.chosen.P, 1)} bar` : "hold"}</td>
-                <td className="num py-1.5 pl-2 text-right whitespace-nowrap text-fg">{d.chosen ? `${fmt(d.chosen.Qv, 1)} m³/h` : "—"}</td>
+                <td className="num py-1.5 pl-2 text-right whitespace-nowrap text-fg">{d.chosen ? `${fmt(d.chosen.Qv, 1)} m³/h` : "–"}</td>
                 <td className="py-1.5 pl-3 text-fg-muted">
                   {d.chosen
                     ? d.chosen.focusMode === "normal"
                       ? "All trains equal"
                       : `${FOCUS_LABEL[d.chosen.focusMode].replace("Focus train", `T${(d.focusTrain ?? 0) + 1}`)}`
-                    : "—"}
+                    : "–"}
                 </td>
                 <td className="num py-1.5 text-right text-fg-subtle">{fmtInt(d.plan.target_m3h)}</td>
               </tr>

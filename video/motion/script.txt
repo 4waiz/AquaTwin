@@ -1,0 +1,14 @@
+# AquaTwin: one-minute pitch (Khalifa University–UNESCO Global Water Hackathon 2026).
+# One line per beat; each line becomes a cut. Numbers and acronyms are written as spoken.
+In the Gulf, cities drink the sea.
+Yet plants still run on fixed setpoints, and alarms that fire once the trouble has started.
+
+Meet AquaTwin: a physics-informed AI digital twin that stays calibrated to the plant as it runs.
+Physics predicts. Machine learning corrects the rest. And every answer carries its uncertainty.
+Before a salinity shock, it rehearses the day ahead. Fixed setpoints break limits for twenty-one hours. AquaTwin's plan breaks none.
+It flags membrane fouling half a day before cleaning is due.
+Its safety layer, AquaGuard, checks every limit, and outside what the model knows, it withholds its advice.
+Tested against a hidden plant, fully reproducible, and built for shadow mode on data plants already record.
+Smart water, for S D G six.
+
+AquaTwin. Predict, simulate, adapt. By Team Kanban.

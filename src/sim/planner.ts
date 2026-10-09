@@ -5,7 +5,7 @@
  * window into (a) a hard minimum production that keeps the reservoir above its
  * reserve level for the next decision interval, (b) a hard maximum that avoids
  * overflow, and (c) a soft production target that steers the reservoir towards
- * its set level — raised in advance of a known power-cap window so storage can
+ * its set level, raised in advance of a known power-cap window so storage can
  * carry the plant through it.
  */
 

@@ -24,7 +24,7 @@ RES = json.loads((ROOT / "public/data/validation/results.json").read_text(encodi
 
 METHODS = ["fixed", "physics", "mlonly", "hybrid"]
 LABEL = {"fixed": "Fixed operation", "physics": "Physics only", "mlonly": "ML only", "hybrid": "AquaTwin hybrid", "nominal": "Physics (uncalibrated)"}
-COLOR = {"fixed": "#b9c0ca", "nominal": "#d5dae1", "physics": "#7fa8dc", "mlonly": "#56627a", "hybrid": "#1f5fbf"}
+COLOR = {"fixed": "#b9c0ca", "nominal": "#d5dae1", "physics": "#86bbe6", "mlonly": "#56627a", "hybrid": "#0a72d6"}
 INK = "#1b2432"
 MUTED = "#5b6677"
 CRIT = "#b3261e"

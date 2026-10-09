@@ -1,7 +1,7 @@
 /**
- * The plant, built from primitives: a high-end miniature process model rather
- * than a photoreal facility. Every asset gets its own highlight uniforms,
- * a raycast proxy, a selection footprint and status beacons.
+ * The plant, built procedurally from primitives on its quay platform. Every
+ * asset gets its own highlight uniforms, a raycast proxy, a selection
+ * footprint and status beacons; static parts are merged per material.
  */
 import * as THREE from "three";
 import type { AssetId } from "@/sim/scenarios";
@@ -36,6 +36,8 @@ export interface PlantBuild {
   windows: THREE.MeshStandardMaterial;
   lamps: THREE.MeshStandardMaterial;
   proxies: THREE.Mesh[];
+  /** Per-frame animation of moving parts (clarifier bridges). */
+  update: (time: number, dt: number, active: number) => void;
 }
 
 const footprintFrag = /* glsl */ `
@@ -54,6 +56,48 @@ const footprintFrag = /* glsl */ `
     gl_FragColor = vec4(uColor, a);
   }`;
 
+/** Circular handrail (posts with top and knee rails) around a tank roof edge at height y. */
+function addRingRail(group: THREE.Group, mat: THREE.Material, x: number, z: number, r: number, y: number) {
+  for (const h of [0.55, 1.05]) {
+    const rail = mesh(new THREE.TorusGeometry(r, 0.025, 6, 64), mat, false);
+    rail.rotation.x = Math.PI / 2;
+    rail.position.set(x, y + h, z);
+    group.add(rail);
+  }
+  const n = Math.max(8, Math.round((2 * Math.PI * r) / 1.4));
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const post = mesh(new THREE.BoxGeometry(0.04, 1.05, 0.04), mat, false);
+    post.position.set(x + Math.cos(a) * r, y + 0.52, z + Math.sin(a) * r);
+    group.add(post);
+  }
+}
+
+/** Rectangular handrail around a roof or platform edge at height y. */
+function addRectRail(group: THREE.Group, mat: THREE.Material, x0: number, z0: number, x1: number, z1: number, y: number) {
+  const sides: [number, number, number, number][] = [
+    [x0, z0, x1, z0],
+    [x1, z0, x1, z1],
+    [x1, z1, x0, z1],
+    [x0, z1, x0, z0],
+  ];
+  for (const [ax, az, bx, bz] of sides) {
+    const len = Math.hypot(bx - ax, bz - az);
+    for (const h of [0.55, 1.05]) {
+      const rail = mesh(new THREE.BoxGeometry(len, 0.045, 0.045), mat, false);
+      rail.position.set((ax + bx) / 2, y + h, (az + bz) / 2);
+      rail.rotation.y = -Math.atan2(bz - az, bx - ax);
+      group.add(rail);
+    }
+    const n = Math.max(1, Math.round(len / 1.3));
+    for (let i = 0; i <= n; i++) {
+      const post = mesh(new THREE.BoxGeometry(0.045, 1.05, 0.045), mat, false);
+      post.position.set(ax + ((bx - ax) * i) / n, y + 0.52, az + ((bz - az) * i) / n);
+      group.add(post);
+    }
+  }
+}
+
 function mesh(geo: THREE.BufferGeometry, mat: THREE.Material, shadow = true) {
   const m = new THREE.Mesh(geo, mat);
   m.castShadow = shadow;
@@ -70,7 +114,8 @@ export function buildPlant(pal: Palette): PlantBuild {
   const deckD = DECK.maxZ - DECK.minZ;
   const deckH = DECK.top - DECK.bottom;
   const deckGeo = new THREE.BoxGeometry(deckW, deckH, deckD);
-  const deckMats = [pal.deckSide, pal.deckSide, pal.deck, pal.deckSide, pal.deckSide, pal.deckSide];
+  // Box faces: +x, -x, top, bottom, +z (quay wall facing the sea), -z.
+  const deckMats = [pal.deckSide, pal.deckSide, pal.deck, pal.deckSide, pal.quayWall, pal.deckSide];
   const deck = new THREE.Mesh(deckGeo, deckMats);
   deck.position.set((DECK.minX + DECK.maxX) / 2, (DECK.top + DECK.bottom) / 2, (DECK.minZ + DECK.maxZ) / 2);
   deck.receiveShadow = true;
@@ -81,12 +126,17 @@ export function buildPlant(pal: Palette): PlantBuild {
   kerb.position.set(deck.position.x, 0.09, DECK.maxZ - 0.14);
   root.add(kerb);
 
-  // Display base (the "table" the model stands on).
-  const base = new THREE.Mesh(new THREE.CircleGeometry(95, 96), pal.base);
-  base.rotation.x = -Math.PI / 2;
-  base.position.y = DECK.bottom;
-  base.receiveShadow = true;
-  root.add(base);
+  // Quay furniture: capping beam and bollards along the sea edge.
+  {
+    const cap = mesh(new THREE.BoxGeometry(deckW, 0.32, 0.55), pal.deckSide);
+    cap.position.set(deck.position.x, -0.16, DECK.maxZ - 0.25);
+    root.add(cap);
+    for (let x = DECK.minX + 2.5; x < DECK.maxX - 1; x += 7.5) {
+      const b = mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.42, 14), pal.paintDark());
+      b.position.set(x, 0.21, DECK.maxZ - 0.45);
+      root.add(b);
+    }
+  }
 
   const assets = {} as Record<AssetId, AssetRuntime>;
   const proxies: THREE.Mesh[] = [];
@@ -100,7 +150,7 @@ export function buildPlant(pal: Palette): PlantBuild {
     const footprint = new THREE.Mesh(
       fpGeo,
       new THREE.ShaderMaterial({
-        uniforms: { uOpacity: { value: 0 }, uColor: { value: new THREE.Color("#5b9dff") }, uSize: { value: new THREE.Vector2(x1 - x0, z1 - z0) } },
+        uniforms: { uOpacity: { value: 0 }, uColor: { value: new THREE.Color("#40b4ff") }, uSize: { value: new THREE.Vector2(x1 - x0, z1 - z0) } },
         vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }",
         fragmentShader: footprintFrag,
         transparent: true,
@@ -141,21 +191,28 @@ export function buildPlant(pal: Palette): PlantBuild {
   // ---------------------------------------------------------------- 01 intake
   {
     const a = makeAsset(ASSETS.find((d) => d.id === "intake")!);
-    const concrete = hl(a, pal.paintMid());
-    const body = mesh(new THREE.BoxGeometry(INTAKE.w, INTAKE.h + 1.6, INTAKE.d), concrete);
-    body.position.set(INTAKE.x, (INTAKE.h - 1.6) / 2, INTAKE.z);
+    const concrete = hl(a, pal.concrete());
+    const body = mesh(new THREE.BoxGeometry(INTAKE.w, INTAKE.h + 0.1, INTAKE.d), concrete);
+    body.position.set(INTAKE.x, (INTAKE.h - 0.1) / 2 + 0.05, INTAKE.z);
     a.group.add(body);
-    // Screen bays facing the sea.
-    const screenMat = hl(a, pal.steel());
+    const parapet = mesh(new THREE.BoxGeometry(INTAKE.w + 0.2, 0.18, INTAKE.d + 0.2), concrete);
+    parapet.position.set(INTAKE.x, INTAKE.h + 0.04, INTAKE.z);
+    a.group.add(parapet);
+    // Intake bays in the quay wall below the pump house: dark openings with bar screens.
+    const screenMat = hl(a, pal.galv());
+    const recess = hl(a, pal.paint("#101418", 0.9, 0, 0));
     for (let i = 0; i < 4; i++) {
-      const bay = mesh(new THREE.BoxGeometry(0.72, 1.6, 0.12), screenMat);
-      bay.position.set(INTAKE.x - 1.5 + i, -0.4, INTAKE.z + INTAKE.d / 2 + 0.06);
+      const bay = mesh(new THREE.BoxGeometry(0.86, 2.6, 0.08), recess, false);
+      bay.position.set(INTAKE.x - 1.6 + i * 1.07, -2.1, DECK.maxZ + 0.02);
       a.group.add(bay);
-      for (let s = 0; s < 5; s++) {
-        const bar = mesh(new THREE.BoxGeometry(0.03, 1.5, 0.05), screenMat, false);
-        bar.position.set(INTAKE.x - 1.78 + i + s * 0.14, -0.4, INTAKE.z + INTAKE.d / 2 + 0.14);
+      for (let s = 0; s < 6; s++) {
+        const bar = mesh(new THREE.BoxGeometry(0.035, 2.6, 0.05), screenMat, false);
+        bar.position.set(INTAKE.x - 1.95 + i * 1.07 + s * 0.14, -2.1, DECK.maxZ + 0.08);
         a.group.add(bar);
       }
+      const lintel = mesh(new THREE.BoxGeometry(0.98, 0.18, 0.12), screenMat, false);
+      lintel.position.set(INTAKE.x - 1.6 + i * 1.07, -0.75, DECK.maxZ + 0.08);
+      a.group.add(lintel);
     }
     // Intake pump columns on the roof slab.
     const motor = hl(a, pal.motor());
@@ -164,14 +221,27 @@ export function buildPlant(pal: Palette): PlantBuild {
       col.position.set(INTAKE.x - 0.8 + i * 1.6, INTAKE.h + 0.45, INTAKE.z + 0.5);
       a.group.add(col);
     }
-    const rail = mesh(new THREE.BoxGeometry(INTAKE.w + 0.1, 0.08, 0.08), hl(a, pal.steel()), false);
-    rail.position.set(INTAKE.x, INTAKE.h + 0.55, INTAKE.z - INTAKE.d / 2 + 0.05);
-    a.group.add(rail);
+    // Pump discharge heads, roof handrail and a monorail hoist beam over the pumps.
+    for (let i = 0; i < 2; i++) {
+      const head = mesh(new THREE.CylinderGeometry(0.26, 0.3, 0.42, 16), hl(a, pal.steel()));
+      head.position.set(INTAKE.x - 0.8 + i * 1.6, INTAKE.h + 0.21, INTAKE.z + 0.5);
+      a.group.add(head);
+    }
+    addRectRail(a.group, hl(a, pal.yellow()), INTAKE.x - INTAKE.w / 2 + 0.1, INTAKE.z - INTAKE.d / 2 + 0.1, INTAKE.x + INTAKE.w / 2 - 0.1, INTAKE.z + INTAKE.d / 2 - 0.1, INTAKE.h + 0.12);
+    const beam = mesh(new THREE.BoxGeometry(INTAKE.w + 0.6, 0.16, 0.12), hl(a, pal.yellow()));
+    beam.position.set(INTAKE.x, INTAKE.h + 2.0, INTAKE.z + 0.5);
+    a.group.add(beam);
+    for (const sx of [-1, 1]) {
+      const leg = mesh(new THREE.BoxGeometry(0.12, 1.9, 0.12), hl(a, pal.yellow()));
+      leg.position.set(INTAKE.x + sx * (INTAKE.w / 2 + 0.2), INTAKE.h + 1.05, INTAKE.z + 0.5);
+      a.group.add(leg);
+    }
     beacon(a, a.def.lightAt);
   }
 
   // ---------------------------------------------------------------- 02 pretreatment
   const pretreatWater: TankWater[] = [];
+  const bridges: THREE.Group[] = [];
   const waterNormal = makeWaterNormal();
   {
     const a = makeAsset(ASSETS.find((d) => d.id === "pretreatment")!);
@@ -191,10 +261,27 @@ export function buildPlant(pal: Palette): PlantBuild {
       rim.position.set(t.x, t.h, t.z);
       const plinth = mesh(new THREE.CylinderGeometry(t.r + 0.25, t.r + 0.3, 0.14, 64), pal.deckSide);
       plinth.position.set(t.x, 0.07, t.z);
-      // Walkway bridge across the top.
-      const bridge = mesh(new THREE.BoxGeometry(t.r * 2 + 0.4, 0.06, 0.5), ring);
+      // Rotating clarifier bridge with its drive at the centre.
+      const bridge = new THREE.Group();
       bridge.position.set(t.x, t.h + 0.05, t.z);
+      const deckB = mesh(new THREE.BoxGeometry(t.r * 2 + 0.2, 0.08, 0.6), ring);
+      const drive = mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.5, 16), hl(a, pal.motor()));
+      drive.position.y = 0.3;
+      bridge.add(deckB, drive);
+      for (const sz of [-1, 1]) {
+        const hr = mesh(new THREE.BoxGeometry(t.r * 2 + 0.1, 0.05, 0.05), hl(a, pal.yellow()), false);
+        hr.position.set(0, 1.0, sz * 0.28);
+        bridge.add(hr);
+        for (let k = -2; k <= 2; k++) {
+          const post = mesh(new THREE.BoxGeometry(0.04, 1.0, 0.04), hl(a, pal.yellow()), false);
+          post.position.set(k * (t.r * 0.45), 0.5, sz * 0.28);
+          bridge.add(post);
+        }
+      }
+      bridge.userData.dynamic = true;
+      bridges.push(bridge);
       a.group.add(outer, innerM, floor, rim, plinth, bridge);
+      addRingRail(a.group, hl(a, pal.yellow()), t.x, t.z, t.r + 0.05, t.h);
       const w = new TankWater(t.r - 0.1, waterNormal, new THREE.Color(0.02, 0.08, 0.13), 0.15, t.h - 0.25);
       w.mesh.position.set(t.x, 0, t.z);
       w.mesh.userData.dynamic = true;
@@ -210,7 +297,7 @@ export function buildPlant(pal: Palette): PlantBuild {
     const a = makeAsset(ASSETS.find((d) => d.id === "pumps")!);
     const skidMat = hl(a, pal.paintDark());
     const motorMat = hl(a, pal.motor());
-    const casingMat = hl(a, pal.steel());
+    const casingMat = hl(a, pal.pumpCasing());
     TRAIN_Z.forEach((z) => {
       const skid = mesh(new THREE.BoxGeometry(3.9, 0.22, 1.5), skidMat);
       skid.position.set(PUMP_X, 0.11, z);
@@ -239,7 +326,7 @@ export function buildPlant(pal: Palette): PlantBuild {
       }
       const guard = mesh(
         new THREE.CylinderGeometry(0.3, 0.3, 0.55, 20, 1, true),
-        new THREE.MeshStandardMaterial({ color: "#1b2027", transparent: true, opacity: 0.35, side: THREE.DoubleSide }),
+        new THREE.MeshStandardMaterial({ color: "#e0ad12", transparent: true, opacity: 0.42, side: THREE.DoubleSide, roughness: 0.5 }),
         false,
       );
       guard.rotation.z = Math.PI / 2;
@@ -271,7 +358,7 @@ export function buildPlant(pal: Palette): PlantBuild {
     const z = TRAIN_Z[ti];
     const vesselMat = hl(a, pal.vessel());
     const capMat = hl(a, pal.endCap());
-    const frameMat = hl(a, pal.steel());
+    const frameMat = hl(a, pal.frameBlue());
     const len = RO.x1 - RO.x0;
     const n = RO.columnsZ.length * RO.rowsY.length;
     const vesselGeo = new THREE.CylinderGeometry(RO.vesselRadius, RO.vesselRadius, len - 0.5, 28);
@@ -348,6 +435,23 @@ export function buildPlant(pal: Palette): PlantBuild {
     gauge.position.set(t.x - t.r * 0.72, t.h / 2, t.z + t.r * 0.7);
     gauge.lookAt(t.x, t.h / 2, t.z);
     a.group.add(outer, inner, floor, rim, plinth, gauge);
+    addRingRail(a.group, hl(a, pal.yellow()), t.x, t.z, t.r + 0.06, t.h);
+    // Caged access ladder on the shell.
+    const lad = hl(a, pal.galv());
+    const la = -2.35;
+    const lx = t.x + Math.cos(la) * (t.r + 0.18);
+    const lz = t.z + Math.sin(la) * (t.r + 0.18);
+    for (const off of [-0.22, 0.22]) {
+      const stile = mesh(new THREE.BoxGeometry(0.05, t.h + 1.0, 0.05), lad, false);
+      stile.position.set(lx - Math.sin(la) * off, (t.h + 1.0) / 2, lz + Math.cos(la) * off);
+      a.group.add(stile);
+    }
+    for (let y = 0.3; y < t.h + 0.9; y += 0.3) {
+      const rung = mesh(new THREE.BoxGeometry(0.03, 0.03, 0.44), lad, false);
+      rung.position.set(lx, y, lz);
+      rung.rotation.y = -la;
+      a.group.add(rung);
+    }
     productWater = new TankWater(t.r - 0.12, waterNormal, new THREE.Color(0.03, 0.11, 0.19), 0.2, t.h - 0.25);
     productWater.mesh.position.set(t.x, 0, t.z);
     productWater.mesh.userData.dynamic = true;
@@ -380,10 +484,13 @@ export function buildPlant(pal: Palette): PlantBuild {
         a.group.add(c);
       }
     });
-    // Outfall headwall at the quay.
-    const head = mesh(new THREE.BoxGeometry(2.2, 1.4, 0.8), pal.deckSide);
-    head.position.set(OUTFALL.x, -0.3, DECK.maxZ + 0.1);
-    a.group.add(head);
+    // Outfall (seal-weir) chamber built out from the quay; the outfall pipeline leaves it on the seabed.
+    const chamber = mesh(new THREE.BoxGeometry(2.4, DECK.top + 0.35 - DECK.bottom, 2.5), pal.quayWall);
+    chamber.position.set(OUTFALL.x, (DECK.top + 0.35 + DECK.bottom) / 2, OUTFALL.z);
+    const grate = mesh(new THREE.BoxGeometry(1.9, 0.04, 2.0), hl(a, pal.galv()), false);
+    grate.position.set(OUTFALL.x, 0.37, OUTFALL.z);
+    a.group.add(chamber, grate);
+    addRectRail(a.group, hl(a, pal.yellow()), OUTFALL.x - 1.15, DECK.maxZ + 0.05, OUTFALL.x + 1.15, OUTFALL.z + 1.2, 0.35);
     beacon(a, a.def.lightAt);
   }
 
@@ -391,6 +498,15 @@ export function buildPlant(pal: Palette): PlantBuild {
   const windows = pal.glass;
   {
     const control = mesh(new THREE.BoxGeometry(7.2, 3.2, 4.4), pal.building());
+    // Photovoltaic array on the control building roof (tilted toward the south, away from the sea).
+    const pv = pal.pv();
+    for (let row = 0; row < 2; row++)
+      for (let col = 0; col < 4; col++) {
+        const panel = mesh(new THREE.BoxGeometry(1.55, 0.04, 1.0), pv);
+        panel.position.set(-20.0 + col * 1.65, 3.62 + 0.13, -10.0 + row * 1.35);
+        panel.rotation.x = 0.26;
+        root.add(panel);
+      }
     control.position.set(-17.6, 1.6, -8.8);
     const roof = mesh(new THREE.BoxGeometry(7.5, 0.18, 4.7), pal.roof());
     roof.position.set(-17.6, 3.29, -8.8);
@@ -438,6 +554,13 @@ export function buildPlant(pal: Palette): PlantBuild {
   // Merge static geometry per asset (and for the context buildings) to cut draw calls.
   for (const a of Object.values(assets)) mergeStatic(a.group);
   mergeStatic(root);
+  for (const b of bridges) mergeStatic(b);
 
-  return { root, assets, pumps, pretreatWater, productWater, windows, lamps, proxies };
+  let spin = 0;
+  const update = (_time: number, dt: number, active: number) => {
+    spin += dt * 0.07 * active;
+    bridges.forEach((b, i) => (b.rotation.y = spin * (i % 2 ? -1 : 1) + i * 0.9));
+  };
+
+  return { root, assets, pumps, pretreatWater, productWater, windows, lamps, proxies, update };
 }

@@ -12,9 +12,9 @@ import { fmt, fmtSigned } from "@/lib/format";
 const HOUR = 3_600_000;
 
 const STAGES = [
-  { key: "intake", label: "Seawater intake", color: "#2f5f9e" },
+  { key: "intake", label: "Seawater intake", color: "#1b5f94" },
   { key: "pretreatment", label: "Pretreatment", color: "#3a78c2" },
-  { key: "hpPump", label: "High-pressure pumps", color: "#5b9dff" },
+  { key: "hpPump", label: "High-pressure pumps", color: "#40b4ff" },
   { key: "booster", label: "ERD booster", color: "#8fb4e6" },
   { key: "postTreatment", label: "Post-treatment & transfer", color: "#7c8799" },
   { key: "base", label: "Buildings & controls", color: "#475163" },
@@ -138,7 +138,7 @@ export default function EnergyPage() {
               series={[
                 { id: "b", label: "Baseline (no disturbance)", color: "#7c8799", values: scen.map((id) => results[id]!.baseline.metrics.sec) },
                 { id: "n", label: "Disturbance, no action", color: "#d4dae3", values: scen.map((id) => results[id]!.noAction.metrics.sec) },
-                { id: "a", label: "Disturbance, AquaTwin", color: "#5b9dff", values: scen.map((id) => results[id]!.aquatwin.metrics.sec) },
+                { id: "a", label: "Disturbance, AquaTwin", color: "#40b4ff", values: scen.map((id) => results[id]!.aquatwin.metrics.sec) },
               ]}
               format={(v) => v.toFixed(3)}
               unit="kWh/m³ (24 h mean)"
@@ -177,7 +177,7 @@ export default function EnergyPage() {
           <>
             <LineChart
               x={chart.x}
-              series={[{ id: "p", label: "Plant power (modelled)", color: "#5b9dff", values: chart.power, fill: true }]}
+              series={[{ id: "p", label: "Plant power (modelled)", color: "#40b4ff", values: chart.power, fill: true }]}
               xFormat={(v) => (Math.abs(v) < 0.5 ? "now" : `${Math.round(v)}h`)}
               xTicks={[-24, -18, -12, -6, 0]}
               yFormat={(v) => v.toFixed(1)}
@@ -194,7 +194,7 @@ export default function EnergyPage() {
           </>
         ) : null}
         <p className="col-span-2 -mt-2 text-[11px] text-fg-subtle max-lg:col-span-1 max-lg:mt-0">
-          Carbon is an estimate: an illustrative diurnal profile around {GRID_CARBON_BASE} kg CO₂e/kWh (UAE, 2024, lifecycle basis — Ember). It is not metered data and is
+          Carbon is an estimate: an illustrative diurnal profile around {GRID_CARBON_BASE} kg CO₂e/kWh (UAE, 2024, lifecycle basis; Ember). It is not metered data and is
           not specific to any plant or supplier.
         </p>
       </Panel>

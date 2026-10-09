@@ -1,67 +1,11 @@
 {
   "shots": [
     {
-      "name": "00a-intro-initializing",
-      "forbidden": []
-    },
-    {
-      "name": "00b-intro-synchronizing",
-      "forbidden": []
-    },
-    {
-      "name": "00c-intro-activation",
-      "forbidden": []
-    },
-    {
-      "name": "01-overview",
-      "forbidden": []
-    },
-    {
-      "name": "02-digital-twin",
-      "forbidden": []
-    },
-    {
       "name": "03a-scenario-lab-no-action",
       "forbidden": []
     },
     {
       "name": "03b-scenario-lab-aquatwin",
-      "forbidden": []
-    },
-    {
-      "name": "04-optimization",
-      "forbidden": []
-    },
-    {
-      "name": "05-membrane-health",
-      "forbidden": []
-    },
-    {
-      "name": "06-water-quality",
-      "forbidden": []
-    },
-    {
-      "name": "07-energy-carbon",
-      "forbidden": []
-    },
-    {
-      "name": "08a-model-intelligence",
-      "forbidden": []
-    },
-    {
-      "name": "08b-model-intelligence-withheld",
-      "forbidden": []
-    },
-    {
-      "name": "09-validation",
-      "forbidden": []
-    },
-    {
-      "name": "10-reports",
-      "forbidden": []
-    },
-    {
-      "name": "11-about",
       "forbidden": []
     }
   ],

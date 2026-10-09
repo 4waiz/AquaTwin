@@ -64,7 +64,7 @@ export function outcomeLine(r: RunRecord): string {
   if (n.violationHours > 0 && a.violationHours === 0)
     return `No action violates constraints for ${fmt(n.violationHours, 1)} h; AquaTwin's plan keeps every constraint (SEC ${fmtSigned(((a.sec - n.sec) / n.sec) * 100, 1, "%")}).`;
   if (n.violationHours > 0) return `No action: ${fmt(n.violationHours, 1)} h of violations; AquaTwin: ${fmt(a.violationHours, 1)} h.`;
-  if (a.violationHours > 0) return `AquaTwin's plan has ${fmt(a.violationHours, 1)} h of violations — see decisions.`;
+  if (a.violationHours > 0) return `AquaTwin's plan has ${fmt(a.violationHours, 1)} h of violations; see decisions.`;
   return `No constraint violations in either branch; SEC ${fmt(n.sec, 3)} → ${fmt(a.sec, 3)} kWh/m³.`;
 }
 
@@ -186,7 +186,7 @@ export function RunReport({ r, tone = "dark" }: { r: RunRecord; tone?: Tone }) {
             re-plans in between when the feed trend would take the current setpoints past a limit; the full decision log follows.
           </p>
         ) : (
-          <p className={s.warn}>No action was approved in this run — AquaGuard rejected or withheld every candidate strategy.</p>
+          <p className={s.warn}>No action was approved in this run: AquaGuard rejected or withheld every candidate strategy.</p>
         )}
         <table className="mt-2 w-full">
           <thead>

@@ -366,7 +366,7 @@ export function optimize(input: OptimizationInput): OptimizationResult {
       best: null,
       current,
       verdict: "WITHHELD",
-      message: "Low model confidence — recommendation withheld. Operator review required.",
+      message: "Low model confidence: recommendation withheld. Operator review required.",
     };
   }
   if (!feasible.length) {
@@ -386,7 +386,7 @@ export function optimize(input: OptimizationInput): OptimizationResult {
         best,
         current,
         verdict: "APPROVED",
-        message: "Minimum production cannot be met safely — AquaTwin maximises production within every safety limit.",
+        message: "Minimum production cannot be met safely, so AquaTwin maximises production within every safety limit.",
         relaxed: true,
       };
     }

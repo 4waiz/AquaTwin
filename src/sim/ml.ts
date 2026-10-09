@@ -179,7 +179,7 @@ export interface ConformalJson {
 
 /**
  * Normalised distance between the calibration state (u0, env0) and the queried
- * what-if state (u1, env1) — same definition as ml/train.py.
+ * what-if state (u1, env1), the same definition as ml/train.py.
  */
 export function extrapolationDistance(P1: number, Qv1: number, P0: number, Qv0: number, Cf1: number, Cf0: number, T1: number, T0: number): number {
   return Math.sqrt(((P1 - P0) / 3) ** 2 + (Qv1 - Qv0) ** 2 + ((Cf1 - Cf0) / 3) ** 2 + ((T1 - T0) / 3) ** 2);

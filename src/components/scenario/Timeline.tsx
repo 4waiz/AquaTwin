@@ -47,7 +47,7 @@ export function Timeline({ startClock }: { startClock: number | null }) {
           if (cursor >= 24) setCursor(0);
           setPlaying(!playing);
         }}
-        className="flex h-7 w-7 items-center justify-center rounded-md bg-accent-strong text-white hover:bg-[#4b8ff7]"
+        className="flex h-7 w-7 items-center justify-center rounded-md btn-brand text-white"
         aria-label={playing ? "Pause timeline" : "Play timeline"}
       >
         {playing ? <IconPause size={13} /> : <IconPlay size={13} />}
@@ -111,7 +111,7 @@ export function Timeline({ startClock }: { startClock: number | null }) {
       </div>
       <div className="w-[84px] text-right leading-tight max-sm:w-[64px]">
         <div className="num font-mono text-[12px] text-fg">+{cursor.toFixed(1)} h</div>
-        <div className="num font-mono text-[10px] text-fg-subtle">{startClock === null ? "—" : hourOfDay(startClock + cursor)}</div>
+        <div className="num font-mono text-[10px] text-fg-subtle">{startClock === null ? "–" : hourOfDay(startClock + cursor)}</div>
       </div>
     </div>
   );

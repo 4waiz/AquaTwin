@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AquaTwinMark, IconExternal, IconInfo } from "@/components/icons";
+import { TourButton } from "./GuidedTour";
 import { useLive } from "@/state/live";
 import { TEAM_URL } from "@/lib/brand";
 import { NAV, STATUS_DOT, STATUS_TEXT } from "./Sidebar";
@@ -32,7 +33,7 @@ export function MobileNav() {
     <div className="no-print relative z-30 shrink-0 lg:hidden">
       <div className="flex h-14 items-center gap-3 border-b border-line bg-ink-900 px-4">
         <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
-          <AquaTwinMark size={24} />
+          <AquaTwinMark size={28} glow />
           <span className="text-[15px] font-semibold tracking-tight text-fg">AquaTwin</span>
         </Link>
         <span className="truncate text-[12.5px] text-fg-subtle">{current}</span>
@@ -84,6 +85,9 @@ export function MobileNav() {
                 );
               })}
             </ul>
+            <div className="mt-3 px-3">
+              <TourButton className="h-9 w-full justify-center text-[11.5px]" onStart={() => setOpen(false)} />
+            </div>
             <div className="mt-4 flex items-center justify-between border-t border-line px-3 pt-4 text-[13px]">
               <a href={TEAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-fg-muted hover:text-fg">
                 Team Kanban

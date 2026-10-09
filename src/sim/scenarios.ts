@@ -204,7 +204,7 @@ export const SCENARIOS: Record<ScenarioId, ScenarioSpec> = {
     name: "Compound extreme",
     tag: "Outside model envelope",
     summary: "Salinity reaches 53 g/L and temperature 37.5 °C, beyond the conditions the model was trained on.",
-    represents: "Compound event outside the model's validated envelope — tests safe abstention.",
+    represents: "Compound event outside the model's validated envelope; tests safe abstention.",
     env: (t, clock) => {
       const e = baseEnvironment(clock);
       const p = pulse(t, 1, 2, 20, 3);

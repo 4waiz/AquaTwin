@@ -8,7 +8,7 @@ export function Sparkline({
   values,
   width = 120,
   height = 32,
-  color = "#5b9dff",
+  color = "#40b4ff",
   domain,
   threshold,
 }: {

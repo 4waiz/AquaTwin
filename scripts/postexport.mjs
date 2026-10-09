@@ -33,7 +33,7 @@ function walk(dir) {
 }
 
 if (!existsSync(OUT)) {
-  console.error("postexport: no out/ directory — run next build first");
+  console.error("postexport: no out/ directory; run next build first");
   process.exit(1);
 }
 walk(OUT);

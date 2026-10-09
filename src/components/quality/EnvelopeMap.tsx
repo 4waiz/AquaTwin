@@ -70,7 +70,7 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
     <div className="flex h-full min-h-0 flex-col">
       <div className="mb-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10.5px] text-fg-subtle">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-3 rounded-[2px] bg-[#5b9dff]/40" /> Admissible
+          <span className="h-2 w-3 rounded-[2px] bg-[#40b4ff]/40" /> Admissible
         </span>
         {present.map((b) => (
           <span key={b.bit} className="inline-flex items-center gap-1.5">
@@ -92,7 +92,7 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
                       y={y(grid.Qv[j]) - ch / 2}
                       width={cw + 0.5}
                       height={ch + 0.5}
-                      fill={code === 0 ? "#5b9dff" : code & 256 ? "#070a0f" : (d?.color ?? "#313c4e")}
+                      fill={code === 0 ? "#40b4ff" : code & 256 ? "#070a0f" : (d?.color ?? "#313c4e")}
                       opacity={code === 0 ? 0.28 : code & 256 ? 1 : 0.14}
                       onMouseEnter={() => setHover({ i, j })}
                       onMouseLeave={() => setHover(null)}

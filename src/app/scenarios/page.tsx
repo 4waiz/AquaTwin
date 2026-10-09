@@ -18,7 +18,7 @@ import { pointAt } from "@/twin/visualState";
 import { fmt, fmtHours, hourOfDay } from "@/lib/format";
 import type { ScenarioResult } from "@/runtime/protocol";
 
-const COLORS = { baseline: "#7c8799", noAction: "#d4dae3", aquatwin: "#5b9dff" };
+const COLORS = { baseline: "#7c8799", noAction: "#d4dae3", aquatwin: "#40b4ff" };
 
 function ScenarioChart({ spec, res, cursor, onCursor }: { spec: ChartSpec; res: ScenarioResult; cursor: number; onCursor: (x: number) => void }) {
   const x = res.aquatwin.points.map((p) => p.t);

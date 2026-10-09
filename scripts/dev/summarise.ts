@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 const file = process.argv[2] ?? "public/data/validation/results.json";
 const r = JSON.parse(readFileSync(file, "utf8"));
-const f = (x: { mean: number | null } | undefined, d = 2) => (x && x.mean !== null ? x.mean.toFixed(d) : "—");
+const f = (x: { mean: number | null } | undefined, d = 2) => (x && x.mean !== null ? x.mean.toFixed(d) : "n/a");
 for (const s of r.scenarios) {
   console.log(`\n== ${s.id} (${s.tag})  lead: ${JSON.stringify(r.leadTime[s.id])}`);
   for (const m of r.methods) {

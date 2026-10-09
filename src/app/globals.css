@@ -2,8 +2,11 @@
 
 /*
   AquaTwin design tokens.
-  Surfaces are near-black navy; blue is the only accent. Green / amber / red are
-  reserved for state (healthy / warning / critical) and never used decoratively.
+  Surfaces are near-black navy; azure, taken from the logo, is the only accent.
+  Green / amber / red are reserved for state (healthy / warning / critical) and
+  never used decoratively. The brand-* colours are sampled from the logo
+  (cyan crest → azure → deep blue; teal bars) and appear only in brand moments:
+  the logo, primary actions and the active-page marker.
 */
 @theme {
   --color-ink-950: #04060a;
@@ -21,11 +24,18 @@
   --color-fg-subtle: #6d7787;
   --color-fg-faint: #475163;
 
-  --color-accent: #5b9dff;
-  --color-accent-strong: #3b82f6;
-  --color-accent-soft: #16294a;
+  --color-accent: #40b4ff;
+  --color-accent-strong: #138be9;
+  --color-accent-soft: #0e2b47;
   --color-water: #3a9be0;
   --color-water-deep: #12406b;
+
+  --color-brand-cyan: #5ee9f6;
+  --color-brand-azure: #22b5fb;
+  --color-brand-blue: #0a84ea;
+  --color-brand-deep: #0461c8;
+  --color-brand-teal: #43cbc6;
+  --color-brand-navy: #031635;
 
   --color-ok: #3ecf8e;
   --color-ok-soft: #0e2a20;
@@ -74,8 +84,43 @@ body {
 }
 
 ::selection {
-  background: #2b4c80;
+  background: #0f4f82;
   color: #fff;
+}
+
+/* Brand moments: logo-gradient text, primary action, active marker. */
+.brand-text {
+  background: linear-gradient(100deg, var(--color-brand-cyan), var(--color-brand-azure) 45%, var(--color-brand-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-fill {
+  background: linear-gradient(180deg, var(--color-brand-cyan), var(--color-brand-azure) 45%, var(--color-brand-deep));
+}
+.btn-brand {
+  background: linear-gradient(135deg, #1aa8f5, #0b78dd 60%, #0866cc);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 0 0 1px rgb(34 181 251 / 0.25),
+    0 10px 24px -14px rgb(19 139 233 / 0.9);
+  transition:
+    filter 160ms var(--ease-out-cubic),
+    box-shadow 160ms var(--ease-out-cubic);
+}
+.btn-brand:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    0 0 0 1px rgb(94 233 246 / 0.35),
+    0 12px 28px -12px rgb(19 139 233 / 1);
+}
+.btn-brand:disabled {
+  background: var(--color-ink-700);
+  box-shadow: none;
+}
+.logo-glow {
+  filter: drop-shadow(0 6px 18px rgb(34 181 251 / 0.28));
 }
 
 /* Numbers in telemetry must not jitter as they update. */

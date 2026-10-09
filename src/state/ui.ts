@@ -11,7 +11,7 @@ interface UiState {
   /** Incremented to request a camera reset. */
   cameraReset: number;
   introPhase: IntroPhase;
-  /** Twin rendering failed (WebGL unavailable) — pages show the 2D schematic instead. */
+  /** Twin rendering failed (WebGL unavailable); pages show the 2D schematic instead. */
   twinFailed: boolean;
   perfOpen: boolean;
   /** Touch devices: the 3D view only captures gestures after "Explore 3D" is tapped (so pages still scroll). */

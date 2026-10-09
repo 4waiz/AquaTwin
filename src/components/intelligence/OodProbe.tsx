@@ -113,7 +113,7 @@ export function OodProbe({ className = "", reveal }: { className?: string; revea
                   step={s.step}
                   value={v}
                   onChange={(e) => setInput({ ...input, [s.key]: Number(e.target.value) })}
-                  className="mt-0.5 block w-full accent-[#5b9dff]"
+                  className="mt-0.5 block w-full accent-[#40b4ff]"
                   aria-label={s.label}
                 />
                 <div className="relative mx-[7px] mt-0.5 h-[2px] rounded-full bg-warn/35" aria-hidden title="Training envelope">
@@ -149,7 +149,7 @@ export function OodProbe({ className = "", reveal }: { className?: string; revea
             <div className="text-right">
               <div className="label">Confidence</div>
               <div className={`num text-[24px] font-medium ${res && res.confidence < 0.5 ? "text-warn" : "text-fg"}`}>
-                {res ? `${fmt(res.confidence * 100, 0)}%` : "—"}
+                {res ? `${fmt(res.confidence * 100, 0)}%` : "–"}
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@ export function OodProbe({ className = "", reveal }: { className?: string; revea
                   const ref = res.reference[r.key];
                   const cell = (v: number | undefined) =>
                     v === undefined ? (
-                      "—"
+                      "–"
                     ) : (
                       <>
                         {r.d ? fmt(v, r.d) : fmtInt(v)}

@@ -11,7 +11,7 @@ for (const id of ids) {
       const r = runScenario({ scenario: SCENARIOS[id], strategy, model: "physics", plant, bundle: null, degradation: DEFAULT_DEGRADATION, seed: 7 });
       const ms = performance.now() - t0;
       const m = r.metrics;
-      const f = (x: number | null | undefined, d = 2) => (x === null || x === undefined ? "—" : x.toFixed(d));
+      const f = (x: number | null | undefined, d = 2) => (x === null || x === undefined ? "n/a" : x.toFixed(d));
       console.log(
         `${id.padEnd(9)} ${strategy.padEnd(8)} ${plant.padEnd(9)} ${ms.toFixed(0).padStart(5)}ms SEC=${f(m.sec_kWh_m3, 3)} prod=${f(m.production_m3, 0)} TDSmax=${f(m.maxTds_mgL, 0)} viol=${f(m.anyViolation_h)}h ${JSON.stringify(m.violationHoursBy)} minRes=${f(m.minReservoirFraction, 3)} health=${m.finalHealth.map((h) => h.toFixed(3)).join("/")} warn=${f(m.firstWarning_h)} alarm=${f(m.firstAlarm_h)} W/R=${m.withheldDecisions}/${m.rejectedDecisions} MAEprod=${f(m.predMAE?.production_m3h, 1)}`,
       );

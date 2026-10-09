@@ -1,5 +1,5 @@
 /**
- * Reference ("virtual") SWRO plant — the stand-in for a physical plant.
+ * Reference ("virtual") SWRO plant: the stand-in for a physical plant.
  *
  * AquaTwin has no access to industrial data, so this higher-fidelity model
  * generates the "measured" telemetry that the twin sees, the training data for

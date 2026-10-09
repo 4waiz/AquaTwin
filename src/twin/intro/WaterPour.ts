@@ -3,7 +3,7 @@
  * above the viewport, accelerating under gravity (thinning as it speeds up),
  * then an impact with a restrained splash, secondary droplets and a faint
  * mist. Stream, droplets and mist are all evaluated on the GPU from a handful
- * of uniforms — the CPU only advances time.
+ * of uniforms; the CPU only advances time.
  */
 import * as THREE from "three";
 import { INTRO } from "./timeline";

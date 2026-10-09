@@ -31,7 +31,7 @@ function Row({
       </div>
       <Sparkline values={series} width={112} height={30} threshold={threshold} />
       <div className="num text-right text-[11.5px] text-fg-muted">
-        {deltaPct === null || !isNum(deltaPct) ? "—" : `${deltaPct >= 0 ? "↑" : "↓"} ${Math.abs(deltaPct).toFixed(1)}%`}
+        {deltaPct === null || !isNum(deltaPct) ? "–" : `${deltaPct >= 0 ? "↑" : "↓"} ${Math.abs(deltaPct).toFixed(1)}%`}
         <div className="text-[10px] text-fg-faint">vs 24 h</div>
       </div>
     </div>

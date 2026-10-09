@@ -184,7 +184,7 @@ export function Button({
   title?: string;
 }) {
   const v = {
-    primary: "bg-accent-strong text-white hover:bg-[#4b8ff7] disabled:bg-ink-700 disabled:text-fg-faint",
+    primary: "btn-brand text-white disabled:text-fg-faint",
     secondary: "border border-line-strong bg-ink-800 text-fg hover:bg-ink-750 hover:border-line-bright disabled:text-fg-faint",
     ghost: "text-fg-muted hover:bg-ink-800 hover:text-fg disabled:text-fg-faint",
   }[variant];

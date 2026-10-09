@@ -63,3 +63,12 @@ docs/screenshots/qa/
 
 # third-party music (see video/composition/assets/music/README.md)
 video/composition/assets/music/*.mp3
+
+# film project (video/motion): renders, scratch and the regenerable music bed
+video/motion/out/
+video/motion/work/
+video/motion/reel/audio/music.wav
+video/motion/reel/audio/music.beats.json
+
+# local submission copies (renamed deliverables)
+submission/

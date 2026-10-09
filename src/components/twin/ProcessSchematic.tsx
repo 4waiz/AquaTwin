@@ -59,7 +59,7 @@ export function ProcessSchematic({ values, compact = false }: { values?: Partial
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && select(n.id)}
             className="cursor-pointer outline-none"
           >
-            <rect x={n.x} y={y} width={W} height={H} rx="7" fill={sel ? "#0f1a2b" : "#0b0f15"} stroke={sel ? "#5b9dff" : "#263041"} strokeWidth={sel ? 1.4 : 1} />
+            <rect x={n.x} y={y} width={W} height={H} rx="7" fill={sel ? "#0b1d2e" : "#0b0f15"} stroke={sel ? "#40b4ff" : "#263041"} strokeWidth={sel ? 1.4 : 1} />
             <text x={n.x + 12} y={y + 20} fill="#e8edf4" fontSize="12.5" fontWeight={500} fontFamily="var(--font-sans)">
               {n.label}
             </text>

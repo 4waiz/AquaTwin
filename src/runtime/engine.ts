@@ -1,5 +1,5 @@
 /**
- * TwinRuntime — everything the interface needs from the simulation layer.
+ * TwinRuntime: everything the interface needs from the simulation layer.
  * Runs inside a Web Worker in the browser (src/runtime/twin.worker.ts) and
  * directly in Node for tests. It owns:
  *   - the simulated plant (reference model + sensors) producing live telemetry,
@@ -271,7 +271,7 @@ export class TwinRuntime {
       if (c.due && h.npf >= LIMITS.cipHealthThreshold) alerts.push({ level: "info", text: `Train ${i + 1}: cleaning criteria met (${c.reasons.join(", ")}).` });
     });
     for (const r of guard.rules) if (r.status === "fail") alerts.push({ level: "critical", text: `${r.label} outside limit (${r.scope}).` });
-    if (confidence < LIMITS.minConfidence) alerts.push({ level: "warning", text: "Model confidence low — recommendations withheld." });
+    if (confidence < LIMITS.minConfidence) alerts.push({ level: "warning", text: "Model confidence low; recommendations withheld." });
 
     const anyFail = guard.rules.some((r) => r.status === "fail");
     const anyWarn = guard.rules.some((r) => r.status === "warn");
@@ -413,7 +413,7 @@ export class ComputeRuntime {
       reservoir = live.reservoirFraction * PLANT.reservoirCapacity_m3;
       demandNext = demandAt(clockNow + 0.5);
       health = live.health;
-      label = "Live plant — now";
+      label = "Live plant · now";
       feedHist = Array.from({ length: 7 }, (_, k) => {
         const e = baseEnvironment(clockNow - 1 + k / 6);
         return { t: -1 + k / 6, s: e.salinity_gL, T: e.temperature_C };

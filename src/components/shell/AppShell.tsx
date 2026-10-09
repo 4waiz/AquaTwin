@@ -6,6 +6,7 @@ import { MobileNav } from "./MobileNav";
 import { TwinHost } from "@/twin/react/TwinHost";
 import { IntroOverlay } from "@/twin/intro/IntroOverlay";
 import { PerfPanel } from "@/twin/react/PerfPanel";
+import { GuidedTour } from "./GuidedTour";
 import { twinClient } from "@/runtime/client";
 import { useRuns } from "@/state/runs";
 import { useLive } from "@/state/live";
@@ -44,6 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <TwinHost />
       <IntroOverlay />
       <PerfPanel />
+      <GuidedTour />
     </div>
   );
 }

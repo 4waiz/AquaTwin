@@ -193,13 +193,25 @@ export const IconWarning = (p: P) => (
   </Svg>
 );
 
-/** AquaTwin mark: two offset stream lines forming a twinned wave. */
-export function AquaTwinMark({ size = 22 }: { size?: number }) {
+/**
+ * AquaTwin logo: the app-icon tile (a droplet holding two waves and the plant's
+ * bars). Raster assets are generated from the master by scripts/brand/make_assets.py.
+ */
+export function AquaTwinMark({ size = 22, glow = false, className = "" }: { size?: number; glow?: boolean; className?: string }) {
+  const [x1, x2] = size <= 64 ? [128, 256] : [256, 512];
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="0.5" y="0.5" width="23" height="23" rx="6" fill="#0f1a2b" stroke="#233553" />
-      <path d="M5 9.5c2.2-2 3.8-2 6 0s3.8 2 6 0" stroke="#6aa9ff" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M7 14.5c2.2-2 3.8-2 6 0s3.8 2 6 0" stroke="#3a9be0" strokeWidth="1.8" strokeLinecap="round" opacity="0.8" />
-    </svg>
+    // A plain <img>: the app is a static export, so next/image optimisation is unavailable.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/brand/aquatwin-icon-${x1}.png`}
+      srcSet={`/brand/aquatwin-icon-${x1}.png 1x, /brand/aquatwin-icon-${x2}.png 2x`}
+      width={size}
+      height={size}
+      alt=""
+      aria-hidden
+      draggable={false}
+      decoding="async"
+      className={`shrink-0 select-none ${glow ? "logo-glow" : ""} ${className}`}
+    />
   );
 }

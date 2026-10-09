@@ -5,6 +5,7 @@ import { twinClient } from "@/runtime/client";
 import { clockLabel, dateLabel, fmt } from "@/lib/format";
 import { useNow } from "@/lib/useNow";
 import { IconDroplet, IconThermo, IconWave, IconEye } from "@/components/icons";
+import { TourButton } from "./GuidedTour";
 
 function Condition({ icon, value, unit, label }: { icon: React.ReactNode; value: string; unit: string; label: string }) {
   return (
@@ -51,6 +52,7 @@ export function TopBar() {
         <span className="inline-flex h-6 items-center rounded-md border border-line-strong px-2 font-mono text-[10.5px] tracking-wider text-fg-subtle uppercase">
           Simulated plant
         </span>
+        <TourButton />
         <span className="hidden truncate text-[12.5px] text-fg-muted xl:inline">Reference SWRO plant · 3 trains · 57,500 m³/d</span>
       </div>
 

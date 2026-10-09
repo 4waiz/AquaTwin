@@ -1,6 +1,6 @@
 "use client";
 /**
- * TwinHost — mounts the single persistent WebGL canvas for the application
+ * TwinHost: mounts the single persistent WebGL canvas for the application
  * and keeps it aligned with whichever page viewport slot is registered.
  * Also owns the intro decision (full / skip), wires simulation state into the
  * engine and falls back gracefully if WebGL is unavailable.

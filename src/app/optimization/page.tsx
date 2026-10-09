@@ -58,9 +58,9 @@ function Compare({ cur, rec }: { cur: CandidateLite; rec: CandidateLite | null }
                 {r.k} <span className="text-[10.5px] text-fg-faint">{r.unit}</span>
               </td>
               <td className="num py-1.5 text-right text-fg">{r.d === 0 ? fmtInt(a) : fmt(a, r.d)}</td>
-              <td className="num py-1.5 text-right text-fg">{rec ? (r.d === 0 ? fmtInt(b) : fmt(b, r.d)) : "—"}</td>
+              <td className="num py-1.5 text-right text-fg">{rec ? (r.d === 0 ? fmtInt(b) : fmt(b, r.d)) : "–"}</td>
               <td className={`num py-1.5 text-right ${good === null || Math.abs(diff) < 1e-9 ? "text-fg-subtle" : good ? "text-ok" : "text-fg-muted"}`}>
-                {rec ? fmtSigned(diff, r.d) : "—"}
+                {rec ? fmtSigned(diff, r.d) : "–"}
               </td>
             </tr>
           );
@@ -199,10 +199,10 @@ export default function OptimizationPage() {
         )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[10.5px] text-fg-subtle">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#5b9dff]" /> Pareto-optimal
+            <span className="h-2 w-2 rounded-full bg-[#40b4ff]" /> Pareto-optimal
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#2f5f9e]" /> Admissible
+            <span className="h-2 w-2 rounded-full bg-[#1b5f94]" /> Admissible
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full border border-fg-faint" /> Rejected by AquaGuard
@@ -331,7 +331,7 @@ export default function OptimizationPage() {
                 step={0.05}
                 value={weights[k]}
                 onChange={(e) => setWeights({ ...weights, [k]: Number(e.target.value) })}
-                className="accent-[#5b9dff]"
+                className="accent-[#40b4ff]"
                 aria-label={WEIGHT_LABEL[k]}
               />
               <span className="num text-right text-fg">{weights[k].toFixed(2)}</span>

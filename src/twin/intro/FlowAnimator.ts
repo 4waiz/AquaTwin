@@ -1,5 +1,5 @@
 /**
- * Flow activation: water moves physically through the process —
+ * Flow activation: water moves physically through the process:
  * sea → intake → pretreatment → HP pumps → RO trains, then RO splits into
  * product (tank fills) and brine (outfall starts last). Returns, for intro
  * time t, how far each pipe is filled and how "on" each subsystem is.

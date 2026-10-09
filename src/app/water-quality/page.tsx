@@ -77,7 +77,7 @@ export default function WaterQualityPage() {
     ? [
         {
           label: "AquaTwin",
-          color: "#5b9dff",
+          color: "#40b4ff",
           points: res.aquatwin.points
             .filter((_, i) => i % 3 === 0)
             .map((p) => {
@@ -150,7 +150,7 @@ export default function WaterQualityPage() {
               {tdsChart ? (
                 <LineChart
                   x={tdsChart.x}
-                  series={[{ id: "tds", label: "Blended permeate (30-min mean)", color: "#5b9dff", values: tdsChart.y, fill: true }]}
+                  series={[{ id: "tds", label: "Blended permeate (30-min mean)", color: "#40b4ff", values: tdsChart.y, fill: true }]}
                   limits={[{ value: LIMITS.maxPermeateTDS_mgL, label: "Specification", tone: "crit", violates: "above" }]}
                   xFormat={(v) => (Math.abs(v) < 0.5 ? "now" : `${Math.round(v)}h`)}
                   xTicks={[-24, -18, -12, -6, 0]}

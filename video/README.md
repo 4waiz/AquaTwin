@@ -1,4 +1,7 @@
-# AquaTwin — one-minute video
+# AquaTwin: one-minute video
+
+> **Current film:** the motion-graphics cut in [`motion/`](motion/) (rendered to `public/media/aquatwin-film.mp4` and shown on the app's About page). This folder's `brag.mp4` and its Hyperframes source in `composition/` and `tools/` are the earlier screen-recorded cut, kept for reference.
+
 
 | File | What it is |
 |---|---|

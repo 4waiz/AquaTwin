@@ -397,8 +397,8 @@ Source: DuPont manual §6.3 "Cleaning Requirements", p. 135 [19] (VERIFIED, verb
 
 > "Elements should be cleaned when one or more of the below mentioned parameters are applicable:
 > - The normalized permeate flow drops 10%
-> - The normalized salt passage increases 5 – 10%
-> - The normalized pressure drop (feed pressure minus concentrate pressure) increases 10 – 15%"
+> - The normalized salt passage increases 5–10%
+> - The normalized pressure drop (feed pressure minus concentrate pressure) increases 10–15%"
 
 - The cleaning-procedure section adds: "the 15 psi per element or the 50 psi per multi-element vessel should NOT be used as a cleaning criteria. Cleaning is recommended when the pressure drop increases 15%."
 - The manual also notes that some operators accept up to 10 % flux loss from iron fouling before cleaning.
@@ -591,7 +591,7 @@ Projected performance for one case: a 250 MLD plant (10 trains of 25,000 m³/d),
 - SDG 6 page, updated 30 Dec 2024 [41], quoted: "The UAE produces annually 2.52 billion cubic metres of underground water consumed mainly in the agriculture sector, 2.02 billion cubic metres of desalinated seawater consumed by the urban sector, and 0.53 billion cubic metres of treated wastewater". It cites the UAE State of Environment report 2020.
   - That puts desalination at **≈ 40 % of total production** (APPROX, our arithmetic: 2.02/5.07).
 
-**Share of domestic and drinking water** (APPROX): "96 per cent of domestic consumption of water – from drinking water to showers – comes from one of the 70 desalination plants". The National attributes this to MOCCAE in an article of 2 Feb 2017 [42]. It is a news source and was not confirmed on a current official page.
+**Share of domestic and drinking water** (APPROX): "96 per cent of domestic consumption of water, from drinking water to showers, comes from one of the 70 desalination plants". The National attributes this to MOCCAE in an article of 2 Feb 2017 [42]. It is a news source and was not confirmed on a current official page.
 
 **Taweelah IWP**, from ACWA Power's official project page [43] (VERIFIED):
 - "200 MIGD via reverse osmosis (909,201 m3/day)", at Taweelah, Abu Dhabi.
@@ -768,7 +768,7 @@ Ask the CMAT program contacts listed on the program page, or check the participa
 |---|---|---|---|---|
 | MW_TDS (mean molar mass of sea-salt solutes) | 31.4038218e-3 | kg/mol | [1], [5] | verified |
 | Osmotic coefficient φ(t,S), Sharqawy eq. 49, a1..a10 | 0.89453, 4.1561e-4, −4.6262e-6, 2.2211e-11, −0.11445, −1.4783e-3, −1.3526e-8, 7.0132, 5.696e-2, −2.8624e-4 | t °C, S kg/kg | [1], [3] | verified |
-| φ validity | 0–200 °C; 10–120 g/kg; ±1.4 % | – | [3] | verified |
+| φ validity | 0–200 °C; 10–120 g/kg; ±1.4 % | n/a | [3] | verified |
 | Osmotic pressure form | π = φ·m_TDS·ρ_w·R·T (no factor 2) | Pa | [1], [2], [4] | verified |
 | Pure-water density A1..A5 (eq. 8) | 999.9; 2.034e-2; −6.162e-3; 2.261e-5; −4.657e-8 | kg/m³ | [1], [3] | verified |
 | Seawater density B1..B5 (eq. 8) | 802.0; −2.001; 1.677e-2; −3.060e-5; −1.613e-5 | kg/m³ | [1], [3] | verified |
@@ -785,15 +785,15 @@ Ask the CMAT program contacts listed on the program page, or check the participa
 | B, SW30HRLE-440i derived | ≈ 1.55e-8 (0.056 LMH) | m/s | [15] + our calc | approximate |
 | B, SW30XLE-440i derived | ≈ 1.9e-8 (0.069 LMH) | m/s | [16] + our calc | approximate |
 | Water density in flux equation | 1000 (fixed) | kg/m³ | [11] | verified |
-| Sherwood correlation | Sh = 0.46(Re·Sc)^0.36 | – | [10], [11] | verified as the WaterTAP model; original attribution unverified |
-| Friction factor, spiral wound | f = 6.23·Re^−0.3 | – | [11], [14] | verified |
-| Friction factor, flat sheet | f = 0.42 + 189.3/Re | – | [11] | verified |
+| Sherwood correlation | Sh = 0.46(Re·Sc)^0.36 | n/a | [10], [11] | verified as the WaterTAP model; original attribution unverified |
+| Friction factor, spiral wound | f = 6.23·Re^−0.3 | n/a | [11], [14] | verified |
+| Friction factor, flat sheet | f = 0.42 + 189.3/Re | n/a | [11] | verified |
 | Hydraulic diameter | d_h = 4ε/(2/h + (1 − ε)·8/h) | m | [11] | verified |
 | Feed channel height | 1e-3 | m | [12] | verified (WaterTAP example) |
-| Spacer porosity | 0.85 (0.9 in the second flowsheet) | – | [12] | verified (WaterTAP example) |
+| Spacer porosity | 0.85 (0.9 in the second flowsheet) | n/a | [12] | verified (WaterTAP example) |
 | Element active area (440i) | 41 | m² | [15], [16] | verified |
 | Element nominal permeate flow | 30.2 (HRLE) / 37.5 (XLE) | m³/d | [15], [16] | verified |
-| Element test conditions | 32,000 ppm NaCl, 55 bar, 25 °C, 8 % recovery, pH 8, 5 ppm B | – | [15], [16] | verified |
+| Element test conditions | 32,000 ppm NaCl, 55 bar, 25 °C, 8 % recovery, pH 8, 5 ppm B | n/a | [15], [16] | verified |
 | Stabilized / minimum salt rejection | 99.80 / 99.65 (HRLE); 99.8 / 99.6 (XLE) | % | [15], [16] | verified |
 | Boron rejection | 92 (HRLE) / 91.5 (XLE) | % | [15], [16] | verified |
 | Max feed pressure | 83 | bar | [15], [16] | verified |
@@ -805,22 +805,22 @@ Ask the CMAT program contacts listed on the program page, or check the participa
 | Max element recovery, SW (SDI < 2.5 / < 3 / < 5) | 15 / 14 / 13 | % | [17] | verified |
 | Design average flux, SW (SDI < 2.5 / < 3 / < 5) | 15–19 / 14–17 / 12–17 | LMH | [17] | verified |
 | Max element flux, SW (SDI < 2.5 / < 3 / < 5) | 36 / 34 / 32 | LMH | [17] | verified |
-| CP factor (DuPont) | pf = exp(0.7·Y_i) | – | [19] | verified |
-| CPF limit (Hydranautics) | 1.20 (≈ 18 % element recovery) | – | [20] | verified (mirror document) |
+| CP factor (DuPont) | pf = exp(0.7·Y_i) | n/a | [19] | verified |
+| CPF limit (Hydranautics) | 1.20 (≈ 18 % element recovery) | n/a | [20] | verified (mirror document) |
 | TCF constant, T ≥ 25 °C | 2640 | K | [19] | verified |
 | TCF constant, T ≤ 25 °C | 3020 | K | [19] | verified |
-| Salt passage temperature scaling | B(T) = B₂₅·TCF(T) (DuPont Eq. 57/71) | – | [19] | verified |
+| Salt passage temperature scaling | B(T) = B₂₅·TCF(T) (DuPont Eq. 57/71) | n/a | [19] | verified |
 | Concentrate-side ΔP (empirical) | ΔP_fc = 0.01·n·q̄^1.7 | psi (q̄ in gpm) | [19] | verified |
 | Cleaning trigger: normalized permeate flow | −10 | % | [19] | verified |
 | Cleaning trigger: normalized salt passage | +5 to +10 | % | [19] | verified |
 | Cleaning trigger: normalized ΔP | +10 to +15 (procedure text says +15) | % | [19] | verified |
-| HP pump efficiency | 0.80 | – | [12] | verified as the WaterTAP default; "typical" value unverified |
-| PX efficiency | 0.95 (WaterTAP); 0.957–0.967 overall and up to 0.98 (ERI) | – | [12], [32] | verified |
-| PX volumetric mixing | 3 (Q400) – 5 (Q300) | % | [32] | verified |
+| HP pump efficiency | 0.80 | n/a | [12] | verified as the WaterTAP default; "typical" value unverified |
+| PX efficiency | 0.95 (WaterTAP); 0.957–0.967 overall and up to 0.98 (ERI) | n/a | [12], [32] | verified |
+| PX volumetric mixing | 3 (Q400) to 5 (Q300) | % | [32] | verified |
 | Membrane feed salinity increase due to PX | 1.3–2.2 (field: +3.8 at Al-Jubail) | % | [32], [35] | verified |
 | PX lubrication flow | 0.9–1.2 % of concentrate | % | [32] | verified |
 | PX pressure drop, HP / LP side | 0.67–1.02 / 0.62–1.04 | bar | [32] | verified |
-| Operating-pressure initial guess | P = OPF·π_brine (OPF 1.15 default; 1.3 in the example) | – | [12] | verified |
+| Operating-pressure initial guess | P = OPF·π_brine (OPF 1.15 default; 1.3 in the example) | n/a | [12] | verified |
 | RO SEC (HP section) at 42 g/L, 28 °C, 42 % recovery | 2.08–2.11 (2.22–2.27 with feed pump) | kWh/m³ | [32] | verified (vendor projection) |
 | Whole-plant SEC, typical | 3.5–4.5 | kWh/m³ | [30] | verified (secondary) |
 | Whole-plant SEC, Arabian Gulf | ≈ 4 | kWh/m³ | [31] | verified |
@@ -836,7 +836,7 @@ Ask the CMAT program contacts listed on the program page, or check the participa
 | UAE grid carbon intensity, 2024, lifecycle | 0.468 | kg CO₂e/kWh | [46] | verified |
 | WHO TDS palatability thresholds | < ~600 good; > ~1000 increasingly unpalatable | mg/L | [44] | verified |
 | WHO boron guideline value | 2.4 | mg/L | [44] | verified |
-| Hackathon final submission deadline | 01 Nov 2026 | – | [64] | verified |
+| Hackathon final submission deadline | 01 Nov 2026 | n/a | [64] | verified |
 
 ---
 
@@ -867,7 +867,7 @@ All entries below were verified to exist, via Crossref, the publisher or officia
 4. Nayar, K.G., Sharqawy, M.H., Banchik, L.D., Lienhard V, J.H. (2016). Thermophysical properties of seawater: A review and new correlations that include pressure dependence. *Desalination* 390:1–24. https://doi.org/10.1016/j.desal.2016.02.024. Preprint: http://hdl.handle.net/1721.1/106794
 5. Millero, F.J., Feistel, R., Wright, D.G., McDougall, T.J. (2008). The composition of Standard Seawater and the definition of the Reference-Composition Salinity Scale. *Deep-Sea Research Part I* 55(1):50–72. https://doi.org/10.1016/j.dsr.2007.10.001 (existence verified; used via [1]).
 6. Bartholomew, T.V., Mauter, M.S. (2019). Computational framework for modeling membrane processes without process and solution property simplifications. *Journal of Membrane Science* 573:682–693. https://doi.org/10.1016/j.memsci.2018.11.067 (existence verified; used via [1], [9]).
-7. IOC, SCOR, IAPSO (2010). *The international thermodynamic equation of seawater – 2010: Calculation and use of thermodynamic properties*. Intergovernmental Oceanographic Commission, Manuals and Guides No. 56, UNESCO, 196 pp. https://www.teos-10.org/pubs/TEOS-10_Manual.pdf
+7. IOC, SCOR, IAPSO (2010). *The international thermodynamic equation of seawater-2010: Calculation and use of thermodynamic properties*. Intergovernmental Oceanographic Commission, Manuals and Guides No. 56, UNESCO, 196 pp. https://www.teos-10.org/pubs/TEOS-10_Manual.pdf
 8. TEOS-10 GSW documentation. `gsw_osmotic_pressure_t_exact`. https://www.teos-10.org/pubs/gsw/html/gsw_osmotic_pressure_t_exact.html
 9. watertap-org. `watertap/property_models/NaCl_prop_pack.py` (main). https://github.com/watertap-org/watertap/blob/main/watertap/property_models/NaCl_prop_pack.py
 10. WaterTAP documentation. "Reverse Osmosis (0D)" and "Reverse Osmosis (1D)". https://watertap.readthedocs.io/en/latest/technical_reference/unit_models/reverse_osmosis_0D.html and https://watertap.readthedocs.io/en/latest/technical_reference/unit_models/reverse_osmosis_1D.html
@@ -888,7 +888,7 @@ All entries below were verified to exist, via Crossref, the publisher or officia
 25. Elimelech, M., Phillip, W.A. (2011). The future of seawater desalination: energy, technology, and the environment. *Science* 333(6043):712–717. https://doi.org/10.1126/science.1200488 (abstract only).
 26. Biesheuvel, P.M., Porada, S., Wang, L., Wang, R., Elimelech, M., Dykstra, J.E. (2025). A concise tutorial review of reverse osmosis and electrodialysis. arXiv:2110.07506v6. https://arxiv.org/abs/2110.07506. An earlier version was published as Biesheuvel, Porada, Elimelech & Dykstra (2022), *J. Membr. Sci.* 647:120221, https://doi.org/10.1016/j.memsci.2021.120221.
 27. Mistry, K.H., Lienhard V, J.H. (2013). Generalized least energy of separation for desalination and other chemical separation processes. *Entropy* 15(6):2046–2080. https://doi.org/10.3390/e15062046 (MIT copy: http://hdl.handle.net/1721.1/80326).
-28. Voutchkov, N. (2018). Energy use for membrane seawater desalination – current status and trends. *Desalination* 431:2–14. https://doi.org/10.1016/j.desal.2017.10.033 (existence only).
+28. Voutchkov, N. (2018). Energy use for membrane seawater desalination: current status and trends. *Desalination* 431:2–14. https://doi.org/10.1016/j.desal.2017.10.033 (existence only).
 29. Kim, J., Park, K., Yang, D.R., Hong, S. (2019). A comprehensive review of energy consumption of seawater reverse osmosis desalination plants. *Applied Energy* 254:113652. https://doi.org/10.1016/j.apenergy.2019.113652 (abstract only).
 30. Schunke, A.J., Hernandez Herrera, G.A., Padhye, L., Berry, T.-A. (2020). Energy Recovery in SWRO Desalination: Current Status and New Possibilities. *Frontiers in Sustainable Cities* 2:9. https://doi.org/10.3389/frsc.2020.00009
 31. Gude, V.G., Fthenakis, V. (2020). Energy efficiency and renewable energy utilization in desalination systems. *Progress in Energy* 2(2):022003. https://doi.org/10.1088/2516-1083/ab7bf6
@@ -924,6 +924,6 @@ All entries below were verified to exist, via Crossref, the publisher or officia
 61. Aish, A.M., Zaqoot, H.A., Abdeljawad, S.M. (2015). Artificial neural network approach for predicting reverse osmosis desalination plants performance in the Gaza Strip. *Desalination* 367:240–247. https://doi.org/10.1016/j.desal.2015.04.008
 62. Khalifa University (2026, 27 Aug). Khalifa University Launches Global Water Hackathon 2026 to Accelerate Solutions to Global Water Challenges. https://www.ku.ac.ae/khalifa-university-launches-global-water-hackathon-2026-to-accelerate-solutions-to-global-water-challenges
 63. Khalifa University (2026, 24 Sep). Nearly 1,400 Students from 56 Countries Join Khalifa University-UNESCO Global Water Hackathon 2026. https://www.ku.ac.ae/nearly-1400-students-from-56-countries-join-khalifa-university-unesco-global-water-hackathon-2026
-64. Khalifa University CMAT. Khalifa University – UNESCO Global Water Hackathon 2026 (program page). https://ku.events/global_water_hackathon_2026/
+64. Khalifa University CMAT. Khalifa University–UNESCO Global Water Hackathon 2026 (program page). https://ku.events/global_water_hackathon_2026/
 65. Khalifa University CMAT (2026). *Hackathon Guidelines* (PDF, 4 pp.). https://ku.events/global_water_hackathon_2026/assets/attachments/Water_Hackathon_2026_Guidlines.pdf
-66. Khalifa University. Khalifa University – UN Global Water Hackathon 2026, registration page. https://apps.ku.ac.ae/UNESCO2026/
+66. Khalifa University. Khalifa University–UN Global Water Hackathon 2026, registration page. https://apps.ku.ac.ae/UNESCO2026/

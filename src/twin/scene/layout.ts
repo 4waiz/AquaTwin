@@ -1,15 +1,16 @@
 /**
- * Plant layout — the single source of truth for every coordinate in the 3D
+ * Plant layout: the single source of truth for every coordinate in the 3D
  * twin. World units are metres-ish at model scale; +x follows the process
  * (intake → product), +z points toward the sea, +y is up.
  */
 import * as THREE from "three";
 import type { AssetId } from "@/sim/scenarios";
 
-export const DECK = { minX: -23, maxX: 23, minZ: -12.5, maxZ: 8.5, top: 0, bottom: -1.6 };
-export const SEA_LEVEL = -0.55;
+export const DECK = { minX: -23, maxX: 23, minZ: -12.5, maxZ: 8.5, top: 0, bottom: -5.2 };
+/** Mean sea level: the plant platform is a quay 1.5 m above the water. */
+export const SEA_LEVEL = -1.5;
 
-/** RO train rows (z) — train 1 nearest the sea. */
+/** RO train rows (z); train 1 is nearest the sea. */
 export const TRAIN_Z = [3.1, -0.9, -4.9] as const;
 export const RO = {
   x0: 0.9,
@@ -31,7 +32,12 @@ export const TANKS = {
 };
 
 export const INTAKE = { x: -19.2, z: 6.3, w: 4.4, d: 3.4, h: 2.4 };
-export const OUTFALL = { x: 16.2, z: 10.6 };
+/** Brine outfall (seal-weir) chamber at the quay; the outfall pipeline continues on the seabed. */
+export const OUTFALL = { x: 16.2, z: 9.2 };
+/** Multiport brine diffuser offshore (ports along a line on the seabed). */
+export const DIFFUSER = { x: 21.5, z: 18.5, length: 7.0, angle: 0.32, ports: 5 };
+/** Offshore intake head (velocity cap) at the end of the subsea intake pipeline. */
+export const INTAKE_HEAD = { x: -26.5, z: 27 };
 
 export interface PipeDef {
   id: string;
@@ -60,7 +66,7 @@ export function pipeDefs(): PipeDef[] {
     asset: "intake",
     fillAt: 0.1,
     fillDuration: 0.42,
-    points: [v(-19.2, -1.2, 10.4), v(-19.2, -0.2, 8.0), v(-19.2, 2.9, 7.2), v(-19.2, 2.9, 2.4), v(-14.6, 2.9, 2.4), v(-13.3, 3.3, 2.4)],
+    points: [v(-19.2, 2.35, 6.9), v(-19.2, 2.9, 6.9), v(-19.2, 2.9, 2.4), v(-14.6, 2.9, 2.4), v(-13.3, 3.3, 2.4)],
   });
   pipes.push({
     id: "intake-b",
@@ -131,7 +137,7 @@ export function pipeDefs(): PipeDef[] {
     asset: "brine",
     fillAt: 2.15,
     fillDuration: 0.35,
-    points: [v(ERD_X + 2.4, 0.55, 6.6), v(ERD_X + 2.4, 0.55, 7.8), v(OUTFALL.x, 0.2, 8.6), v(OUTFALL.x, -0.35, OUTFALL.z)],
+    points: [v(ERD_X + 2.4, 0.55, 6.6), v(ERD_X + 2.4, 0.55, 7.7), v(OUTFALL.x, 0.55, 8.6), v(OUTFALL.x, -0.6, OUTFALL.z)],
   });
   return pipes;
 }

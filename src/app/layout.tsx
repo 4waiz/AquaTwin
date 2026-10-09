@@ -6,10 +6,23 @@ import { AppShell } from "@/components/shell/AppShell";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+const DESCRIPTION =
+  "A physics-informed, self-calibrating digital twin for resilient and safe seawater desalination. By Team Kanban for the Khalifa University–UNESCO Global Water Hackathon 2026.";
+
 export const metadata: Metadata = {
-  title: "AquaTwin — Desalination digital twin",
-  description:
-    "A physics-informed, self-calibrating digital twin for resilient and safe seawater desalination. Team Kanban — Khalifa University–UNESCO Global Water Hackathon 2026.",
+  metadataBase: new URL("https://aquatwin.kanbanstudios.ae"),
+  title: { default: "AquaTwin · Desalination digital twin", template: "%s · AquaTwin" },
+  description: DESCRIPTION,
+  applicationName: "AquaTwin",
+  authors: [{ name: "Team Kanban", url: "https://kanbanstudios.ae/team-kanban" }],
+  openGraph: {
+    type: "website",
+    siteName: "AquaTwin",
+    title: "AquaTwin · Desalination digital twin",
+    description: DESCRIPTION,
+    url: "/",
+  },
+  twitter: { card: "summary_large_image", title: "AquaTwin · Desalination digital twin", description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {

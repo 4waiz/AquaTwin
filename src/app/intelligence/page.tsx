@@ -72,7 +72,7 @@ const LAYERS: Layer[] = [
     live: (s) =>
       s.hybrid[1].residual
         ? `T2 residuals: Q ${fmtSigned(s.hybrid[1].residual.Q * 100, 2, "%")} · C ${fmtSigned(s.hybrid[1].residual.C * 100, 2, "%")} · ΔP ${fmtSigned(s.hybrid[1].residual.D, 3, " bar")}`
-        : "—",
+        : "–",
   },
   {
     id: "degradation",

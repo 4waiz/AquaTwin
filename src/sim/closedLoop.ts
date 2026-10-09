@@ -151,7 +151,7 @@ const ENV_TREND_WINDOW_h = 1;
 /**
  * Between hourly decisions, AquaTwin re-plans as soon as its current setpoints
  * would break a hard limit if the measured feed trend continued for another
- * decision interval — at most this often, and not while recommendations are
+ * decision interval, at most this often, and not while recommendations are
  * withheld. Hourly decisions alone react up to an hour late to a ramp that
  * starts just after a decision.
  */

@@ -1,0 +1,47 @@
+{
+ "duration": 57.5,
+ "voice": { "file": "audio/voiceover.wav", "db": 0 },
+ "music": { "file": "audio/music.wav", "db": -11, "fade_in": 0.4, "fade_out": 2.4 },
+ "sfx": [
+  { "file": "sfx:impact/impactSoft_medium_002.ogg", "t": "word:cities-0.2", "db": -17 },
+  { "file": "sfx:interface/drop_001.ogg", "t": "word:sea-0.04", "db": -16 },
+
+  { "file": "sfx:impact/impactSoft_medium_000.ogg", "t": "line:Yet plants still-0.18", "db": -17 },
+  { "file": "sfx:interface/error_005.ogg", "t": "word:fire-0.05", "db": -24, "lp": 4800 },
+  { "file": "sfx:impact/impactSoft_medium_004.ogg", "t": "word:started-0.05", "db": -16 },
+
+  { "file": "sfx:interface/drop_002.ogg", "t": "line:Meet AquaTwin-0.15", "db": -17 },
+  { "file": "sfx:impact/impactBell_heavy_000.ogg", "t": "line:Meet AquaTwin+0.62", "db": -20, "lp": 5000 },
+  { "file": "sfx:casino/card-slide-1.ogg", "t": "line:that stays calibrated-0.18", "db": -23, "lp": 6000 },
+
+  { "file": "sfx:interface/click_003.ogg", "t": "word:Physics-0.12", "db": -21 },
+  { "file": "sfx:interface/click_003.ogg", "t": "word:Machine-0.27", "db": -22 },
+  { "file": "sfx:interface/bong_001.ogg", "t": "word:every-0.12", "db": -19 },
+  { "file": "sfx:casino/card-slide-1.ogg", "t": "word:uncertainty-0.5", "db": -24, "lp": 6000 },
+
+  { "file": "sfx:casino/card-slide-1.ogg", "t": "line:Before a salinity-0.18", "db": -22, "lp": 6000 },
+  { "file": "sfx:impact/impactSoft_medium_001.ogg", "t": "line:Fixed setpoints break-0.2", "db": -17 },
+  { "file": "sfx:impact/impactBell_heavy_003.ogg", "t": "word:none-0.06", "db": -19, "lp": 5200 },
+
+  { "file": "sfx:impact/impactSoft_medium_003.ogg", "t": "line:It flags membrane-0.18", "db": -18 },
+  { "file": "sfx:interface/switch_002.ogg", "t": "word:half-0.08", "db": -21, "lp": 6500 },
+  { "file": "sfx:interface/drop_002.ogg", "t": "word:due-0.04", "db": -20 },
+
+  { "file": "sfx:impact/impactSoft_medium_000.ogg", "t": "line:Its safety layer-0.18", "db": -18 },
+  { "file": "sfx:interface/click_002.ogg", "t": "word:checks-0.25", "db": -22 },
+  { "file": "sfx:interface/bong_001.ogg", "t": "word:limit+0.05", "db": -19 },
+  { "file": "sfx:impact/impactSoft_heavy_003.ogg", "t": "word:withholds-0.08", "db": -15, "lp": 6000 },
+
+  { "file": "sfx:impact/impactSoft_medium_002.ogg", "t": "line:Tested against-0.18", "db": -18 },
+  { "file": "sfx:casino/card-slide-1.ogg", "t": "word:reproducible-0.2", "db": -23, "lp": 6000 },
+  { "file": "sfx:interface/switch_007.ogg", "t": "word:shadow-0.05", "db": -21, "lp": 6500 },
+
+  { "file": "sfx:impact/impactSoft_medium_004.ogg", "t": "line:Smart water-0.18", "db": -17 },
+
+  { "file": "sfx:impact/impactSoft_medium_001.ogg", "t": "line:AquaTwin Predict-0.15", "db": -13 },
+  { "file": "sfx:impact/impactBell_heavy_000.ogg", "t": "line:AquaTwin Predict+0.3", "db": -17, "lp": 5000 },
+  { "file": "sfx:interface/drop_001.ogg", "t": "word:Kanban-0.02", "db": -20 }
+ ],
+ "duck": { "music": 8, "sfx": 5 },
+ "lufs": -14
+}

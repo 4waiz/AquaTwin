@@ -1,5 +1,5 @@
 /**
- * IntroController — owns intro time and turns it into:
+ * IntroController: owns intro time and turns it into:
  *   - activation / flow factors applied on top of the real twin state,
  *   - camera easing and depth-of-field amounts,
  *   - UI stage events (branding text, staggered panel reveal, LIVE).

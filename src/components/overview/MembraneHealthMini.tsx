@@ -44,7 +44,7 @@ export function MembraneHealthMini() {
   return (
     <Panel title="Membrane health" right={<Provenance kind="estimated" />} reveal="panel2" bodyClassName="flex flex-col px-4 py-2">
       <div className="flex-1 space-y-3.5 pt-1.5">
-        {(rows ?? [0, 1, 2].map((i) => ({ i, npf: NaN, tone: "ok" as const, outlook: "—", slope: 0, due: false }))).map((r) => (
+        {(rows ?? [0, 1, 2].map((i) => ({ i, npf: NaN, tone: "ok" as const, outlook: "–", slope: 0, due: false }))).map((r) => (
           <div key={r.i} className="grid grid-cols-[64px_58px_1fr] items-center gap-3">
             <span className="text-[12.5px] text-fg-muted">Train {r.i + 1}</span>
             <span className={`num text-[15px] font-medium ${r.tone === "ok" ? "text-ok" : "text-warn"}`}>{fmt(r.npf * 100, 1)}%</span>

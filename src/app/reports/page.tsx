@@ -132,7 +132,7 @@ export default function ReportsPage() {
               action={
                 <Link
                   href="/scenarios"
-                  className="mt-2 inline-flex h-8 items-center rounded-md bg-accent-strong px-3 text-[12.5px] font-medium text-white hover:bg-[#4b8ff7]"
+                  className="mt-2 inline-flex h-8 items-center rounded-md btn-brand px-3 text-[12.5px] font-medium text-white"
                 >
                   Open Scenario Lab
                 </Link>

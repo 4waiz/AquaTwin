@@ -54,7 +54,7 @@ export const MEMBRANE = {
   /**
    * Salt-permeability activation constant used only by the reference plant, K.
    * DuPont applies the water TCF to salt passage [ref:DUPONT-MANUAL]; the reference
-   * plant assumes a stronger temperature dependence for salt [assumed] — a
+   * plant assumes a stronger temperature dependence for salt [assumed], a
    * deliberate model-form difference from the reduced-order twin.
    */
   tcfSalt_K: 3400,

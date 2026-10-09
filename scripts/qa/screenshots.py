@@ -1,11 +1,11 @@
 """
 Curated screenshots of the running app for the README, report and QA
-(docs/screenshots). Drives real interactions — scenario branch and timeline,
-the out-of-distribution probe, a recorded run — so every image shows the
+(docs/screenshots). Drives real interactions (scenario branch and timeline,
+the out-of-distribution probe, a recorded run) so every image shows the
 actual product, not a mock-up.
 
 Usage:
-  python scripts/qa/screenshots.py --base http://localhost:3200 --out docs/screenshots [--nvidia]
+  python scripts/qa/screenshots.py --base http://localhost:3200 --out docs/screenshots [--nvidia] [--scale 2] [--only 01-overview,04-optimization]
 """
 
 from __future__ import annotations
@@ -26,6 +26,8 @@ def main() -> int:
     ap.add_argument("--out", default="docs/screenshots")
     ap.add_argument("--size", default="1920x1080")
     ap.add_argument("--nvidia", action="store_true")
+    ap.add_argument("--scale", type=float, default=1.0, help="device scale factor (2 = 3840x2160 captures for video)")
+    ap.add_argument("--only", default="", help="comma-separated shot names to keep (others are captured but not saved)")
     a = ap.parse_args()
     w, h = (int(x) for x in a.size.split("x"))
     out = Path(a.out)
@@ -37,7 +39,7 @@ def main() -> int:
 
     with sync_playwright() as p:
         b = p.chromium.launch(channel="chrome", headless=True, args=flags)
-        page = b.new_context(viewport={"width": w, "height": h}, device_scale_factor=1).new_page()
+        page = b.new_context(viewport={"width": w, "height": h}, device_scale_factor=a.scale).new_page()
         page.on("pageerror", lambda e: log["errors"].append(f"pageerror: {str(e)[:300]}"))
         page.on("console", lambda m: log["errors"].append(f"console: {m.text[:300]}") if m.type == "error" else None)
 
@@ -46,7 +48,11 @@ def main() -> int:
             page.goto(f"{a.base}{path}{sep}intro=0&quality=high", wait_until="domcontentloaded", timeout=120_000)
             page.wait_for_timeout(int(wait * 1000))
 
+        keep = {n.strip() for n in a.only.split(",") if n.strip()}
+
         def shot(name: str, pg: Page = page):
+            if keep and name not in keep:
+                return
             path = out / f"{name}.png"
             pg.screenshot(path=str(path))
             bad = sorted(set(FORBIDDEN.findall(pg.evaluate("() => document.body.innerText"))))
@@ -71,7 +77,7 @@ def main() -> int:
         go("/twin", 8)
         shot("02-digital-twin")
 
-        go("/scenarios?s=salinity&run=1", 12)
+        go("/scenarios?s=salinity&run=1", 40)
         page.get_by_role("tab", name="No action").click()
         page.get_by_role("button", name="+6h").click()
         page.wait_for_timeout(2500)

@@ -51,13 +51,13 @@ export function Sidebar() {
       className="no-print relative z-20 flex h-full w-[var(--sidebar-w)] shrink-0 flex-col border-r border-line bg-ink-900 max-lg:hidden"
       aria-label="Primary"
     >
-      <div className="flex h-[68px] items-center gap-3 px-5">
-        <AquaTwinMark size={26} />
+      <Link href="/" className="group flex h-[68px] items-center gap-3 px-5" aria-label="AquaTwin: Overview">
+        <AquaTwinMark size={32} glow className="transition-transform duration-300 group-hover:scale-[1.04]" />
         <div className="leading-tight">
           <div className="text-[15px] font-semibold tracking-tight text-fg">AquaTwin</div>
           <div className="text-[11px] text-fg-subtle">Desalination digital twin</div>
         </div>
-      </div>
+      </Link>
 
       <nav className="scroll-quiet mt-2 flex-1 overflow-y-auto px-3">
         <ul className="space-y-0.5">
@@ -72,7 +72,7 @@ export function Sidebar() {
                     active ? "bg-ink-750 text-fg" : "text-fg-muted hover:bg-ink-800 hover:text-fg"
                   }`}
                 >
-                  {active && <span className="absolute left-0 top-2 h-5 w-[2px] rounded-full bg-accent" aria-hidden />}
+                  {active && <span className="brand-fill absolute left-0 top-2 h-5 w-[2px] rounded-full" aria-hidden />}
                   <Icon size={16} className={active ? "text-accent" : "text-fg-subtle group-hover:text-fg-muted"} />
                   <span>{label}</span>
                 </Link>

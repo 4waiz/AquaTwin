@@ -1,9 +1,9 @@
 /**
  * Number formatting. Every value shown in the interface passes through here so
- * that NaN, Infinity or undefined can never reach the screen ("—" instead).
+ * that NaN, Infinity or undefined can never reach the screen ("–" instead).
  */
 
-export const DASH = "—";
+export const DASH = "–";
 
 export function isNum(x: unknown): x is number {
   return typeof x === "number" && Number.isFinite(x);

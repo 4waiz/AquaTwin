@@ -1,9 +1,9 @@
 /**
  * AquaTwin: the hybrid digital twin of one plant (docs/MODEL.md §4–5).
  *
- *  physics   – reduced-order 0D model with self-calibrated parameters θ̂
- *  mlonly    – gradient-boosted trees mapping inputs + recent measurements to outputs
- *  hybrid    – physics prediction corrected by an ML residual model
+ *  physics:  reduced-order 0D model with self-calibrated parameters θ̂
+ *  mlonly:   gradient-boosted trees mapping inputs + recent measurements to outputs
+ *  hybrid:   physics prediction corrected by an ML residual model
  *
  * The estimator continuously re-identifies θ̂ = {A25, B25, k_dp, η} for each
  * train from telemetry (self-calibration). Health is normalised permeability:
