@@ -24,9 +24,9 @@
 <div><span>Registration</span><b>CMAT-00022</b></div>
 <div><span>Team</span><b><a href="https://kanbanstudios.ae/team-kanban">Team Kanban</a> · United Arab Emirates</b></div>
 <div><span>Team leader</span><b>Eng. Awaiz Ahmed</b></div>
-<div><span>Members</span><b>Eng. Huda Mueen · Eng. Inshal Syed · Mr. Mohammad Umar · Eng. Bilal Feroz</b></div>
+<div><span>Members</span><b>Eng. Huda Mueen · Eng. Inshal Syed · Eng. Mohammad Umar · Eng.&nbsp;Bilal&nbsp;Feroz</b></div>
 <div><span>Faculty advisor</span><b>Dr. Khubaib Alam</b></div>
-<div><span>Industry mentor</span><b>Eng. Yazeed Ghadi</b></div>
+<div><span>Industry mentor</span><b>Dr. Yazeed Ghadi</b></div>
 </div>
 <p class="cover-note">{{DATE}} · Research prototype evaluated on a simulated seawater reverse-osmosis plant. All performance figures are simulation results or model estimates and are labelled as such. No organisation named in this report has reviewed or endorsed AquaTwin.</p>
 </section>
