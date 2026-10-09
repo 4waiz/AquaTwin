@@ -119,9 +119,9 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
             style={{ transform: "translate3d(-999px,-999px,0)" }}
           >
             {/* anchor dot + leader */}
-            <span className={`absolute -left-[3px] -top-[3px] h-[6px] w-[6px] rounded-full ${toneDot} shadow-[0_0_0_3px_rgba(7,10,15,0.8)]`} />
+            <span className={`absolute -left-[3px] -top-[3px] h-[6px] w-[6px] rounded-full ${toneDot} shadow-[0_0_0_3px_var(--color-ink-900)]`} />
             <svg className="absolute left-0 top-0 overflow-visible" width="1" height="1" aria-hidden>
-              <line x1="0" y1="0" x2={dx} y2={dy + (dy < 0 ? 14 : -14)} stroke="rgba(162,172,186,0.35)" strokeWidth="1" />
+              <line x1="0" y1="0" x2={dx} y2={dy + (dy < 0 ? 14 : -14)} stroke="var(--color-fg-faint)" strokeWidth="1" />
             </svg>
             <button
               type="button"
@@ -129,7 +129,7 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
               onClick={() => select(it.id)}
               title={it.value ? `${it.label}: ${it.value}` : it.label}
               className={`pointer-events-auto absolute whitespace-nowrap rounded-md border px-2 py-1 text-left backdrop-blur-sm transition-colors ${
-                isSel ? "border-accent/60 bg-[#0d1522]" : "border-line-strong bg-ink-900/90 hover:border-line-bright"
+                isSel ? "border-accent/60 bg-accent-soft" : "border-line-strong bg-ink-900/90 hover:border-line-bright"
               }`}
               style={{ transform: `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))` }}
             >

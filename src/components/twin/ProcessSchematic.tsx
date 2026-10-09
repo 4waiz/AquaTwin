@@ -59,11 +59,11 @@ export function ProcessSchematic({ values, compact = false }: { values?: Partial
             onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && select(n.id)}
             className="cursor-pointer outline-none"
           >
-            <rect x={n.x} y={y} width={W} height={H} rx="7" fill={sel ? "#0b1d2e" : "#0b0f15"} stroke={sel ? "#40b4ff" : "#263041"} strokeWidth={sel ? 1.4 : 1} />
-            <text x={n.x + 12} y={y + 20} fill="#e8edf4" fontSize="12.5" fontWeight={500} fontFamily="var(--font-sans)">
+            <rect x={n.x} y={y} width={W} height={H} rx="7" fill={sel ? "var(--color-accent-soft)" : "var(--color-ink-850)"} stroke={sel ? "var(--color-accent)" : "var(--color-line-strong)"} strokeWidth={sel ? 1.4 : 1} />
+            <text x={n.x + 12} y={y + 20} fill="var(--color-fg)" fontSize="12.5" fontWeight={500} fontFamily="var(--font-sans)">
               {n.label}
             </text>
-            <text x={n.x + 12} y={y + 36} fill="#8a94a4" fontSize="10.5" fontFamily="var(--font-mono)">
+            <text x={n.x + 12} y={y + 36} fill="var(--color-fg-dim)" fontSize="10.5" fontFamily="var(--font-mono)">
               {values?.[n.id] ?? n.sub}
             </text>
           </g>

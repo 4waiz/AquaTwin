@@ -153,7 +153,7 @@ export default function MembraneHealthPage() {
               key={t.i}
               onClick={() => setSel(t.i)}
               aria-pressed={active}
-              className={`rounded-[10px] border p-4 text-left transition-colors ${active ? "border-accent/60 bg-[#0c1320]" : "border-line bg-ink-850 hover:border-line-strong"}`}
+              className={`rounded-[10px] border p-4 text-left transition-colors ${active ? "border-accent/60 bg-accent-soft/60" : "border-line bg-ink-850 hover:border-line-strong"}`}
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -227,11 +227,11 @@ export default function MembraneHealthPage() {
             <LineChart
               x={chart.x}
               series={[
-                { id: "obs", label: "Estimated NPF (last 24 h)", color: "#d4dae3", values: chart.obs, width: 1.4 },
+                { id: "obs", label: "Estimated NPF (last 24 h)", color: "var(--color-series-noact)", values: chart.obs, width: 1.4 },
                 {
                   id: "proj",
                   label: "Projection (trend, 90% band)",
-                  color: "#40b4ff",
+                  color: "var(--color-accent)",
                   values: chart.proj,
                   dashed: true,
                   width: 1.6,

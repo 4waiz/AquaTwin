@@ -63,27 +63,27 @@ export function CandidateScatter({
           <g transform={`translate(${m.l},${m.t})`}>
             {ys.ticks(5).map((t) => (
               <g key={`y${t}`} transform={`translate(0,${ys(t)})`}>
-                <line x1={0} x2={iw} stroke="#19202b" />
-                <text x={-8} y={3.5} textAnchor="end" fontSize={10} fill="#6d7787" fontFamily="var(--font-mono)">
+                <line x1={0} x2={iw} stroke="var(--color-line)" />
+                <text x={-8} y={3.5} textAnchor="end" fontSize={10} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                   {t.toFixed(2)}
                 </text>
               </g>
             ))}
             {xs.ticks(6).map((t) => (
               <g key={`x${t}`} transform={`translate(${xs(t)},0)`}>
-                <line y1={0} y2={ih} stroke="#141a23" />
-                <text y={ih + 15} textAnchor="middle" fontSize={10} fill="#6d7787" fontFamily="var(--font-mono)">
+                <line y1={0} y2={ih} stroke="var(--color-line)" />
+                <text y={ih + 15} textAnchor="middle" fontSize={10} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                   {t.toFixed(2)}
                 </text>
               </g>
             ))}
-            <text x={iw / 2} y={ih + 32} textAnchor="middle" fontSize={10.5} fill="#8a94a4">
+            <text x={iw / 2} y={ih + 32} textAnchor="middle" fontSize={10.5} fill="var(--color-fg-dim)">
               Specific energy consumption (kWh/m³) →
             </text>
-            <text transform={`translate(-40,${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={10.5} fill="#8a94a4">
+            <text transform={`translate(-40,${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={10.5} fill="var(--color-fg-dim)">
               Membrane stress index →
             </text>
-            {frontier && <polyline points={frontier} fill="none" stroke="#40b4ff" strokeOpacity={0.55} strokeWidth={1.4} strokeDasharray="5 4" />}
+            {frontier && <polyline points={frontier} fill="none" stroke="var(--color-accent)" strokeOpacity={0.55} strokeWidth={1.4} strokeDasharray="5 4" />}
             {[...draw]
               .sort((a, b) => order(a) - order(b))
               .map((c) => {
@@ -98,7 +98,7 @@ export function CandidateScatter({
                       cy={y}
                       r={3.2}
                       fill="none"
-                      stroke="#f2a93b"
+                      stroke="var(--color-warn)"
                       strokeOpacity={0.7}
                       onMouseEnter={() => setHover(c)}
                       onMouseLeave={() => setHover(null)}
@@ -114,7 +114,7 @@ export function CandidateScatter({
                       cy={y}
                       r={2.8}
                       fill="none"
-                      stroke="#475163"
+                      stroke="var(--color-fg-faint)"
                       strokeWidth={1}
                       onMouseEnter={() => setHover(c)}
                       onMouseLeave={() => setHover(null)}
@@ -128,8 +128,8 @@ export function CandidateScatter({
                     cx={x}
                     cy={y}
                     r={c.pareto ? 4.2 : 3.2}
-                    fill={c.pareto ? "#40b4ff" : "#1b5f94"}
-                    stroke={sel ? "#e8edf4" : "none"}
+                    fill={c.pareto ? "var(--color-accent)" : "var(--c-accent-dim)"}
+                    stroke={sel ? "var(--color-fg)" : "none"}
                     strokeWidth={1.5}
                     onMouseEnter={() => setHover(c)}
                     onMouseLeave={() => setHover(null)}
@@ -140,8 +140,8 @@ export function CandidateScatter({
               })}
             {/* current operating point */}
             <g transform={`translate(${xs(current.objectives.sec_kWh_m3)},${ys(current.objectives.stress)})`}>
-              <rect x={-5} y={-5} width={10} height={10} transform="rotate(45)" fill="#e8edf4" stroke="#070a0f" strokeWidth={1.5} />
-              <text x={10} y={4} fontSize={10.5} fill="#d4dae3" stroke="#070a0f" strokeWidth={3} paintOrder="stroke">
+              <rect x={-5} y={-5} width={10} height={10} transform="rotate(45)" fill="var(--color-fg)" stroke="var(--color-ink-900)" strokeWidth={1.5} />
+              <text x={10} y={4} fontSize={10.5} fill="var(--color-series-noact)" stroke="var(--color-ink-900)" strokeWidth={3} paintOrder="stroke">
                 Current
               </text>
             </g>
@@ -154,16 +154,16 @@ export function CandidateScatter({
                 const y = ys(b.objectives.stress);
                 return (
                   <g>
-                    <circle cx={x} cy={y} r={9} fill="none" stroke="#40b4ff" strokeWidth={1.6} />
-                    <line x1={x + 9} y1={y - 9} x2={x + 26} y2={y - 26} stroke="#40b4ff" strokeWidth={1} />
+                    <circle cx={x} cy={y} r={9} fill="none" stroke="var(--color-accent)" strokeWidth={1.6} />
+                    <line x1={x + 9} y1={y - 9} x2={x + 26} y2={y - 26} stroke="var(--color-accent)" strokeWidth={1} />
                     <text
                       x={x + 29}
                       y={y - 27}
                       fontSize={10}
                       fontFamily="var(--font-mono)"
-                      fill="#40b4ff"
+                      fill="var(--color-accent)"
                       letterSpacing="0.08em"
-                      stroke="#070a0f"
+                      stroke="var(--color-ink-900)"
                       strokeWidth={3}
                       paintOrder="stroke"
                     >

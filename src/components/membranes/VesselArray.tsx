@@ -13,7 +13,7 @@ export function VesselArray({ health, ndp, nsp, tone }: { health: number; ndp: n
   const leadWeight = Math.min(1, Math.max(0, (ndp - 1) / 0.35));
   const tailWeight = Math.min(1, Math.max(0, (nsp - 1) / 0.12 - leadWeight * 0.5));
   // Inferred fouling is never drawn in the "healthy" colour.
-  const accent = tone === "crit" ? "#f0564d" : "#f2a93b";
+  const accent = tone === "crit" ? "var(--color-crit)" : "var(--color-warn)";
   const W = 300;
   const H = 128;
   const vw = W - 36;
@@ -26,10 +26,10 @@ export function VesselArray({ health, ndp, nsp, tone }: { health: number; ndp: n
   };
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Pressure vessel array with inferred fouling location">
-      <text x={0} y={9} fontSize={8.5} fill="#6d7787" fontFamily="var(--font-mono)">
+      <text x={0} y={9} fontSize={8.5} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
         FEED
       </text>
-      <text x={W - 36} y={9} fontSize={8.5} fill="#6d7787" fontFamily="var(--font-mono)">
+      <text x={W - 36} y={9} fontSize={8.5} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
         BRINE / PERMEATE
       </text>
       {Array.from({ length: rows }).map((_, r) =>
@@ -38,7 +38,7 @@ export function VesselArray({ health, ndp, nsp, tone }: { health: number; ndp: n
           const x = 14 + c * 4;
           return (
             <g key={`${r}-${c}`} transform={`translate(${x},${y})`} opacity={1 - c * 0.22}>
-              <rect width={vw} height={vh} rx={vh / 2} fill="#1a212b" stroke="#2c3646" strokeWidth={0.8} />
+              <rect width={vw} height={vh} rx={vh / 2} fill="var(--color-ink-700)" stroke="var(--color-line-strong)" strokeWidth={0.8} />
               {Array.from({ length: 7 }).map((___, e) => {
                 const ew = (vw - 10) / 7;
                 const s = shade(e);
@@ -50,13 +50,13 @@ export function VesselArray({ health, ndp, nsp, tone }: { health: number; ndp: n
                     width={ew - 1.6}
                     height={vh - 6}
                     rx={2}
-                    fill={s > 0.04 ? accent : "#5c6878"}
+                    fill={s > 0.04 ? accent : "var(--color-fg-faint)"}
                     opacity={s > 0.04 ? 0.25 + 0.65 * s : 0.35}
                   />
                 );
               })}
-              <rect x={-3} y={2} width={4} height={vh - 4} rx={1} fill="#39424f" />
-              <rect x={vw - 1} y={2} width={4} height={vh - 4} rx={1} fill="#39424f" />
+              <rect x={-3} y={2} width={4} height={vh - 4} rx={1} fill="var(--color-line-bright)" />
+              <rect x={vw - 1} y={2} width={4} height={vh - 4} rx={1} fill="var(--color-line-bright)" />
             </g>
           );
         }),

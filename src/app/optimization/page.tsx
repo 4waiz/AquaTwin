@@ -199,10 +199,10 @@ export default function OptimizationPage() {
         )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[10.5px] text-fg-subtle">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#40b4ff]" /> Pareto-optimal
+            <span className="h-2 w-2 rounded-full bg-accent" /> Pareto-optimal
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#1b5f94]" /> Admissible
+            <span className="h-2 w-2 rounded-full bg-[var(--c-accent-dim)]" /> Admissible
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full border border-fg-faint" /> Rejected by AquaGuard
@@ -331,7 +331,7 @@ export default function OptimizationPage() {
                 step={0.05}
                 value={weights[k]}
                 onChange={(e) => setWeights({ ...weights, [k]: Number(e.target.value) })}
-                className="accent-[#40b4ff]"
+                className="accent-[var(--color-accent)]"
                 aria-label={WEIGHT_LABEL[k]}
               />
               <span className="num text-right text-fg">{weights[k].toFixed(2)}</span>

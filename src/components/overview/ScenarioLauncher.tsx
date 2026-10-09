@@ -21,9 +21,9 @@ export function ScenarioLauncher() {
       className="shrink-0 grow"
       right={<span className="text-[11px] text-fg-subtle">Stress-test before it happens</span>}
       reveal="panel3"
-      bodyClassName="flex flex-col p-2.5"
+      bodyClassName="flex flex-col gap-2 p-2.5"
     >
-      <div className="grid flex-1 auto-rows-fr grid-cols-3 gap-1.5 max-lg:grid-cols-2">
+      <div className="grid auto-rows-min grid-cols-3 content-start gap-1.5 max-lg:grid-cols-2">
         {LAB_SCENARIOS.map((id) => {
           const s = SCENARIOS[id];
           const active = sel === id;
@@ -43,7 +43,7 @@ export function ScenarioLauncher() {
           );
         })}
       </div>
-      <Button variant="primary" size="md" className="mt-2 w-full" onClick={run}>
+      <Button variant="primary" size="md" className="mt-auto w-full" onClick={run}>
         Run scenario
         <IconArrowRight size={14} />
       </Button>

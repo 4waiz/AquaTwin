@@ -6,6 +6,7 @@ import { clockLabel, dateLabel, fmt } from "@/lib/format";
 import { useNow } from "@/lib/useNow";
 import { IconDroplet, IconThermo, IconWave, IconEye } from "@/components/icons";
 import { TourButton } from "./GuidedTour";
+import { ThemeToggle } from "./ThemeToggle";
 
 function Condition({ icon, value, unit, label }: { icon: React.ReactNode; value: string; unit: string; label: string }) {
   return (
@@ -86,6 +87,7 @@ export function TopBar() {
             ))}
           </div>
         </div>
+        <ThemeToggle />
       </div>
     </header>
   );

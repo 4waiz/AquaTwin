@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AquaTwinMark, IconExternal, IconInfo } from "@/components/icons";
 import { TourButton } from "./GuidedTour";
+import { ThemeToggle } from "./ThemeToggle";
 import { useLive } from "@/state/live";
 import { TEAM_URL } from "@/lib/brand";
 import { NAV, STATUS_DOT, STATUS_TEXT } from "./Sidebar";
@@ -86,7 +87,10 @@ export function MobileNav() {
               })}
             </ul>
             <div className="mt-3 px-3">
-              <TourButton className="h-9 w-full justify-center text-[11.5px]" onStart={() => setOpen(false)} />
+              <div className="flex gap-2">
+                <TourButton className="h-9 flex-1 justify-center text-[11.5px]" onStart={() => setOpen(false)} />
+                <ThemeToggle className="h-9 w-9" />
+              </div>
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-line px-3 pt-4 text-[13px]">
               <a href={TEAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-fg-muted hover:text-fg">

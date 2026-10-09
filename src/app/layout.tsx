@@ -35,7 +35,7 @@ export const viewport: Viewport = {
  * interface (opacity only, no layout) so it can be revealed in sequence.
  * Mirrors the decision in TwinHost; never gates when reduced motion is set.
  */
-const introGate = `(function(){try{var q=new URLSearchParams(location.search);var f=q.get('intro')==='1';var n=q.get('intro')==='0';var r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;var p=sessionStorage.getItem('aquatwin.intro.v1')==='1';if(!n&&!r&&(f||(!p&&location.pathname==='/'))){document.documentElement.dataset.intro='pending';}}catch(e){}})();`;
+const introGate = `(function(){try{var th=localStorage.getItem('aquatwin.theme');document.documentElement.dataset.theme=th==='light'?'light':'dark';}catch(e){}try{var q=new URLSearchParams(location.search);var f=q.get('intro')==='1';var n=q.get('intro')==='0';var r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;var p=sessionStorage.getItem('aquatwin.intro.v1')==='1';if(!n&&!r&&(f||(!p&&location.pathname==='/'))){document.documentElement.dataset.intro='pending';}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

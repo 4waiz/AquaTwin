@@ -62,7 +62,7 @@ export function GroupedBars({
               const minV = finite.length ? Math.min(...finite) : null;
               return (
                 <g key={c} transform={`translate(0,${ci * groupH})`}>
-                  <text x={0} y={(series.length * (barHeight + 3)) / 2 + 3} fontSize={11.5} fill="#a2acba">
+                  <text x={0} y={(series.length * (barHeight + 3)) / 2 + 3} fontSize={11.5} fill="var(--color-fg-muted)">
                     {c}
                   </text>
                   {series.map((s, si) => {
@@ -71,13 +71,13 @@ export function GroupedBars({
                     const best = highlightMin && isNum(v) && v === minV;
                     return (
                       <g key={s.id} transform={`translate(${labelW},${y})`}>
-                        <rect width={Math.max(10, W - labelW - valueW)} height={barHeight} rx={2} fill="#111722" />
+                        <rect width={Math.max(10, W - labelW - valueW)} height={barHeight} rx={2} fill="var(--color-ink-750)" />
                         {isNum(v) ? <rect width={Math.max(1.5, x(v))} height={barHeight} rx={2} fill={s.color} opacity={best || !highlightMin ? 1 : 0.55} /> : null}
                         <text
                           x={Math.max(10, W - labelW - valueW) + 8}
                           y={barHeight - 0.5}
                           fontSize={10.5}
-                          fill={best ? "#e8edf4" : "#8a94a4"}
+                          fill={best ? "var(--color-fg)" : "var(--color-fg-dim)"}
                           fontFamily="var(--font-mono)"
                         >
                           {isNum(v) ? format(v) : "–"}

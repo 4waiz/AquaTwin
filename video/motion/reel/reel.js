@@ -7,7 +7,6 @@ import hook from './plates/aq-hook.js';
 import alarm from './plates/aq-alarm.js';
 import reveal from './plates/aq-reveal.js';
 import screen from './plates/screen.js';
-import hero from './plates/aq-hero.js';
 import hybrid from './plates/aq-hybrid.js';
 import shock from './plates/aq-shock.js';
 import foul from './plates/aq-foul.js';
@@ -49,13 +48,12 @@ run({
       E(alarm(), c.problem, c.reveal, T),
       E(reveal(), c.reveal, c.live, { tail: 0.22 }),
       E(
-        hero({
-          name: 'live', src: 'assets/hero.png',
-          from: { x: 0.5, y: 0.47, zoom: 1.0 }, to: { x: 0.55, y: 0.45, zoom: 1.14 },
-          tags: [
-            { x: 0.29, y: 0.385, label: 'Pretreatment', sub: 'media filters', at: 0.5 },
-            { x: 0.53, y: 0.29, label: 'RO trains', sub: 'physics + ML', at: 0.8 },
-            { x: 0.715, y: 0.13, label: 'Product water', sub: 'storage and quality', at: 1.1, side: 'left' },
+        screen({
+          name: 'live', src: 'assets/screens/01-overview.png', vw: 1500, vh: 844, top: 70, url: URL,
+          keys: [{ t: 0, x: 0.5, y: 0.5, zoom: 1 }, { t: 2.1, x: 0.46, y: 0.5, zoom: 1.38, move: 1.4 }],
+          callouts: [
+            { t: 0.45, until: 1.25, x: 0.795, y: 0.12, w: 0.195, h: 0.185, label: 'Live plant KPIs' },
+            { t: 1.55, x: 0.445, y: 0.355, w: 0.21, h: 0.24, label: 'Calibrated to the plant, live' },
           ],
         }),
         c.live, c.hybrid,
@@ -66,8 +64,8 @@ run({
           name: 'scenario', src: 'assets/screens/03a-scenario-lab-no-action.png', vw: 1500, vh: 844, top: 70, url: `${URL}/scenarios`,
           keys: [{ t: 0, x: 0.5, y: 0.5, zoom: 1 }, { t: 1.5, x: 0.36, y: 0.45, zoom: 1.7, move: 1.2 }],
           callouts: [
-            { t: 0.9, x: 0.252, y: 0.268, w: 0.086, h: 0.028, label: 'No action: limit broken' },
-            { t: 1.9, x: 0.136, y: 0.652, w: 0.508, h: 0.044, label: '24 h ahead, from the live plant' },
+            { t: 0.9, x: 0.252, y: 0.258, w: 0.086, h: 0.026, label: 'No action: limit broken' },
+            { t: 1.9, x: 0.136, y: 0.652, w: 0.507, h: 0.044, label: '24 h ahead, from the live plant' },
           ],
         }),
         c.scenario, c.shock,
@@ -77,9 +75,9 @@ run({
       E(guard(), c.guard, c.proof, T),
       E(proof(), c.proof, c.pillars, T),
       E(pillars(), c.pillars, c.outro, { tail: 0.2 }),
-      E(outro(), c.outro, END),
+      E(outro({ bg: 'assets/hero.png' }), c.outro, END),
       E(sub({ name: 'sub1', from: c.problem, to: c.reveal }), c.problem, c.reveal),
-      E(sub({ name: 'sub2', from: c.hybrid, to: c.pillars }), c.hybrid, c.pillars),
+      E(sub({ name: 'sub2', from: c.live, to: c.pillars }), c.live, c.pillars),
     ];
   },
 });

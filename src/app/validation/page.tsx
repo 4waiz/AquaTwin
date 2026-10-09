@@ -58,7 +58,7 @@ interface Metrics {
 }
 
 const METHOD_LABEL: Record<Method, string> = { fixed: "Fixed operation", physics: "Physics only", mlonly: "ML only", hybrid: "AquaTwin hybrid" };
-const METHOD_COLOR: Record<Method, string> = { fixed: "#475163", physics: "#8fb4e6", mlonly: "#c7cdd6", hybrid: "#40b4ff" };
+const METHOD_COLOR: Record<Method, string> = { fixed: "var(--color-fg-faint)", physics: "var(--c-series-physics)", mlonly: "var(--c-series-ml)", hybrid: "var(--color-accent)" };
 
 const METRICS: { key: string; label: string; unit: string; digits: number; better: "lower" | "higher" | "none"; na?: Method[] }[] = [
   { key: "anyViolation_h", label: "Constraint violations", unit: "h", digits: 2, better: "lower" },
@@ -115,7 +115,7 @@ export default function ValidationPage() {
       { k: "W", label: "RO power (kW)" },
     ];
     const kinds = [
-      { k: "nominal", label: "Physics (uncalibrated)", color: "#2f3746" },
+      { k: "nominal", label: "Physics (uncalibrated)", color: "var(--color-line-strong)" },
       { k: "physics", label: "Physics (calibrated)", color: METHOD_COLOR.physics },
       { k: "mlonly", label: "ML only", color: METHOD_COLOR.mlonly },
       { k: "hybrid", label: "AquaTwin hybrid", color: METHOD_COLOR.hybrid },

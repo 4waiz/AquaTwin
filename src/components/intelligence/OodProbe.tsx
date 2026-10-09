@@ -113,7 +113,7 @@ export function OodProbe({ className = "", reveal }: { className?: string; revea
                   step={s.step}
                   value={v}
                   onChange={(e) => setInput({ ...input, [s.key]: Number(e.target.value) })}
-                  className="mt-0.5 block w-full accent-[#40b4ff]"
+                  className="mt-0.5 block w-full accent-[var(--color-accent)]"
                   aria-label={s.label}
                 />
                 <div className="relative mx-[7px] mt-0.5 h-[2px] rounded-full bg-warn/35" aria-hidden title="Training envelope">

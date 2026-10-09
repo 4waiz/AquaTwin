@@ -8,7 +8,7 @@ export function Sparkline({
   values,
   width = 120,
   height = 32,
-  color = "#40b4ff",
+  color = "var(--color-accent)",
   domain,
   threshold,
 }: {
@@ -49,7 +49,7 @@ export function Sparkline({
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      {ty !== null && ty >= 0 && ty <= height && <line x1={0} x2={width} y1={ty} y2={ty} stroke="#f2a93b" strokeOpacity="0.5" strokeDasharray="2 3" />}
+      {ty !== null && ty >= 0 && ty <= height && <line x1={0} x2={width} y1={ty} y2={ty} stroke="var(--color-warn)" strokeOpacity="0.5" strokeDasharray="2 3" />}
       <path d={a} fill={`url(#g${id})`} />
       <path d={d} fill="none" stroke={color} strokeWidth={1.3} strokeLinejoin="round" />
       {last && <circle cx={last[0]} cy={last[1]} r={2.2} fill={color} />}

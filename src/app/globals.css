@@ -271,3 +271,63 @@ html[data-intro="pending"] [data-reveal].is-revealed {
     gap: 12px;
   }
 }
+
+/*
+  Theme. Dark is the default (the product's own look); light is a full,
+  readable alternative chosen with the toggle in the top bar and remembered
+  per browser. Tokens are overridden in place, so every utility and every
+  chart that reads a token follows the theme.
+*/
+:root {
+  --color-fg-dim: #8a94a4;
+  --c-series-ml: #c7cdd6;
+  --c-series-physics: #8fb4e6;
+  --c-accent-dim: #1b5f94;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-ink-950: #eef2f7;
+  --color-ink-900: #ffffff;
+  --color-ink-850: #ffffff;
+  --color-ink-800: #f3f6fa;
+  --color-ink-750: #e8eef6;
+  --color-ink-700: #dde5ef;
+  --color-line: #e1e7ef;
+  --color-line-strong: #ced7e2;
+  --color-line-bright: #b4bfcd;
+  --color-fg: #0f1722;
+  --color-fg-muted: #445063;
+  --color-fg-subtle: #657185;
+  --color-fg-faint: #98a3b2;
+  --color-fg-dim: #5b6677;
+  --color-accent: #0a7bd6;
+  --color-accent-strong: #0a72d6;
+  --color-accent-soft: #e2f0fc;
+  --color-ok: #12955f;
+  --color-ok-soft: #e2f5ec;
+  --color-warn: #b86e00;
+  --color-warn-soft: #fcf0de;
+  --color-crit: #cf3a30;
+  --color-crit-soft: #fcebea;
+  --color-series-base: #8a94a4;
+  --color-series-noact: #2f3a4a;
+  --c-series-ml: #6b7686;
+  --c-series-physics: #6a9fd8;
+  --c-accent-dim: #a9cff0;
+}
+:root[data-theme="light"] ::selection {
+  background: #cfe6fb;
+  color: #0f1722;
+}
+:root[data-theme="light"] .panel {
+  box-shadow: 0 1px 2px rgb(15 23 34 / 0.05), 0 4px 16px -8px rgb(15 23 34 / 0.08);
+}
+:root[data-theme="light"] .scroll-quiet {
+  scrollbar-color: #c5cfdb transparent;
+}
+:root[data-theme="light"] .scroll-quiet::-webkit-scrollbar-thumb {
+  background: #c5cfdb;
+}
+:root[data-theme="light"] .logo-glow {
+  filter: drop-shadow(0 6px 16px rgb(10 123 214 / 0.22));
+}

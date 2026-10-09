@@ -174,7 +174,7 @@ export function LineChart({
                   y1="3"
                   x2="16"
                   y2="3"
-                  stroke={l.tone === "crit" ? "#f0564d" : l.tone === "warn" ? "#f2a93b" : "#6d7787"}
+                  stroke={l.tone === "crit" ? "var(--color-crit)" : l.tone === "warn" ? "var(--color-warn)" : "var(--color-fg-subtle)"}
                   strokeWidth={1.2}
                   strokeDasharray="4 3"
                 />
@@ -206,20 +206,20 @@ export function LineChart({
             <g transform={`translate(${m.l},${m.t})`}>
               {ticksY.map((t, i) => (
                 <g key={t} transform={`translate(0,${ys(t)})`}>
-                  <line x1={0} x2={iw} stroke="#19202b" />
-                  <text x={-8} y={3.5} textAnchor="end" fontSize={10} fill="#6d7787" fontFamily="var(--font-mono)">
+                  <line x1={0} x2={iw} stroke="var(--color-line)" />
+                  <text x={-8} y={3.5} textAnchor="end" fontSize={10} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                     {yLabels[i]}
                   </text>
                 </g>
               ))}
               {ticksX.map((t) => (
-                <text key={t} x={xs(t)} y={ih + 15} textAnchor="middle" fontSize={10} fill="#6d7787" fontFamily="var(--font-mono)">
+                <text key={t} x={xs(t)} y={ih + 15} textAnchor="middle" fontSize={10} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                   {xFormat(t)}
                 </text>
               ))}
               {limits.map((l) => {
                 const y = ys(l.value);
-                const c = l.tone === "crit" ? "#f0564d" : l.tone === "warn" ? "#f2a93b" : "#6d7787";
+                const c = l.tone === "crit" ? "var(--color-crit)" : l.tone === "warn" ? "var(--color-warn)" : "var(--color-fg-subtle)";
                 return (
                   <g key={l.label}>
                     {l.violates && (
@@ -238,8 +238,8 @@ export function LineChart({
               })}
               {markers.map((mk) => (
                 <g key={mk.label} transform={`translate(${xs(mk.x)},0)`}>
-                  <line y1={0} y2={ih} stroke="#313c4e" strokeDasharray="2 3" />
-                  <text x={4} y={10} fontSize={9.5} fill="#6d7787" fontFamily="var(--font-mono)">
+                  <line y1={0} y2={ih} stroke="var(--color-line-bright)" strokeDasharray="2 3" />
+                  <text x={4} y={10} fontSize={9.5} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                     {mk.label}
                   </text>
                 </g>
@@ -251,15 +251,15 @@ export function LineChart({
               ))}
               {isNum(cursor) && (
                 <g transform={`translate(${xs(cursor as number)},0)`}>
-                  <line y1={-4} y2={ih} stroke="#40b4ff" strokeWidth={1.2} />
-                  <circle cy={-4} r={3} fill="#40b4ff" />
+                  <line y1={-4} y2={ih} stroke="var(--color-accent)" strokeWidth={1.2} />
+                  <circle cy={-4} r={3} fill="var(--color-accent)" />
                 </g>
               )}
               {hi >= 0 && hover !== null && (
                 <g transform={`translate(${xs(x[hi])},0)`}>
-                  <line y1={0} y2={ih} stroke="#a2acba" strokeOpacity={0.35} />
+                  <line y1={0} y2={ih} stroke="var(--color-fg-muted)" strokeOpacity={0.35} />
                   {series.map((s) =>
-                    isNum(s.values[hi]) ? <circle key={s.id} cy={ys(s.values[hi] as number)} r={3} fill={s.color} stroke="#070a0f" strokeWidth={1.5} /> : null,
+                    isNum(s.values[hi]) ? <circle key={s.id} cy={ys(s.values[hi] as number)} r={3} fill={s.color} stroke="var(--color-ink-900)" strokeWidth={1.5} /> : null,
                   )}
                 </g>
               )}

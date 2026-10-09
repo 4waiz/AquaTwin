@@ -18,7 +18,7 @@ import { pointAt } from "@/twin/visualState";
 import { fmt, fmtHours, hourOfDay } from "@/lib/format";
 import type { ScenarioResult } from "@/runtime/protocol";
 
-const COLORS = { baseline: "#7c8799", noAction: "#d4dae3", aquatwin: "#40b4ff" };
+const COLORS = { baseline: "var(--color-series-base)", noAction: "var(--color-series-noact)", aquatwin: "var(--color-accent)" };
 
 function ScenarioChart({ spec, res, cursor, onCursor }: { spec: ChartSpec; res: ScenarioResult; cursor: number; onCursor: (x: number) => void }) {
   const x = res.aquatwin.points.map((p) => p.t);
@@ -28,11 +28,11 @@ function ScenarioChart({ spec, res, cursor, onCursor }: { spec: ChartSpec; res: 
     { id: "a", label: "AquaTwin", color: COLORS.aquatwin, values: res.aquatwin.points.map(spec.get), width: 2 },
   ];
   if (spec.id === "production") {
-    series.unshift({ id: "d", label: "Demand", color: "#6d7787", values: res.aquatwin.points.map((p) => p.demand), dashed: true, width: 1 });
+    series.unshift({ id: "d", label: "Demand", color: "var(--color-fg-subtle)", values: res.aquatwin.points.map((p) => p.demand), dashed: true, width: 1 });
   }
   if (spec.id === "power") {
     const cap = capSeries(res.noAction);
-    if (cap.some((c) => c !== null)) series.push({ id: "cap", label: "Power cap", color: "#f0564d", values: cap, dashed: true, width: 1.2 });
+    if (cap.some((c) => c !== null)) series.push({ id: "cap", label: "Power cap", color: "var(--color-crit)", values: cap, dashed: true, width: 1.2 });
   }
   return (
     <LineChart
@@ -180,7 +180,7 @@ export default function ScenarioLabPage() {
             <Chip tone={branch === "aquatwin" ? "accent" : "default"} dot>
               {branch === "aquatwin" ? "AquaTwin response" : "No action"}
             </Chip>
-            <Chip className="max-sm:hidden">{res ? `+${cursor.toFixed(1)} h · ${hourOfDay(res.startClock_h + cursor)}` : "forecast"}</Chip>
+            <Chip className="bg-ink-900/85 backdrop-blur-sm max-sm:hidden">{res ? `+${cursor.toFixed(1)} h · ${hourOfDay(res.startClock_h + cursor)}` : "forecast"}</Chip>
             {point && point.violations.length > 0 && (
               <Chip tone="crit" dot>
                 Constraint violated

@@ -12,14 +12,14 @@ import { useElementSize } from "@/components/charts/useElementSize";
 import { fmt, fmtInt } from "@/lib/format";
 
 const BITS: { bit: number; label: string; color: string }[] = [
-  { bit: 2, label: "Permeate TDS", color: "#f0564d" },
+  { bit: 2, label: "Permeate TDS", color: "var(--color-crit)" },
   { bit: 1, label: "Pressure limit", color: "#c77dff" },
-  { bit: 4, label: "Recovery", color: "#f2a93b" },
+  { bit: 4, label: "Recovery", color: "var(--color-warn)" },
   { bit: 8, label: "Flux", color: "#e6c07b" },
-  { bit: 16, label: "Concentrate flow", color: "#8fb4e6" },
-  { bit: 32, label: "Vessel feed flow", color: "#7c8799" },
-  { bit: 64, label: "Vessel ΔP", color: "#a2acba" },
-  { bit: 128, label: "Motor rating", color: "#6d7787" },
+  { bit: 16, label: "Concentrate flow", color: "var(--c-series-physics)" },
+  { bit: 32, label: "Vessel feed flow", color: "var(--color-series-base)" },
+  { bit: 64, label: "Vessel ΔP", color: "var(--color-fg-muted)" },
+  { bit: 128, label: "Motor rating", color: "var(--color-fg-subtle)" },
 ];
 
 export interface EnvelopePath {
@@ -70,7 +70,7 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
     <div className="flex h-full min-h-0 flex-col">
       <div className="mb-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10.5px] text-fg-subtle">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-3 rounded-[2px] bg-[#40b4ff]/40" /> Admissible
+          <span className="h-2 w-3 rounded-[2px] bg-accent/40" /> Admissible
         </span>
         {present.map((b) => (
           <span key={b.bit} className="inline-flex items-center gap-1.5">
@@ -92,7 +92,7 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
                       y={y(grid.Qv[j]) - ch / 2}
                       width={cw + 0.5}
                       height={ch + 0.5}
-                      fill={code === 0 ? "#40b4ff" : code & 256 ? "#070a0f" : (d?.color ?? "#313c4e")}
+                      fill={code === 0 ? "var(--color-accent)" : code & 256 ? "var(--color-ink-900)" : (d?.color ?? "var(--color-line-bright)")}
                       opacity={code === 0 ? 0.28 : code & 256 ? 1 : 0.14}
                       onMouseEnter={() => setHover({ i, j })}
                       onMouseLeave={() => setHover(null)}
@@ -101,19 +101,19 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
                 }),
               )}
               {x.ticks(7).map((t) => (
-                <text key={`x${t}`} x={x(t)} y={ih + 15} textAnchor="middle" fontSize={10} fill="#6d7787" fontFamily="var(--font-mono)">
+                <text key={`x${t}`} x={x(t)} y={ih + 15} textAnchor="middle" fontSize={10} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                   {t}
                 </text>
               ))}
               {y.ticks(6).map((t) => (
-                <text key={`y${t}`} x={-8} y={y(t) + 3.5} textAnchor="end" fontSize={10} fill="#6d7787" fontFamily="var(--font-mono)">
+                <text key={`y${t}`} x={-8} y={y(t) + 3.5} textAnchor="end" fontSize={10} fill="var(--color-fg-subtle)" fontFamily="var(--font-mono)">
                   {t}
                 </text>
               ))}
-              <text x={iw / 2} y={ih + 31} textAnchor="middle" fontSize={10.5} fill="#8a94a4">
+              <text x={iw / 2} y={ih + 31} textAnchor="middle" fontSize={10.5} fill="var(--color-fg-dim)">
                 Feed pressure (bar) →
               </text>
-              <text transform={`translate(-36,${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={10.5} fill="#8a94a4">
+              <text transform={`translate(-36,${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={10.5} fill="var(--color-fg-dim)">
                 Feed flow per vessel (m³/h) →
               </text>
               {paths.map((p) => (
@@ -121,7 +121,7 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
                   <polyline points={p.points.map((q) => `${x(q.P)},${y(q.Qv)}`).join(" ")} fill="none" stroke={p.color} strokeWidth={1.6} strokeOpacity={0.9} />
                   {p.points.map((q, k) =>
                     q.violated ? (
-                      <circle key={k} cx={x(q.P)} cy={y(q.Qv)} r={2.6} fill="#f0564d" />
+                      <circle key={k} cx={x(q.P)} cy={y(q.Qv)} r={2.6} fill="var(--color-crit)" />
                     ) : k % 4 === 0 ? (
                       <circle key={k} cx={x(q.P)} cy={y(q.Qv)} r={1.8} fill={p.color} />
                     ) : null,
@@ -129,9 +129,9 @@ export function EnvelopeMap({ grid, paths = [] }: { grid: EnvelopeGrid; paths?: 
                 </g>
               ))}
               <g transform={`translate(${x(grid.operating.P)},${y(grid.operating.Qv)})`}>
-                <circle r={6} fill="none" stroke="#e8edf4" strokeWidth={1.5} />
-                <circle r={2} fill="#e8edf4" />
-                <text x={10} y={-8} fontSize={10.5} fill="#e8edf4">
+                <circle r={6} fill="none" stroke="var(--color-fg)" strokeWidth={1.5} />
+                <circle r={2} fill="var(--color-fg)" />
+                <text x={10} y={-8} fontSize={10.5} fill="var(--color-fg)">
                   Operating point
                 </text>
               </g>

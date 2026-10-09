@@ -5,12 +5,13 @@ import { at, clamp, ease, pop, range, svg } from './aq.js';
 
 const ICON = 236, CX = 960, CY = 292;
 
-export default function aqoutro({ name = 'outro' } = {}) {
-  let wrap, icon, glint, word, verbs = [], by, url, meta, rings = [];
+export default function aqoutro({ name = 'outro', bg = '' } = {}) {
+  let wrap, icon, glint, word, verbs = [], by, url, meta, rings = [], bgImg;
   return {
     name,
     setup(root) {
       root.innerHTML = `<div class="rv">
+        ${bg ? `<img class="ot-bg" src="${bg}" alt="" style="position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;opacity:.26;filter:saturate(1.1) blur(1.5px);transform-origin:50% 60%"><i style="position:absolute;inset:0;background:radial-gradient(70% 70% at 50% 42%, rgba(4,6,10,.35), rgba(4,6,10,.92) 75%)"></i>` : ''}
         <svg width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"></svg>
         <div class="rv-mark" style="left:${CX - ICON / 2}px;top:${CY - ICON / 2}px;width:${ICON}px;height:${ICON}px;border-radius:${ICON * 0.2}px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 90px rgba(34,181,251,.25)">
           <img src="assets/aquatwin-icon-512.png" alt="" style="width:${ICON}px;height:${ICON}px;display:block">
@@ -30,12 +31,14 @@ export default function aqoutro({ name = 'outro' } = {}) {
       by = root.querySelector('.ot-by');
       url = root.querySelector('.ot-url');
       meta = root.querySelector('.ot-meta');
+      bgImg = root.querySelector('.ot-bg');
       const s = root.querySelector('svg');
       for (let i = 0; i < 3; i++) rings.push(svg('circle', { cx: CX, cy: CY, r: 10, fill: 'none', stroke: '#22b5fb', 'stroke-width': 2, opacity: 0 }, s));
     },
     draw(f) {
       const t0 = this.start;
       wrap.style.opacity = at(f, t0, 0.35, ease.outQuad);
+      if (bgImg) bgImg.style.transform = `scale(${1.04 + 0.06 * f.p})`;
       const tA = wordOf('AquaTwin', t0 - 0.5)?.s ?? t0 + 0.2;
       const ik = pop(f, tA - 0.15, { stiffness: 150, damping: 14 });
       icon.style.opacity = clamp(ik * 2);

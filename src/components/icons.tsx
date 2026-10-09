@@ -186,6 +186,19 @@ export const IconChevron = (p: P) => (
   </Svg>
 );
 
+export const IconSun = (p: P) => (
+  <Svg {...p}>
+    <circle cx="8" cy="8" r="2.8" />
+    <path d="M8 1.6v1.6M8 12.8v1.6M1.6 8h1.6M12.8 8h1.6M3.5 3.5l1.1 1.1M11.4 11.4l1.1 1.1M3.5 12.5l1.1-1.1M11.4 4.6l1.1-1.1" />
+  </Svg>
+);
+
+export const IconMoon = (p: P) => (
+  <Svg {...p}>
+    <path d="M13.2 9.6A5.6 5.6 0 0 1 6.4 2.8a5.6 5.6 0 1 0 6.8 6.8Z" />
+  </Svg>
+);
+
 export const IconWarning = (p: P) => (
   <Svg {...p}>
     <path d="M8 2.2 14 13H2L8 2.2Z" />
