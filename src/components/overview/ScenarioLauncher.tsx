@@ -17,11 +17,13 @@ export function ScenarioLauncher() {
   return (
     <Panel
       title="Scenario simulation"
+      dense
+      className="shrink-0 grow"
       right={<span className="text-[11px] text-fg-subtle">Stress-test before it happens</span>}
       reveal="panel3"
-      bodyClassName="flex flex-col p-3"
+      bodyClassName="flex flex-col p-2.5"
     >
-      <div className="grid flex-1 grid-cols-2 gap-2">
+      <div className="grid flex-1 auto-rows-fr grid-cols-3 gap-1.5 max-lg:grid-cols-2">
         {LAB_SCENARIOS.map((id) => {
           const s = SCENARIOS[id];
           const active = sel === id;
@@ -30,17 +32,18 @@ export function ScenarioLauncher() {
               key={id}
               onClick={() => setSel(id)}
               aria-pressed={active}
-              className={`rounded-md border px-3 py-2 text-left transition-colors ${
+              title={`${s.name}: ${s.tag}`}
+              className={`min-w-0 rounded-md border px-2 py-1 text-left transition-colors ${
                 active ? "border-accent/60 bg-accent-soft/40" : "border-line bg-ink-900 hover:border-line-strong"
               }`}
             >
-              <div className={`text-[12.5px] font-medium ${active ? "text-fg" : "text-fg-muted"}`}>{s.name}</div>
-              <div className="mt-0.5 truncate text-[11px] text-fg-subtle">{s.tag}</div>
+              <div className={`truncate text-[12px] font-medium ${active ? "text-fg" : "text-fg-muted"}`}>{s.name}</div>
+              <div className="mt-0.5 truncate text-[10.5px] text-fg-subtle">{s.tag}</div>
             </button>
           );
         })}
       </div>
-      <Button variant="primary" size="lg" className="mt-3 w-full" onClick={run}>
+      <Button variant="primary" size="md" className="mt-2 w-full" onClick={run}>
         Run scenario
         <IconArrowRight size={14} />
       </Button>

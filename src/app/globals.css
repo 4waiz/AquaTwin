@@ -260,3 +260,14 @@ html[data-intro="pending"] [data-reveal].is-revealed {
 .print-only {
   display: none;
 }
+
+/*
+  Laptops (short viewports): a tighter page rhythm so dashboards fit on one
+  screen. Page roots are the direct children of the scroll container.
+*/
+@media (min-width: 1024px) and (max-height: 900px) {
+  #page-scroll > div {
+    padding: 12px 16px 16px;
+    gap: 12px;
+  }
+}

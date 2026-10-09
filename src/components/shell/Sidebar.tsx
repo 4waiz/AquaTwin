@@ -51,7 +51,7 @@ export function Sidebar() {
       className="no-print relative z-20 flex h-full w-[var(--sidebar-w)] shrink-0 flex-col border-r border-line bg-ink-900 max-lg:hidden"
       aria-label="Primary"
     >
-      <Link href="/" className="group flex h-[68px] items-center gap-3 px-5" aria-label="AquaTwin: Overview">
+      <Link href="/" className="group flex h-14 items-center gap-3 px-5" aria-label="AquaTwin: Overview">
         <AquaTwinMark size={32} glow className="transition-transform duration-300 group-hover:scale-[1.04]" />
         <div className="leading-tight">
           <div className="text-[15px] font-semibold tracking-tight text-fg">AquaTwin</div>

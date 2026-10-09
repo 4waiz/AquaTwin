@@ -14,6 +14,7 @@ export function Panel({
   bodyClassName = "",
   reveal,
   id,
+  dense = false,
 }: {
   title?: ReactNode;
   right?: ReactNode;
@@ -22,11 +23,13 @@ export function Panel({
   bodyClassName?: string;
   reveal?: string;
   id?: string;
+  /** Shorter header for compact side rails. */
+  dense?: boolean;
 }) {
   return (
     <section id={id} data-reveal={reveal} className={`panel flex min-h-0 flex-col ${className}`}>
       {(title || right) && (
-        <header className="flex h-11 shrink-0 items-center justify-between gap-3 border-b border-line px-4">
+        <header className={`flex shrink-0 items-center justify-between gap-3 border-b border-line px-4 ${dense ? "h-9" : "h-11"}`}>
           <h2 className="truncate text-[13px] font-medium text-fg">{title}</h2>
           {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}
         </header>

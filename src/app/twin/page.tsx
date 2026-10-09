@@ -46,16 +46,21 @@ export default function DigitalTwinPage() {
   const inspector = selected && snap ? inspectorFromLive(selected, snap) : null;
 
   return (
-    <div className="grid h-full min-h-[860px] grid-cols-[minmax(0,1fr)_440px] grid-rows-[auto_minmax(0,1fr)_168px] gap-4 p-5 pt-4 max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col max-lg:p-4">
-      <div data-reveal="header" className="col-span-2 flex items-end justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-3">
-        <div>
+    <div className="grid h-full min-h-[520px] grid-cols-[minmax(0,1fr)_400px] grid-rows-[auto_minmax(0,1fr)_128px] gap-3 p-4 pt-3 min-[1800px]:grid-cols-[minmax(0,1fr)_440px] [@media(min-height:900px)]:grid-rows-[auto_minmax(0,1fr)_160px] max-lg:flex max-lg:h-auto max-lg:min-h-0 max-lg:flex-col">
+      <div data-reveal="header" className="col-span-2 flex items-center justify-between gap-6 max-lg:flex-col max-lg:items-start max-lg:gap-2">
+        <div className="min-w-0">
           <div className="label">Digital Twin</div>
-          <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-fg">Hybrid digital twin</h1>
-          <p className="mt-0.5 text-[13px] text-fg-muted">
-            Reduced-order physics, self-calibrated from telemetry, corrected by a learned residual. Select a subsystem in 3D or in the flow below.
-          </p>
+          <div className="mt-1 flex min-w-0 items-baseline gap-3 max-sm:flex-col max-sm:gap-0.5">
+            <h1 className="shrink-0 text-[20px] font-semibold tracking-tight text-fg">Hybrid digital twin</h1>
+            <p
+              className="truncate text-[12.5px] text-fg-muted"
+              title="Reduced-order physics, self-calibrated from telemetry, corrected by a learned residual. Select a subsystem in 3D or in the flow below."
+            >
+              Physics self-calibrated from telemetry, corrected by a learned residual. Select a subsystem in 3D or in the flow below.
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2 max-lg:justify-start">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 max-lg:justify-start">
           <Chip tone="ok" dot>
             Physics 0D · calibrated
           </Chip>
@@ -70,7 +75,7 @@ export default function DigitalTwinPage() {
         </div>
       </div>
 
-      <TwinViewport preset="twin" className="rounded-[10px] border border-line max-lg:h-[62vw] max-lg:max-h-[460px] max-lg:min-h-[240px] max-lg:shrink-0">
+      <TwinViewport preset="twin" className="min-h-0 rounded-[10px] border border-line max-lg:h-[62vw] max-lg:max-h-[460px] max-lg:min-h-[240px] max-lg:shrink-0">
         <Callouts items={calloutItems(snap)} compact />
         <div data-reveal="panel4" className="absolute left-3 top-3 z-[2] max-sm:hidden">
           <FlowLegend />
@@ -80,8 +85,10 @@ export default function DigitalTwinPage() {
         </div>
       </TwinViewport>
 
-      <div className="row-span-2 flex min-h-0 flex-col gap-4">
+      <div className="scroll-quiet row-span-2 flex min-h-0 flex-col gap-3 overflow-y-auto max-lg:overflow-visible">
         <Panel
+          dense
+          className="shrink-0"
           title={inspector ? inspector.title : "Select a subsystem"}
           right={
             inspector && (
@@ -98,7 +105,14 @@ export default function DigitalTwinPage() {
           )}
         </Panel>
 
-        <Panel title={`Hybrid estimate · RO train ${trainIdx + 1}`} right={<Provenance kind="modeled" />} reveal="panel2" bodyClassName="flex min-h-0 flex-col gap-3 p-4">
+        <Panel
+          dense
+          className="shrink-0"
+          title={`Hybrid estimate · RO train ${trainIdx + 1}`}
+          right={<Provenance kind="modeled" />}
+          reveal="panel2"
+          bodyClassName="flex flex-col gap-3 p-3.5"
+        >
           <Segmented size="sm" value={target} onChange={setTarget} options={HYBRID_TARGETS.map((k) => ({ value: k, label: HYBRID_META[k].label }))} />
           {h ? <HybridEquation h={h} target={target} /> : <div className="text-[12px] text-fg-subtle">Waiting for telemetry…</div>}
           <div className="grid grid-cols-2 gap-x-6 max-sm:grid-cols-1">
@@ -117,18 +131,24 @@ export default function DigitalTwinPage() {
               <Row k="η (lumped pump)" v={fmt(th?.pumpEff, 3)} />
             </div>
           </div>
-          <p className="text-[11.5px] leading-relaxed text-fg-subtle">
-            θ̂ is re-identified every sample by inverting the 0D model on telemetry (EWMA, calibrated at {fmt(ctx?.u0.P, 1)} bar, {fmt(ctx?.u0.Qv, 2)} m³/h per vessel).
-            The residual model corrects what the lumped physics cannot represent: axial polarisation, non-ideal osmotic pressure, ERD mixing, pump curves.
-          </p>
+          <details className="group text-[11.5px] leading-relaxed text-fg-subtle">
+            <summary className="cursor-pointer list-none text-fg-muted hover:text-fg">
+              <span className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>How the twin calibrates itself
+            </summary>
+            <p className="mt-1.5">
+              θ̂ is re-identified every sample by inverting the 0D model on telemetry (EWMA, calibrated at {fmt(ctx?.u0.P, 1)} bar, {fmt(ctx?.u0.Qv, 2)} m³/h per vessel).
+              The residual model corrects what the lumped physics cannot represent: axial polarisation, non-ideal osmotic pressure, ERD mixing, pump curves.
+            </p>
+          </details>
         </Panel>
       </div>
 
       <Panel
+        dense
         title="Process flow"
         right={<span className="text-[11px] text-fg-subtle max-sm:hidden">Click a step to inspect it</span>}
         reveal="panel3"
-        bodyClassName="px-4 py-2 max-lg:overflow-x-auto"
+        bodyClassName="px-3 py-1.5 max-lg:overflow-x-auto"
       >
         <ProcessSchematic
           values={
