@@ -41,6 +41,8 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
         const host = hostRef.current;
         const W = host?.clientWidth ?? 0;
         const H = host?.clientHeight ?? 0;
+        // Small viewports show the label only (the value is one click away in the inspector).
+        if (host) host.dataset.small = H < 440 || W < 720 ? "1" : "0";
         const clampX = (x: number, w: number) => Math.min(Math.max(x, 12 + w / 2), W - 12 - w / 2);
         const clampY = (y: number, h: number) => Math.min(Math.max(y, 12 + h / 2), H - 12 - h / 2);
         const boxes = [];
@@ -99,7 +101,7 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
   return (
     <div
       ref={hostRef}
-      className={`pointer-events-none absolute inset-0 z-[2] transition-opacity duration-700 max-md:hidden ${introPhase !== "done" ? "opacity-0" : "opacity-100"}`}
+      className={`group/callouts pointer-events-none absolute inset-0 z-[2] transition-opacity duration-700 max-md:hidden ${introPhase !== "done" ? "opacity-0" : "opacity-100"}`}
       aria-hidden={false}
     >
       {items.map((it) => {
@@ -125,16 +127,17 @@ export function Callouts({ items, compact = false }: { items: CalloutItem[]; com
               type="button"
               data-label
               onClick={() => select(it.id)}
-              className={`pointer-events-auto absolute whitespace-nowrap rounded-md border px-2.5 py-1.5 text-left transition-colors ${
+              title={it.value ? `${it.label}: ${it.value}` : it.label}
+              className={`pointer-events-auto absolute whitespace-nowrap rounded-md border px-2 py-1 text-left backdrop-blur-sm transition-colors ${
                 isSel ? "border-accent/60 bg-[#0d1522]" : "border-line-strong bg-ink-900/90 hover:border-line-bright"
               }`}
               style={{ transform: `translate(calc(${dx}px - 50%), calc(${dy}px - 50%))` }}
             >
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[10px] text-accent">{it.index}</span>
-                <span className={`font-medium text-fg ${compact ? "text-[11px]" : "text-[12px]"}`}>{it.label}</span>
+                <span className={`font-medium text-fg ${compact ? "text-[11px]" : "text-[11.5px]"}`}>{it.label}</span>
               </div>
-              {it.value && <div className="num mt-0.5 text-[11px] text-fg-muted">{it.value}</div>}
+              {it.value && <div className="num text-[10.5px] text-fg-muted group-data-[small=1]/callouts:hidden">{it.value}</div>}
             </button>
           </div>
         );

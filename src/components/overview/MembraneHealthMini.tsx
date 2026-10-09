@@ -42,24 +42,25 @@ export function MembraneHealthMini() {
   const anyWarn = rows?.some((r) => r.tone !== "ok");
   const dueTrains = (rows ?? []).filter((r) => r.due).map((r) => r.i + 1);
   return (
-    <Panel title="Membrane health" right={<Provenance kind="estimated" />} reveal="panel2" bodyClassName="flex flex-col px-4 py-2">
-      <div className="flex-1 space-y-3.5 pt-1.5">
+    <Panel title="Membrane health" dense className="shrink-0" right={<Provenance kind="estimated" />} reveal="panel2" bodyClassName="flex flex-col px-3 py-2">
+      <div className="flex-1 space-y-1.5">
         {(rows ?? [0, 1, 2].map((i) => ({ i, npf: NaN, tone: "ok" as const, outlook: "–", slope: 0, due: false }))).map((r) => (
-          <div key={r.i} className="grid grid-cols-[64px_58px_1fr] items-center gap-3">
-            <span className="text-[12.5px] text-fg-muted">Train {r.i + 1}</span>
-            <span className={`num text-[15px] font-medium ${r.tone === "ok" ? "text-ok" : "text-warn"}`}>{fmt(r.npf * 100, 1)}%</span>
+          <div key={r.i} className="grid grid-cols-[52px_50px_1fr] items-center gap-2.5" title={r.outlook}>
+            <span className="text-[12px] text-fg-muted">Train {r.i + 1}</span>
+            <span className={`num text-[13.5px] font-medium ${r.tone === "ok" ? "text-ok" : "text-warn"}`}>{fmt(r.npf * 100, 1)}%</span>
             <div className="min-w-0">
               <HealthBar value={Number.isFinite(r.npf) ? r.npf : 0.8} tone={r.tone} />
-              <div className="mt-1 truncate text-[10.5px] text-fg-subtle">{r.outlook}</div>
+              <div className="mt-0.5 truncate text-[10px] text-fg-subtle">{r.outlook}</div>
             </div>
           </div>
         ))}
       </div>
       <Link
         href="/membranes"
-        className="mt-2 flex items-center justify-between rounded-md border border-line bg-ink-900 px-3 py-2 text-[12px] transition-colors hover:border-line-strong"
+        className="mt-1.5 flex items-center justify-between gap-2 rounded-md border border-line bg-ink-900 px-2.5 py-1 text-[11.5px] transition-colors hover:border-line-strong"
+        title="Normalised permeate flow vs the post-clean baseline"
       >
-        <span className="text-fg-muted">
+        <span className="truncate text-fg-muted">
           {dueTrains.length
             ? `Train ${dueTrains.join(", ")}: cleaning criteria met`
             : anyWarn
@@ -68,9 +69,8 @@ export function MembraneHealthMini() {
                   .map((r) => r.i + 1)
                   .join(", ")}: fouling trend under watch`
               : "All trains within normal range"}
-          <span className="ml-2 text-fg-subtle">· NPF vs post-clean baseline</span>
         </span>
-        <IconChevron size={13} className="text-fg-subtle" />
+        <IconChevron size={13} className="shrink-0 text-fg-subtle" />
       </Link>
     </Panel>
   );
